@@ -255,8 +255,8 @@
                                         <body pos="-0.175 -0.075 -0.05" childclass="wheel"><joint name="joint_wheel_r_07"/><geom/></body>
 
                                         <body name="car9" pos="-0.35 0 0" childclass="car">
-                                            <!-- TODO <joint name="joint08" />-->
-                                            <joint name="joint08" range="0 0.1"/>
+                                            <!-- TODO <joint name="joint08" range="0 0.1"/>-->
+                                            <joint name="joint08" />
                                             <body pos="-0.175 0.05 -0.05" childclass="wheel"><joint name="joint_wheel_l_08"/><geom/></body>
                                             <geom name="car9_geom" pos="-0.175 0 0" size="0.125 0.05 0.05" type="box" material="geom" rgba="0.8 0.7 .6 1"/>
                                             <geom fromto="-0.30 0 0  -0.05 0 0" size="0.05" type="capsule" rgba="1.0 0.0 0.0 1"/>

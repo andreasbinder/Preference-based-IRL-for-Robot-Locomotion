@@ -23,13 +23,13 @@ register(
 )
 
 
-#
-'''register(
+# used mujoco model
+register(
     id='Mujoco-planar-snake-cars-angle-line-v1',
     entry_point='gym_mujoco_planar_snake.envs.mujoco_15:MujocoPlanarSnakeCarsAngleLineEnv',
-    max_episode_steps=1000,
+    max_episode_steps=1000, #TODO parameter responsible for episode length
     reward_threshold=6000.0,
-)'''
+)
 
 register(
     id='Mujoco-planar-snake-cars-cam-line-v1',

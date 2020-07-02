@@ -17,9 +17,6 @@ from matplotlib import cm
 
 from tensorboardX import SummaryWriter
 
-#
-import numpy as np
-
 ob_reset = []
 
 def path_segment_generator(pi, env, horizon_path, stochastic, start_observation=None, start_state=None):
@@ -75,7 +72,7 @@ def path_segment_generator(pi, env, horizon_path, stochastic, start_observation=
 
 
 # vine
-def traj_segment_generator(pi, env, horizon, stochastic, fixed_joints, clip_value):
+def traj_segment_generator(pi, env, horizon, stochastic):
     """
     vine
     generates a amount of horizon time steps
@@ -94,8 +91,6 @@ def traj_segment_generator(pi, env, horizon, stochastic, fixed_joints, clip_valu
     new = True # marks if we're on first timestep of an episode
     env.metadata['gen_init_state'] = True
     ob = env.reset()
-
-
 
     cur_ep_ret = 0 # return in current episode
     cur_ep_len = 0 # len of current episode
@@ -137,9 +132,6 @@ def traj_segment_generator(pi, env, horizon, stochastic, fixed_joints, clip_valu
 
 
 
-        import sys
-        #sys.exit("traf_segment")
-
 
         # Sligdataht weirdness here because we need value function at time T
         # before returning segment [0, T-1] so we get the correct
@@ -170,12 +162,9 @@ def traj_segment_generator(pi, env, horizon, stochastic, fixed_joints, clip_valu
         vpreds[i] = vpred # predicted value
         news[i] = new # done
 
+        index = 7
 
-
-        #ac = set_action_to_zero(ac, fixed_joints)
-        #ac = set_action_to_constant(ac, fixed_joints)
-
-        ac = clip_action_to_constant(ac, fixed_joints, clip_value)
+        #ac = set_action_to_zero(ac, index)
 
         acs[i] = ac # action
         prevacs[i] = prevac # previous action
@@ -379,28 +368,14 @@ def learn(env, policy_func, *,
         max_timesteps=0, max_episodes=0, max_iters=0, max_seconds=0,  # time constraint
         callback=None, # you can do anything in the callback, since it takes locals(), globals()
         adam_epsilon=1e-5,
-        schedule='constant', # annealing for stepsize parameters (epsilon and adam)
-        fixed_joints=None,
-        run=1,
-        clip_value=1.5
+        schedule='constant' # annealing for stepsize parameters (epsilon and adam)
         ):
     # Setup losses and stuff
     # ----------------------------------------
     ob_space = env.observation_space
     ac_space = env.action_space
-
-    '''
-        print("in ppo")
-
-    print(ac_space.low)
-    print(ac_space.high)
-    import sys
-    #sys.exit("Test")
-    '''
-
-
-    pi = policy_func("pi"+str(run), ob_space, ac_space) # Construct network for new policy
-    oldpi = policy_func("oldpi"+str(run), ob_space, ac_space) # Network for old policy
+    pi = policy_func("pi", ob_space, ac_space) # Construct network for new policy
+    oldpi = policy_func("oldpi", ob_space, ac_space) # Network for old policy
     atarg = tf.placeholder(dtype=tf.float32, shape=[None]) # Target advantage function (if applicable)
     ret = tf.placeholder(dtype=tf.float32, shape=[None]) # Empirical return
 
@@ -438,9 +413,7 @@ def learn(env, policy_func, *,
 
     # Prepare for rollouts
     # ----------------------------------------
-
-
-    seg_gen = traj_segment_generator(pi, env, timesteps_per_actorbatch, stochastic=True, fixed_joints=fixed_joints, clip_value=clip_value)
+    seg_gen = traj_segment_generator(pi, env, timesteps_per_actorbatch, stochastic=True)
 
     episodes_so_far = 0
     timesteps_so_far = 0
@@ -451,8 +424,47 @@ def learn(env, policy_func, *,
 
     assert sum([max_iters>0, max_timesteps>0, max_episodes>0, max_seconds>0])==1, "Only one time constraint permitted"
 
+    # my
+    #sess = tf.get_default_session()
+    #writer = tf.summary.FileWriter("../log/tensorboard/v1")
+    writer = tf.summary.FileWriter("../log/tensorboard/v1")
+
+    print("log_dir" + str(writer.get_logdir()))
+    # writer.add_histogram("ep_vpred", data, iters_so_far)
+    # hist_dict[placeholder_ep_rews] = ep_rews[ep]
+    # sess2 = sess.run(summ, feed_dict=hist_dict)
+
+    for i in range(50):
+        #writer.add_scalar('Test', i)
+        pass
+    #placeholder_rews = tf.placeholder(tf.float32)
+    #placeholder_vpreds = tf.placeholder(tf.float32)
+    #placeholder_advs = tf.placeholder(tf.float32)
+    #placeholder_news = tf.placeholder(tf.float32)
+    #placeholder_ep_rews = tf.placeholder(tf.float32)
+
+    #tf.summary.histogram("rews", placeholder_rews)
+    #tf.summary.histogram("vpreds", placeholder_vpreds)
+    #tf.summary.histogram("advs", placeholder_advs)
+    #tf.summary.histogram("news", placeholder_news)
+    #tf.summary.scalar("ep_rews", placeholder_ep_rews)
+
+    #writer = SummaryWriter("/home/chris/openai_logdir/tb2")
 
 
+    #placeholder_ep_rews = tf.placeholder(tf.float32)
+    #placeholder_ep_vpred = tf.placeholder(tf.float32)
+    #placeholder_ep_atarg = tf.placeholder(tf.float32)
+
+    #sess = tf.get_default_session()
+    #writer = tf.summary.FileWriter("/home/chris/openai_logdir/x_new/tb2")
+    #tf.summary.scalar("EpRews", placeholder_ep_rews)
+    #tf.summary.scalar("EpVpred", placeholder_ep_vpred)
+
+    #tf.summary.scalar("EpRews", placeholder_ep_rews)
+    #tf.summary.scalar("EpVpred", placeholder_ep_vpred)
+    #tf.summary.scalar("EpAtarg", placeholder_ep_atarg)
+    #summ = tf.summary.merge_all()
 
     time_step_idx = 0
 
@@ -478,22 +490,6 @@ def learn(env, policy_func, *,
 
         seg = seg_gen.__next__()
 
-        ##Test
-        visualize = False
-        writer = SummaryWriter("gym_mujoco_planar_snake/log/tensorboard/")
-        if visualize:
-
-
-            for i, x in enumerate(seg["rew"]):
-                writer.add_scalar('data/scalar',i,  x)
-
-
-            #writer.add_scalar('scalar',seg["rew"])
-        writer.close()
-        #writer.add_scalar('test', 10)
-        #print("did it in ")
-
-
         # Compute target value using TD(lambda) estimator, and advantage with GAE(lambda)
         add_vtarg_and_adv(seg, gamma, lam)
 
@@ -503,7 +499,8 @@ def learn(env, policy_func, *,
 
         atarg = (atarg - atarg.mean()) / atarg.std() # standardized advantage function estimate
 
-        print(env.action_space.low)
+
+
 
         d = Dataset(dict(ob=ob, ac=ac, atarg=atarg, vtarg=tdlamret), shuffle=not pi.recurrent)
         optim_batchsize = optim_batchsize or ob.shape[0]
@@ -560,7 +557,6 @@ def learn(env, policy_func, *,
         #my
         logger.record_tabular("PathLenMean", np.mean(path_lens))
         logger.record_tabular("PathRewMean", np.mean(path_rews))
-        logger.record_tabular("Latest Action", ac[-1])
 
 
         # MY
@@ -570,15 +566,28 @@ def learn(env, policy_func, *,
         #plots
 
         plt.figure(figsize=(10, 4))
-
+        # plt.plot(vpredbefore, animated=True, label="vpredbefore")
+        #new_with_nones = seg["new"]
+        #np.place(new_with_nones, new_with_nones == 0, [6])
+        #plt.plot(new_with_nones, 'r.', animated=True, label="new")
 
         for dd in np.where(seg["new"] == 1)[0]:
             plt.axvline(x= dd, color='green', linewidth=1)
+            #plt.annotate('asd', xy=(2, 1), xytext=(3, 1.5),)
 
+        #np.place(new_episode_with_nones, new_episode_with_nones == 0, [90])
+        #aaaa = np.where(seg["news_episode"] > 0)
+        #for dd in aaaa[0]:
+        #    plt.annotate('ne'+str(dd), xy=(0, 6), xytext=(3, 1.5),)
+            #plt.axvline(x=dd, color='green', linewidth=1)
+
+        #plt.plot(ac, animated=True, label="ac")
 
         plt.plot(vpredbefore, 'g', label="vpredbefore", antialiased=True)
 
         # plot advantage of episode time steps
+        #plt.plot(seg["adv"], 'b', animated=True, label="adv")
+        #plt.plot(atarg, 'r', animated=True, label="atarg")
         plt.plot(tdlamret, 'y', animated=True, label="tdlamret")
 
         plt.legend()
@@ -587,7 +596,8 @@ def learn(env, policy_func, *,
         #plt.savefig(dir + env_name+'_plot.png', dpi=300)
 
         if iters_so_far % 2 == 0 or iters_so_far == 0:
-
+            #plt.ylim(ymin=-10, ymax=100)
+            #plt.ylim(ymin=-15, ymax=15)
             pass
             # TODO enable or disable plotting
             #plt.savefig(dir+ '/plotiters/' + env_name + '_plot' + '_iter' + str(iters_so_far).zfill(3) + '.png', dpi=300)
@@ -605,7 +615,7 @@ def learn(env, policy_func, *,
             figV, axV = plt.subplots()
 
             # surface
-            #figV = plt.figure()EpLenMean
+            #figV = plt.figure()
             #axV = Axes3D(figV)
 
             obs = env.observation_space
@@ -650,6 +660,57 @@ def learn(env, policy_func, *,
 
 
 
+        """
+        # transfer timesteps of iterations into timesteps of episodes
+        idx_seg = 0
+        for ep in range(len(lens)) :
+            all_ep = episodes_so_far - len(lens) + ep
+
+            if all_ep%100==0:
+                break
+
+            ep_rews = seg["rew"][idx_seg:idx_seg+lens[ep]]
+            ep_vpred = seg["vpred"][idx_seg:idx_seg+lens[ep]]
+            ep_atarg = atarg[idx_seg:idx_seg+lens[ep]]
+
+            idx_seg += lens[ep]
+            #writer.add_histogram("ep_vpred", data, iters_so_far)
+            #hist_dict[placeholder_ep_rews] = ep_rews[ep]
+            #sess2 = sess.run(summ, feed_dict=hist_dict)
+
+            #summary = tf.Summary()
+
+            #if test_ep:
+            #    break
+            for a in range(len(ep_rews)):
+                d = ep_rews[a]
+                d2 = ep_vpred[a]
+                d3 = ep_atarg[a]
+
+                #summary.value.add(tag="EpRews/"+str(all_ep), simple_value=d)
+                #writer.add_summary(summary, a)
+
+                sess2 = sess.run(summ, feed_dict={placeholder_ep_rews: d, placeholder_ep_vpred: d2, placeholder_ep_atarg: d3})
+            #writer.add_summary(sess2, global_step=a)
+                writer.add_summary(sess2, global_step=time_step_idx)
+                time_step_idx += 1
+
+            writer.flush()
+            #writer.close()
+            #logger.record_tabular("vpred_e" + str(all_ep), ep_rews[ep])
+
+        """
+
+        """
+        ###
+        sess2 = sess.run(summ, feed_dict={placeholder_rews: seg["rew"],
+                                          placeholder_vpreds: seg["vpred"],
+                                          placeholder_advs: seg["adv"],
+                                          placeholder_news: seg["new"]})
+        writer.add_summary(sess2, global_step=episodes_so_far)
+        """
+
+
         if MPI.COMM_WORLD.Get_rank()==0:
             logger.dump_tabular()
 
@@ -657,10 +718,9 @@ def flatten_lists(listoflists):
     return [el for list_ in listoflists for el in list_]
 
 # TODO here start my helper
-def set_action_to_zero(ac, fixed_joints):
-    if fixed_joints is not None:
-        for index in fixed_joints:
-            ac[index] = 0
+def set_action_to_zero(ac, index):
+    if index is not None:
+        ac[index] = 0
         return ac
     else:
         return ac
@@ -668,21 +728,4 @@ def set_action_to_zero(ac, fixed_joints):
     #print("Set Action Number %s to zero" % index)
     #print(ac)
 
-
-def set_action_to_constant(ac, fixed_joints, constant=0.5):
-    if fixed_joints is not None:
-        for index in fixed_joints:
-            ac[index] = constant if ac[index] > 0 else  constant * -1
-        return ac
-    else:
-        return ac
-
-def clip_action_to_constant(ac, fixed_joints, clip_value=1.5):
-    if fixed_joints is not None:
-        for index in fixed_joints:
-            ac[index] = np.clip(ac[index], clip_value * -1, clip_value)
-            #ac[index] = constant if ac[index] > 0 else  constant * -1
-        return ac
-    else:
-        return ac
 

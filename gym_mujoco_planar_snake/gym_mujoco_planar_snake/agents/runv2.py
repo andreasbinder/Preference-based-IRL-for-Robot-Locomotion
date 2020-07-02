@@ -99,6 +99,8 @@ def run_environment_episode(env, pi, seed, model_file, max_timesteps, render, st
 
         action = action[0]  # TODO check
 
+        print(action)
+
         """
         if number_of_timestep % int(max_timesteps / len(injured_joint_pos)) == 0:
             index = int(number_of_timestep / int(max_timesteps / (len(injured_joint_pos))))
@@ -305,12 +307,16 @@ def enjoy(env_id, seed):
 
         gym.logger.setLevel(logging.WARN)
 
+        model_dir = '/home/andreas/LRZ_Sync+Share/BachelorThesis/gym_mujoco_planar_snake/gym_mujoco_planar_snake/log/initial_PPO_runs/run0_1/Mon Jun  8 13:28:55 2020/models/Mujoco-planar-snake-cars-angle-line-v1/ppo'
+            #'/tmp/openai-2020-06-07-17-04-08-287219/models/Mujoco-planar-snake-cars-angle-line-v1/ppo'
+
         # init load
         #model_dir = get_model_dir(env_id, 'ppo')
         #model_dir = '/home/andreas/LRZ Sync+Share/Training_Performances/snake_disabled/models/Mujoco-planar-snake-cars-angle-line-v1/ppo'
 
         # fix range in mujoco xml file
-        model_dir = '/tmp/openai-2020-06-03-20-12-06-951977/models/Mujoco-planar-snake-cars-angle-line-v1/ppo'
+        #model_dir = '/home/andreas/LRZ Sync+Share/Training_Performances/openai-2020-06-03-20-12-06-951977/models/Mujoco-planar-snake-cars-angle-line-v1/ppo'
+                    #'/tmp/openai-2020-06-03-20-12-06-951977/models/Mujoco-planar-snake-cars-angle-line-v1/ppo'
 
         # 8 joint disabled
         #model_dir = '/tmp/openai-2020-06-03-18-36-43-071582/models/Mujoco-planar-snake-cars-angle-line-v1/ppo'
