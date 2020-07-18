@@ -34,4 +34,6 @@ def load_state(fname, var_list=None):
 def save_state(fname, var_list=None):
     os.makedirs(os.path.dirname(fname), exist_ok=True)
     saver = tf.train.Saver(var_list=var_list)
-    saver.save(get_session(), fname)
+    #saver.save(get_session(), fname)
+    # to save memory
+    saver.save(get_session(), fname, write_meta_graph=False)

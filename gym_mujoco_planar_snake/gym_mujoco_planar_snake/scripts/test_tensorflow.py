@@ -127,5 +127,57 @@ def tf_group():
         sess.run(tf.group( var2, var1))
         print(var2)
 
+def tf_keras():
+    #import tensorflow.keras as keras
+    from tensorflow.keras.layers import Dense
+    import tensorflow as tf
+    model = Dense(10, input_shape=(3,3))
+    print(tf.__version__)
+
+@tf.function
+def function():
+    print("TF function")
+
+
+def output():
+    from tensorflow import keras
+    import tensorflow as tf
+    import numpy as np
+    m = tf.Variable(0)
+    inp = np.arange(-5,5)
+    model = keras.Sequential()
+    model.add(keras.layers.ReLU())
+    model.compile(loss='binary_crossentropy', optimizer='adam', metrics=['accuracy'])
+    m = model(inp)
+    #print(model.output)
+    #final = tf.assign(m, model(inp))
+    print(m)
+    #var = tf.initialize_all_variables()
+    print(m)
+    with tf.Session() as sess:
+        #sess.run(var)
+        sess.run(m)
+        m = sess.run(model(inp))
+        print(m)
+
+def eager():
+    tf.compat.v1.enable_eager_execution()
+    var = tf.ones((3,4))
+    result = tf.add(var, 1)
+    result = result
+
+def cross_entropy():
+    tf.compat.v1.enable_eager_execution()
+    y_true = [[0., 1.], [0., 0.]]
+    y_pred = [[0.6, 0.4], [0.4, 0.6]]
+    #y_pred = [1, 1, 1, 1, 1, 2, 2, 1, 2, 2, 2, 2, 2, 1, 1, 2, 1, 1, 2, 1, 1, 2, 1, 1, 1, 2, 2, 1, 1, 2, 1, 2]
+    #y_true = [2, 1, 2, 1, 1, 2, 2, 1, 1, 1, 2, 1, 2, 1, 1, 2, 2, 2, 2, 2, 2, 2, 1, 2, 1, 2, 1, 1, 1, 2, 2, 1]
+    # Using 'auto'/'sum_over_batch_size' reduction type.
+    bce = tf.keras.losses.BinaryCrossentropy()
+    res = bce(y_true, y_pred).numpy()
+    rest = res
+
+
+
 if __name__ == "__main__":
-    tf_group()
+    cross_entropy()

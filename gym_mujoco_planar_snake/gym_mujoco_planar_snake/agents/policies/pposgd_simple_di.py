@@ -60,6 +60,10 @@ def path_segment_generator(pi, env, horizon_path, stochastic, start_observation=
         news[i] = new  # done
         acs[i] = ac  # action
         prevacs[i] = prevac  # previous action
+        # TODO model would predict reward here
+        # rew = model.predict(ob)
+        # ob, _, new, _ = env.step(ac)
+
 
         ob, rew, new, _ = env.step(ac)
 
@@ -169,6 +173,11 @@ def traj_segment_generator(pi, env, horizon, stochastic, fixed_joints, clip_valu
         obs[i] = ob # observation
         vpreds[i] = vpred # predicted value
         news[i] = new # done
+
+        #print("Observations")
+        #print(ob.shape)
+        #print(obs.shape)
+
 
 
 
@@ -477,6 +486,12 @@ def learn(env, policy_func, *,
         logger.log("********** Iteration %i ************"%iters_so_far)
 
         seg = seg_gen.__next__()
+
+        # TODO
+        # get random obs sequence out of seg["ob"]
+
+        print("seg ob shape")
+        print(seg["ob"].shape)
 
         ##Test
         visualize = False

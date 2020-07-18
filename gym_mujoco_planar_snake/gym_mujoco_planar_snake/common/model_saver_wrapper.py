@@ -36,7 +36,9 @@ class ModelSaverWrapper(ObservationWrapper):
         if self.total_steps_save_counter >= self.save_frequency_steps or self.total_steps == 1:
             # save
             file_name = osp.join(self.model_dir, '%s-%0*d' % (self.str_time_start, 9, self.total_steps))
-            U.save_state(file_name)
+            #U.save_state(file_name)
+
+            U.save_state(file_name )
             logger.log('Saved model to: ' + file_name)
 
             self.total_steps_save_counter = 0

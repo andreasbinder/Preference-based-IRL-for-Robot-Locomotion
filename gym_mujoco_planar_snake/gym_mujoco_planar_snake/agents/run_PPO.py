@@ -114,7 +114,7 @@ def main():
     parser = argparse.ArgumentParser(formatter_class=argparse.ArgumentDefaultsHelpFormatter)
     parser.add_argument('--seed', help='RNG seed', type=int, default=0)
     parser.add_argument('--num-timesteps', type=int, default=int(1e6))  # 1e6
-    parser.add_argument('--sfs', help='save_frequency_steps', default=10000)  # for mujoco
+    parser.add_argument('--sfs', help='save_frequency_steps', type=int, default=10000)  # for mujoco
     parser.add_argument('--env', help='environment ID', default='Mujoco-planar-snake-cars-angle-line-v1')
     parser.add_argument('--log_dir', help='log directory', default='gym_mujoco_planar_snake/log/initial_PPO_runs/')
     parser.add_argument('--injured', type=bool, default=False)

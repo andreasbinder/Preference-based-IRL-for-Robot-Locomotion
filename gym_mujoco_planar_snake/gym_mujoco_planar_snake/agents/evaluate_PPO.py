@@ -191,7 +191,7 @@ def enjoy(env_id, seed):
         #gym.logger.setLevel(logging.DEBUG)
 
         run = 0
-        model_dir = '/home/andreas/LRZ_Sync+Share/BachelorThesis/gym_mujoco_planar_snake/gym_mujoco_planar_snake/log/clip_test/InjuryIndex_2/Thu Jun 25 19:15:04 2020/models/Mujoco-planar-snake-cars-angle-line-v1/ppo'
+        model_dir = '/gym_mujoco_planar_snake/gym_mujoco_planar_snake/log/initial_PPO_runs/InjuryIndex_2/Thu Jun 25 19:15:04 2020/models/Mujoco-planar-snake-cars-angle-line-v1/ppo'
         #'/home/andreas/LRZ_Sync+Share/BachelorThesis/gym_mujoco_planar_snake/gym_mujoco_planar_snake/log/snake_test/run0_0/Thu Jun 25 13:03:08 2020/models/Mujoco-planar-snake-cars-angle-line-v1/ppo'
             #'/home/andreas/LRZ_Sync+Share/BachelorThesis/gym_mujoco_planar_snake/gym_mujoco_planar_snake/log/snake_test/run0_-1/Thu Jun 11 14:28:53 2020_0.1/models/Mujoco-planar-snake-cars-angle-line-v1/ppo'
         #'/home/andreas/LRZ_Sync+Share/BachelorThesis/gym_mujoco_planar_snake/gym_mujoco_planar_snake/log/snake_test/run0_-1/Wed Jun 10 14:49:21 2020/models/Mujoco-planar-snake-cars-angle-line-v1/ppo'

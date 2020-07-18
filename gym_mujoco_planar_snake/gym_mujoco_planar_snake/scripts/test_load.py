@@ -140,9 +140,6 @@ def run_environment_episode(env, pi, seed, model_file, max_timesteps, render, st
 
     #my_tf_util.load_state(save_dir)
 
-    if False:
-        import sys
-        sys.exit()
 
 
 
@@ -203,7 +200,7 @@ def run_environment_episode(env, pi, seed, model_file, max_timesteps, render, st
 
         # add info
         info_collector.add_info(info)
-        render = False
+
         # render
         if render:
             env.render()
@@ -243,7 +240,7 @@ def enjoy(env_id, seed):
         #gym.logger.setLevel(logging.DEBUG)
 
         run = 0
-        model_dir = '/home/andreas/LRZ_Sync+Share/BachelorThesis/gym_mujoco_planar_snake/gym_mujoco_planar_snake/log/clip_test/InjuryIndex_6/Fri Jun 26 11:59:30 2020/models/Mujoco-planar-snake-cars-angle-line-v1/ppo'
+        model_dir = '/home/andreas/LRZ_Sync+Share/BachelorThesis/gym_mujoco_planar_snake/gym_mujoco_planar_snake/log/initial_PPO_runs/InjuryIndex_6/Fri Jun 26 11:59:30 2020/models/Mujoco-planar-snake-cars-angle-line-v1/ppo'
         #'/home/andreas/LRZ_Sync+Share/BachelorThesis/gym_mujoco_planar_snake/gym_mujoco_planar_snake/log/clip_test/InjuryIndex_7/Sat Jun 27 03:59:02 2020/models/Mujoco-planar-snake-cars-angle-line-v1/ppo'
         #'/home/andreas/LRZ_Sync+Share/BachelorThesis/gym_mujoco_planar_snake/gym_mujoco_planar_snake/log/clip_test/InjuryIndex_7/Mon Jun 29 11:36:26 2020/models/Mujoco-planar-snake-cars-angle-line-v1/ppo'
         #'/home/andreas/LRZ_Sync+Share/BachelorThesis/gym_mujoco_planar_snake/gym_mujoco_planar_snake/log/snake_test/run0_-1/Thu Jun 11 10:25:54 2020_0.2/models/Mujoco-planar-snake-cars-angle-line-v1/ppo'
@@ -252,7 +249,7 @@ def enjoy(env_id, seed):
 
         # model_file = get_latest_model_file(model_dir)
 
-        model_index = 99#0
+        model_index = 40#0
         model_file = model_files[model_index]
         print('available models: ', len(model_files))
         #model_file = model_files[model_index]
@@ -274,6 +271,17 @@ def enjoy(env_id, seed):
             # env.unwrapped.metadata['target_v'] = 0.25
 
             # env._max_episode_steps = env._max_episode_steps * 3
+
+
+
+            #########################################################################
+            # TODO:                                                                 #
+            #                                                                       #
+            #########################################################################
+            env._max_episode_steps = 50
+            #########################################################################
+            #                       END OF YOUR CODE                                #
+            #########################################################################
 
             done, number_of_timesteps, info_collector, rewards = run_environment_episode(env, pi, seed, model_file,
                                                                                 env._max_episode_steps, render=True,
@@ -312,8 +320,7 @@ def enjoy(env_id, seed):
         
 
 
-        np.save("rewards.npy", arr)
-        
+        #np.save("rewards.npy", arr)
 
             
 
