@@ -1,5 +1,6 @@
 import pandas as pd
 import os
+from time import ctime
 
 # save training results
 def to_excel(hparams, results):
@@ -11,7 +12,10 @@ def to_excel(hparams, results):
                               'batch_size': [hparams['batch_size']],
                               'dataset_size': [hparams['dataset_size']],
                               'loss': [results['loss']],
-                              'accuracy': [results['accuracy']]})
+                              'accuracy': [results['accuracy']],
+                              'time':[ctime()]
+
+                            })
 
 
     old_excel_file = pd.read_excel(excel_file_path, index=False)

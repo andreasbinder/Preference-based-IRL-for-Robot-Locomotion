@@ -2,18 +2,17 @@
 import numpy as np
 
 class TrajectoryBase(object):
-    def __init__(self, cum_reward=0, observations=[]):
+    def __init__(self, cum_reward, observations, time_step=0):
 
         self.observations = observations
-        self.cum_reward = cum_reward # sum(self.rewards)
-        #
-        # self.rewards = rewards
-        # self.actions = actions
+        self.cum_reward = cum_reward
+        self.time_step = time_step
+
 
 
 class SubTrajectory(TrajectoryBase):
-    def __init__(self, cum_reward, observations=[]):
-        super(SubTrajectory, self).__init__(cum_reward=cum_reward, observations=observations)
+    def __init__(self, cum_reward, observations, time_step):
+        super(SubTrajectory, self).__init__(cum_reward=cum_reward, observations=observations, time_step=time_step)
 
 
 class Trajectory(TrajectoryBase):
@@ -94,7 +93,8 @@ class Dataset(object):
         with open(output, 'wb') as f:
             pickle.dump(self.list_trajectories, f)
 
-    def load(self, path, name="Dataset"):
+    @staticmethod
+    def load(path, name="Dataset"):
         import os.path as osp
         import pickle
         inp = osp.join(path, name)
@@ -110,34 +110,13 @@ class Dataset(object):
         return [data[i:i + 2] for i, _ in enumerate(data[::2])]
 
     @staticmethod
-    def data_to_pairs_old(data):
-        #data = self.list_trajectories
+    def get_pairs_v2(data):
+        from random import shuffle
+        shuffle(data)
 
-        # include
+        return [data[i:i + 2] for i, _ in enumerate(data[::2])]
 
-        pairs, labels, rewards = [], [], []
-        demos = Dataset.get_pairs(data)
 
-        for demo_pair in demos:
-            obs1, obs2 = demo_pair[0].observations, demo_pair[1].observations
-            if isinstance(obs1, list):
-                obs1 = np.array(obs1)
-            if isinstance(obs2, list):
-                obs2 = np.array(obs2)
-
-            pairs.append(np.array([obs1, obs2]))
-            rew1, rew2 = demo_pair[0].cum_reward, demo_pair[1].cum_reward
-            label = 1 if rew1 > rew2 else 2
-            rewards.append(np.array([rew1, rew2]))
-
-            #labels.append(np.array([label]))
-            labels.append(label)
-
-        #pairs = [pair for pair in pairs if pair.shape == (2, 50, 27)]
-
-        # arr = np.array(pairs)
-
-        return np.array(pairs), np.array(labels), np.array(rewards)
 
     @staticmethod
     def data_to_pairs(data):

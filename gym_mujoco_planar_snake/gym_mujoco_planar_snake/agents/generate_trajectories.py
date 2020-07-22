@@ -143,7 +143,7 @@ def initialize_dataset(env_id, original_dataset, horizon, num_samples_per_trajec
 
             # cum_reward übergeben
             #subtrajectory = SubTrajectory(rewards=l_rews, actions=l_acs, observations=l_obs)
-            subtrajectory = SubTrajectory(cum_reward=cum_reward, observations=l_obs)
+            subtrajectory = SubTrajectory(cum_reward=cum_reward, observations=l_obs, time_step=trajectory.time_step)
 
             final_dataset.append(subtrajectory)
 
@@ -193,12 +193,14 @@ def create_dataset(log_dir):
     #print("dir",str(dirs[0]), type(str(dirs[0])))
 
     min_val, max_val = 10000, 1000000
+    sfs = 5000
+    #sfs = 10000
     trajectories = []
     num_dirs = len(dirs)
     print("Total Number of Directories", str(num_dirs))
     for i, directory in enumerate(dirs):
 
-        for index, time_step in enumerate(range(min_val, max_val + 1, 10000)):
+        for index, time_step in enumerate(range(min_val, max_val + 1, sfs)):
 
             off_set = 9 - len(str(time_step))
 
@@ -223,19 +225,6 @@ def create_dataset(log_dir):
 
     return dataset
 
-def get_as_iterator():
-    pass
-
-def prepare_data(log_dir, max_num_traj):
-
-    d = create_dataset(log_dir)
-    print("Number of Trajectories after create: ", str(len(d)))
-
-
-    original_d, d = adjust_dataset(d, max_num_traj=max_num_traj)
-    print("Number of Trajectories after adjust: ", str(len(d)))
-
-    return original_d, d
 
 def main():
     import argparse

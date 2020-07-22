@@ -2,36 +2,21 @@ import tensorflow as tf
 tf.compat.v1.enable_eager_execution()
 
 import os
+
 # take before TREX trajectories and put results into after TREX traj
 from gym_mujoco_planar_snake.common.dataset import Dataset, SubTrajectory
-#from gym_mujoco_planar_snake.common.reward_net import RewardNet
 from gym_mujoco_planar_snake.common.iterator import Iterator
 from gym_mujoco_planar_snake.common.trainer import Trainer
-
 from gym_mujoco_planar_snake.common.documentation import to_excel
 import tensorflow.keras as keras
 #######################################################################
-from tensorflow import keras
-from tensorflow.keras.layers import Dense, BatchNormalization, Input, Dense, Reshape, Flatten, Dropout
 
-from tensorflow.keras.layers import LeakyReLU, ReLU
-from tensorflow.keras.models import Sequential, Model, load_model
-from tensorflow.keras.optimizers import Adam, SGD
-
-#######################################################################
-
-
-import pandas as pd
-import numpy as np
-# define Model
-# classification 1 für schlechter, 2 für besser
-# cut episode length
 
 
 
 # load data
 def get_data_from_file(path, name="Dataset"):
-    return Dataset([]).load(path=path, name=name)
+    return Dataset.load(path=path, name=name)
 
 def get_all_files_from_dir():
     import os
@@ -53,9 +38,9 @@ def get_all_files_from_dir():
 def hyperparameters():
     hparams = {
         "lr": 0.001,
-        "epochs": 50,
-        "batch_size": 64,
-        "dataset_size": 1000
+        "epochs": 1,
+        "batch_size": 128,
+        "dataset_size": None
     }
     return hparams
 
@@ -106,23 +91,29 @@ def main():
     #########################################################################
 
     # load data
-    #trajectories = get_all_files_from_dir()
-    trajectories = get_data_from_file("/home/andreas/LRZ_Sync+Share/BachelorThesis/gym_mujoco_planar_snake/gym_mujoco_planar_snake/log/SubTrajectoryDataset/","Dataset500_Sun Jul 12 17:21:36 2020")
+    trajectories = get_all_files_from_dir()
+    #trajectories = get_data_from_file("/home/andreas/LRZ_Sync+Share/BachelorThesis/gym_mujoco_planar_snake/gym_mujoco_planar_snake/log/SubTrajectoryDataset/","Dataset500_Sun Jul 12 17:21:36 2020")
+
+    hparams.update({'dataset_size': len(trajectories)})
+
+
 
     # create pairs of trajectories
     pairs, labels, rewards = Dataset.data_to_pairs(trajectories)
     data = pairs, labels
 
+
+
     trainer = Trainer(hparams)
 
-    #trainer.fit_pair(data)
+    trainer.fit_pair_v4(data)
+    #trainer.fit_pair_v2(data)
 
-    results = {
-        "loss": 0.001,
-        "accuracy": 0.98
-    }
+    results = trainer.results
 
+    # document training results
     to_excel(hparams, results)
+
 
 '''    # train
     model = train(data=data)
