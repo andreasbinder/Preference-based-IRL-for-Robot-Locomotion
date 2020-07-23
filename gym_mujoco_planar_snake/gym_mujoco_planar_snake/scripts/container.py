@@ -33,3 +33,54 @@ def train(data, input_shape=(2,50,27)):
 
     return model
 
+######################################################################################
+
+@staticmethod
+def eval_loss(data_set, model, loss_fn):
+
+    total_loss = 0
+
+    for step, (x, y) in enumerate(data_set):
+        batch_size = x.shape[0].value
+
+        x = x[:, 0, :], x[:, 1, :]
+
+        predictions, _ = model(x)
+
+        loss_value = loss_fn(y, predictions)
+
+        total_loss += loss_value / batch_size
+
+        # predictions_int = tf.cast(predictions, tf.int64)
+        #
+        # count = tf.math.equal(predictions_int, y)
+        #
+        # c += tf.count_nonzero(count)
+
+    return total_loss
+
+######################################################################################
+
+@staticmethod
+def eval_on_batch(test_set, model, size):
+
+    total = 0
+
+    c = 0
+
+    for step, (x, y) in enumerate(test_set):
+        total += x.shape[0].value
+
+        x = x[:, 0, :], x[:, 1, :]
+
+        predictions, _ = model(x)
+
+        predictions_int = tf.cast(predictions, tf.int64)
+
+        count = tf.math.equal(predictions_int, y)
+
+        c += tf.count_nonzero(count)
+
+    return c.numpy() / total
+
+######################################################################################

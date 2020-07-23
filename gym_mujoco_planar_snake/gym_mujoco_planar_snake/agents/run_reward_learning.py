@@ -37,7 +37,7 @@ def get_all_files_from_dir():
 
 def hyperparameters():
     hparams = {
-        "lr": 0.001,
+        "lr": 0.0001,
         "epochs": 1,
         "batch_size": 128,
         "dataset_size": None

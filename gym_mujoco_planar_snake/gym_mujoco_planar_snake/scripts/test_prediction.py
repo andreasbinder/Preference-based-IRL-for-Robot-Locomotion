@@ -13,20 +13,30 @@ file = '/home/andreas/LRZ_Sync+Share/BachelorThesis/gym_mujoco_planar_snake/gym_
 name = 'Dataset500_Sun Jul 12 17:21:36 2020'
 files = get_data_from_file(file, name)
 
-file = files[0]
+file1 = files[0]
 
 import numpy as np
 
 
-obs = np.array(file.observations).reshape((1350,))
+obs1 = np.array(file1.observations).reshape((1350,))
 
-obs = tf.convert_to_tensor(obs)
+obs1 = tf.convert_to_tensor(obs1)
 
-obs = tf.expand_dims(obs, axis=0)
+obs1 = tf.expand_dims(obs1, axis=0)
+
+file2 = files[1]
+
+
+
+obs2 = np.array(file2.observations).reshape((1350,))
+
+obs2 = tf.convert_to_tensor(obs2)
+
+obs2 = tf.expand_dims(obs2, axis=0)
 
 #path = '/home/andreas/LRZ_Sync+Share/BachelorThesis/gym_mujoco_planar_snake/gym_mujoco_planar_snake/log/models/Tue Jul 21 12:47:05 2020/Tue Jul 21 12:47:05 2020'
 
-path = '/home/andreas/LRZ_Sync+Share/BachelorThesis/gym_mujoco_planar_snake/gym_mujoco_planar_snake/log/models/Tue Jul 21 14:22:38 2020/Tue Jul 21 14:22:38 2020.h5'
+path = '/home/andreas/LRZ_Sync+Share/BachelorThesis/gym_mujoco_planar_snake/gym_mujoco_planar_snake/log/models/Wed Jul 22 17:37:45 2020/Wed Jul 22 17:37:45 2020.h5'
 
 #model = keras.Model()
 
@@ -36,9 +46,13 @@ model.load_weights(path)
 
 inp = tf.random.normal([1,1350])
 
-res, _ = model.reward(obs)
+res1, _ = model.reward(obs1)
 
-test = res.numpy()
+res2, _ = model.reward(obs2)
 
-file.cum_reward
+x, _ = model((obs1, obs2))
+
+test = res1.numpy()
+
+
 

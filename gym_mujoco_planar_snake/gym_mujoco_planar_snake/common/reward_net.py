@@ -81,6 +81,11 @@ class SimpleNet(tf.keras.Model):
 
     def __init__(self):
         super(SimpleNet, self).__init__()
+
+        # self.optimizer = optimizer
+        # self.loss = loss
+        # self.accuracy = accuracy
+
         self.dense1 = Dense(256, nn.relu, input_shape=(1350,))
         self.dense2 = Dense(256, nn.relu)
         self.dense3 = Dense(256, nn.relu)
@@ -90,9 +95,20 @@ class SimpleNet(tf.keras.Model):
         self.model = tf.keras.Sequential([
             Dense(256, nn.relu, input_shape=(1350,)),
             Dense(256, nn.relu),
+            #Dense(256, nn.relu),
+            #Flatten(),
+            Dense(1)
+        ])
+
+
+
+        self.model_v2 = tf.keras.Sequential([
+            Dense(256, nn.relu, input_shape=(1350,)),
+            Dense(256, nn.relu),
             Dense(256, nn.relu),
             Dense(1)
         ])
+
 
     def reward(self, x):
         '''
