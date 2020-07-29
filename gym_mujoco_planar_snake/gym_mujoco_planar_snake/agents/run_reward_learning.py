@@ -8,6 +8,7 @@ from gym_mujoco_planar_snake.common.dataset import Dataset, SubTrajectory
 from gym_mujoco_planar_snake.common.iterator import Iterator
 from gym_mujoco_planar_snake.common.trainer import Trainer
 from gym_mujoco_planar_snake.common.documentation import to_excel
+from gym_mujoco_planar_snake.common.performance_checker import reward_prediction
 import tensorflow.keras as keras
 #######################################################################
 
@@ -37,9 +38,9 @@ def get_all_files_from_dir():
 
 def hyperparameters():
     hparams = {
-        "lr": 0.0001,
-        "epochs": 25,
-        "batch_size": 128,
+        "lr": 0.00001,
+        "epochs": 10,
+        "batch_size": 16,
         "dataset_size": None
     }
     return hparams
@@ -55,6 +56,20 @@ def return_iterator(batch_size, max_num_traj, num_samples_per_trajectories):
                          max_num_dir=10)
 
 
+def test_predictions(model, trajectories, k):
+
+    from random import choices
+
+    sample = choices(trajectories, k=k)
+
+    for trajectory in sample:
+        reward_prediction(model, trajectory)
+
+
+
+
+
+
 
 def main():
     import argparse
@@ -62,7 +77,8 @@ def main():
     parser.add_argument('--seed', help='RNG seed', type=int, default=0)
     parser.add_argument('--env', help='environment ID', default='Mujoco-planar-snake-cars-angle-line-v1')
     parser.add_argument('--data_dir', help='subtrajectory dataset')
-    parser.add_argument('--net_save_path', help='subtrajectory dataset')
+    parser.add_argument('--net_save_path', help='subtrajectory dataset',
+                        default='/home/andreas/LRZ_Sync+Share/BachelorThesis/gym_mujoco_planar_snake/gym_mujoco_planar_snake/log/models/')
 
     args = parser.parse_args()
     hparams = hyperparameters()
@@ -85,6 +101,8 @@ def main():
 
     #data = get_data_from_file(path, name)
 
+    net_save_path = '/home/andreas/Desktop'
+
 
     #########################################################################
     #                       END OF YOUR CODE                                #
@@ -104,12 +122,23 @@ def main():
 
 
 
-    trainer = Trainer(hparams)
+    trainer = Trainer(hparams,
+                      save_path=net_save_path,
+                      Save=True)
 
-    trainer.fit_pair_v4(data)
+    trainer.fit_test(data)
+
+    #trainer.fit_pair_v4(data)
     #trainer.fit_pair_v2(data)
 
+    #trainer.fit_hinge(data)
+
+
     results = trainer.results
+
+    model = trainer.model
+
+    #test_predictions(model, trajectories, 15)
 
     # document training results
     to_excel(hparams, results)

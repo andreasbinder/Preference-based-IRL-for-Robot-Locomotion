@@ -193,8 +193,8 @@ def create_dataset(log_dir):
     #print("dir",str(dirs[0]), type(str(dirs[0])))
 
     min_val, max_val = 10000, 1000000
-    sfs = 5000
-    #sfs = 10000
+    #sfs = 5000
+    sfs = 10000
     trajectories = []
     num_dirs = len(dirs)
     print("Total Number of Directories", str(num_dirs))

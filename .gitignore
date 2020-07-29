@@ -2,6 +2,7 @@
 /gym_mujoco_planar_snake/gym_mujoco_planar_snake/log
 /gym_mujoco_planar_snake/gym_mujoco_planar_snake/BrownGooFiles
 /gym_mujoco_planar_snake/gym_mujoco_planar_snake/LemkeFiles
+/gym_mujoco_planar_snake/gym_mujoco_planar_snake/common/__pycache__
 .idea
 .PowerFolder
 .vscode

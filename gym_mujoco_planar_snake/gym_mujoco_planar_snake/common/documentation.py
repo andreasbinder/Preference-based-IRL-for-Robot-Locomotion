@@ -13,6 +13,8 @@ def to_excel(hparams, results):
                               'dataset_size': [hparams['dataset_size']],
                               'loss': [results['loss']],
                               'accuracy': [results['accuracy']],
+                              'test_loss': [results['test_loss']],
+                              'test_accuracy': [results['test_accuracy']],
                               'time':[ctime()]
 
                             })

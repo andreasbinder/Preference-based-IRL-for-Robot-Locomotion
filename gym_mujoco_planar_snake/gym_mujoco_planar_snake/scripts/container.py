@@ -298,3 +298,30 @@ class Trainer:
 
     def fit_triplet(self, dataset):
         pass
+
+#####################################################################################################################
+
+class RewardNetWrapper(VecEnvWrapper):
+
+    def __init__(self, venv, model_dir):
+        VecEnvWrapper.__init__(self, venv)
+
+        self.model_dir = model_dir
+        self.model = SimpleNet()
+
+    def step_wait(self):
+        obs, rews, news, infos = self.venv.step_wait()
+
+        self.model.load_weights(self.model_dir)
+
+        obs = tf.expand_dims(tf.convert_to_tensor(obs.reshape((1350,)).astype("float32")), axis=0)
+
+        reward, abs_reward = self.model.reward(obs)
+
+        # TODO return reward or abs_reward
+        return obs, abs_reward, news, infos
+
+    def reset(self, **kwargs):
+        obs = self.venv.reset()
+
+        return obs

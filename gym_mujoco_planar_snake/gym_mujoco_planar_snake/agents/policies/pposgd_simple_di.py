@@ -1,7 +1,14 @@
+import tensorflow as tf, numpy as np
+# TODO eager
+
+tf.enable_eager_execution()
+
 from baselines.common import Dataset, explained_variance, fmt_row, zipsame
 from baselines import logger
 import baselines.common.tf_util as U
-import tensorflow as tf, numpy as np
+
+
+
 import time
 from baselines.common.mpi_adam import MpiAdam
 from baselines.common.mpi_moments import mpi_moments
@@ -15,7 +22,8 @@ import matplotlib.pyplot as plt
 from mpl_toolkits.mplot3d import Axes3D
 from matplotlib import cm
 
-from tensorboardX import SummaryWriter
+# TODO use tensorboard
+#from tensorboardX import SummaryWriter
 
 #
 import numpy as np

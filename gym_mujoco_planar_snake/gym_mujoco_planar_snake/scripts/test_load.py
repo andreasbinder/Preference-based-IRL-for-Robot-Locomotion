@@ -18,6 +18,11 @@ register(
 )'''
 
 
+# TODO doesnt work
+#from baselines.common.vec_env import VecVideoRecorder
+
+import imageio
+
 import os
 import os.path as osp
 
@@ -61,65 +66,7 @@ def policy_fn(name, ob_space, ac_space):
     # from baselines.ppo1 import cnn_policy
     # return cnn_policy.CnnPolicy(name=name, ob_space=ob_space, ac_space=ac_space)
 
-class PPO2Agent(object):
-    def __init__(self, env, env_type, path, stochastic=False, gpu=True):
-        from baselines.common.policies import build_policy
-        from baselines.ppo2.model import Model
 
-        self.graph = tf.Graph()
-
-        if gpu:
-            config = tf.ConfigProto()
-            config.gpu_options.allow_growth = True
-        else:
-            config = tf.ConfigProto(device_count = {'GPU': 0})
-
-        self.sess = tf.Session(graph=self.graph,config=config)
-
-        with self.graph.as_default():
-            with self.sess.as_default():
-                ob_space = env.observation_space
-                ac_space = env.action_space
-
-                if env_type == 'atari':
-                    policy = build_policy(env,'cnn')
-                elif env_type == 'mujoco':
-                    policy = build_policy(env,'mlp')
-                else:
-                    assert False,' not supported env_type'
-
-                make_model = lambda : Model(policy=policy, ob_space=ob_space, ac_space=ac_space, nbatch_act=1, nbatch_train=1,
-                                nsteps=1, ent_coef=0., vf_coef=0.,
-                                max_grad_norm=0.)
-                self.model = make_model()
-
-                self.model_path = path
-                self.model.load(path)
-
-        if env_type == 'mujoco':
-            with open(path+'.env_stat.pkl', 'rb') as f :
-                import pickle
-                s = pickle.load(f)
-            self.ob_rms = s['ob_rms']
-            self.ret_rms = s['ret_rms']
-            self.clipob = 10.
-            self.epsilon = 1e-8
-        else:
-            self.ob_rms = None
-
-        self.stochastic = stochastic
-
-    def act(self, obs, reward, done):
-        if self.ob_rms:
-            obs = np.clip((obs - self.ob_rms.mean) / np.sqrt(self.ob_rms.var + self.epsilon), -self.clipob, self.clipob)
-
-        with self.graph.as_default():
-            with self.sess.as_default():
-                if self.stochastic:
-                    a,v,state,neglogp = self.model.step(obs)
-                else:
-                    a = self.model.act_model.act(obs)
-        return a
 
 
 # also for benchmark
@@ -140,7 +87,12 @@ def run_environment_episode(env, pi, seed, model_file, max_timesteps, render, st
 
     #my_tf_util.load_state(save_dir)
 
+    images = []
+    #################
+    # TODO imageio test
+    img = env.render(mode='rgb_array')
 
+    #################
 
 
     # set seed
@@ -169,6 +121,7 @@ def run_environment_episode(env, pi, seed, model_file, max_timesteps, render, st
     while (not done) and number_of_timestep < max_timesteps:
     #while number_of_timestep < max_timesteps:
 
+        images.append(img)
 
         #print("Timesteps: ", str(number_of_timestep))
         # TODO!!!
@@ -201,11 +154,19 @@ def run_environment_episode(env, pi, seed, model_file, max_timesteps, render, st
         # add info
         info_collector.add_info(info)
 
+        ### TODO imagio
+        img = env.render(mode='rgb_array')
+        ###
+
+
+
         # render
-        if render:
-            env.render()
+        # if render:
+        #     env.render()
 
         number_of_timestep += 1
+
+    #imageio.mimsave('snake.gif', [np.array(img) for i, img in enumerate(images) if i % 2 == 0], fps=20)
 
     return done, number_of_timestep, info_collector, cum_reward
 
@@ -217,13 +178,31 @@ def enjoy(env_id, seed):
 
         env = gym.make(env_id)
 
+        #obs = env.observation_space.sample()
+        print(env.observation_space)
+        print(env.observation_space.high)
+        print(env.observation_space.low)
+        if True:
+            return
+
+
+
         # TODO
         # if I also wanted the newest model
         check_for_new_models = False
 
+        ###################################################
+        # TODO for video recording
+        ###################################################
 
 
-        max_timesteps = 3000000
+
+        ###################################################
+
+
+
+        #max_timesteps = 3000000
+        max_timesteps = 10000
         #max_timesteps = 1
 
         modelverion_in_k_ts = 2510  # better
@@ -240,7 +219,8 @@ def enjoy(env_id, seed):
         #gym.logger.setLevel(logging.DEBUG)
 
         run = 0
-        model_dir = '/home/andreas/LRZ_Sync+Share/BachelorThesis/gym_mujoco_planar_snake/gym_mujoco_planar_snake/log/initial_PPO_runs/InjuryIndex_6/Fri Jun 26 11:59:30 2020/models/Mujoco-planar-snake-cars-angle-line-v1/ppo'
+        model_dir = '/home/andreas/LRZ_Sync+Share/BachelorThesis/gym_mujoco_planar_snake/gym_mujoco_planar_snake/log/clip_test/InjuryIndex_/Sun Jul 26 22:07:24 2020/models/Mujoco-planar-snake-cars-angle-line-v1/ppo'
+        #'/home/andreas/LRZ_Sync+Share/BachelorThesis/gym_mujoco_planar_snake/gym_mujoco_planar_snake/log/initial_PPO_runs/InjuryIndex_6/Fri Jun 26 11:59:30 2020/models/Mujoco-planar-snake-cars-angle-line-v1/ppo'
         #'/home/andreas/LRZ_Sync+Share/BachelorThesis/gym_mujoco_planar_snake/gym_mujoco_planar_snake/log/clip_test/InjuryIndex_7/Sat Jun 27 03:59:02 2020/models/Mujoco-planar-snake-cars-angle-line-v1/ppo'
         #'/home/andreas/LRZ_Sync+Share/BachelorThesis/gym_mujoco_planar_snake/gym_mujoco_planar_snake/log/clip_test/InjuryIndex_7/Mon Jun 29 11:36:26 2020/models/Mujoco-planar-snake-cars-angle-line-v1/ppo'
         #'/home/andreas/LRZ_Sync+Share/BachelorThesis/gym_mujoco_planar_snake/gym_mujoco_planar_snake/log/snake_test/run0_-1/Thu Jun 11 10:25:54 2020_0.2/models/Mujoco-planar-snake-cars-angle-line-v1/ppo'
@@ -249,7 +229,7 @@ def enjoy(env_id, seed):
 
         # model_file = get_latest_model_file(model_dir)
 
-        model_index = 40#0
+        model_index = 0
         model_file = model_files[model_index]
         print('available models: ', len(model_files))
         #model_file = model_files[model_index]
@@ -278,7 +258,7 @@ def enjoy(env_id, seed):
             # TODO:                                                                 #
             #                                                                       #
             #########################################################################
-            env._max_episode_steps = 50
+            #env._max_episode_steps = 50
             #########################################################################
             #                       END OF YOUR CODE                                #
             #########################################################################
@@ -287,6 +267,9 @@ def enjoy(env_id, seed):
                                                                                 env._max_episode_steps, render=True,
                                                                                 stochastic=False)
 
+
+            if True:
+                break
 
             info_collector.episode_info_print()
 
@@ -315,12 +298,7 @@ def enjoy(env_id, seed):
 
             print('timesteps: %d, info: %s' % (number_of_timesteps, str(sum_info)))
 
-        print(len(sum_reward))
-        arr = np.array(sum_reward)
-        
 
-
-        #np.save("rewards.npy", arr)
 
             
 
@@ -350,6 +328,8 @@ def main():
 
     # CUDA off -> CPU only!
     os.environ['CUDA_VISIBLE_DEVICES'] = ''
+
+
 
     enjoy(args.env, seed=args.seed)
 

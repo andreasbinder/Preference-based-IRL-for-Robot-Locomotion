@@ -17,7 +17,7 @@ class SubTrajectory(TrajectoryBase):
 
 class Trajectory(TrajectoryBase):
     def __init__(self, path, pure_data_file, time_step, fixed_joints = None):
-        super(Trajectory, self).__init__()
+        super(Trajectory, self).__init__(cum_reward=0, observations=[], time_step=time_step)
         #self.elements = elements
         self.pure_data_file = pure_data_file
         self.path = path
@@ -115,6 +115,11 @@ class Dataset(object):
         shuffle(data)
 
         return [data[i:i + 2] for i, _ in enumerate(data[::2])]
+
+    @staticmethod
+    def get_triplets(data):
+        pass
+        # (anchor, positive, negative)
 
 
 

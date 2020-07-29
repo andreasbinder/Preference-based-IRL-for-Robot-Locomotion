@@ -13,68 +13,112 @@ class RewardNet(tf.keras.Model):
 
     def __init__(self):
         super(RewardNet, self).__init__()
-        '''        self.dense1 = Dense(256, nn.relu, input_shape=(1350, ))
+
+        # self.optimizer = optimizer
+        # self.loss = loss
+        # self.accuracy = accuracy
+
+        self.dense1 = Dense(256, nn.relu, input_shape=(27,))
         self.dense2 = Dense(256, nn.relu)
         self.dense3 = Dense(256, nn.relu)
         self.dense4 = Dense(1)
-        self.flatten = Flatten()'''
+        self.flatten = Flatten()
+
         self.model = tf.keras.Sequential([
-            Dense(256, nn.relu, input_shape=(1350,)),
-            Dense(256, nn.relu),
-            Dense(256, nn.relu),
-            Flatten(),
+            Dense(128, nn.sigmoid, input_shape=(27,)),
+            Dense(128, nn.sigmoid),
+            #Dense(256, nn.relu),
+            #Flatten(),
             Dense(1)
         ])
 
-    def reward(self, traj):
-        '''       sum_rewards = 0
-        sum_abs_rewards = 0'''
+        self.model_v5 = tf.keras.Sequential([
+            Dense(256, nn.sigmoid, input_shape=(27,)),
+            BatchNormalization(),
+            Dense(256, nn.sigmoid),
+            BatchNormalization(),
+            Dense(256, nn.sigmoid),
+            BatchNormalization(),
+            # Dense(256, nn.relu),
+            # Flatten(),
+            Dense(1)
+        ])
 
-        sum_rewards = tf.Variable(0.)
-        sum_abs_rewards = tf.Variable(0.)
-        x = traj
-        '''x = self.dense1(x)
-        x = self.dense2(x)
-        x = self.dense3(x)
-        x = self.flatten(x)
-        r = self.dense4(x)'''
+        self.model_v3 = tf.keras.Sequential([
+            Dense(256, nn.relu, input_shape=(27,)),
+            Dense(256, nn.relu),
+            # Dense(256, nn.relu),
+            # Flatten(),
+            Dense(1)
+        ])
 
-        r = self.model(traj)
-        # sum_rewards += keras_sum(r)
 
-        '''        sum_rewards += keras_sum(r, axis=1)
-        sum_abs_rewards += keras_sum(keras_abs(r))
 
-        return sum_rewards, sum_abs_rewards'''
+        self.model_v2 = tf.keras.Sequential([
+            Dense(256, nn.relu, input_shape=(1350,)),
+            Dense(256, nn.relu),
+            Dense(256, nn.relu),
+            Dense(1)
+        ])
 
-        '''        sum_rewards += tf.Variable(keras_sum(r, axis=1))
-        sum_abs_rewards += tf.Variable(keras_sum(keras_abs(r)))'''
+    def summary(self, line_length=None, positions=None, print_fn=None):
+        self.model.summary(line_length, positions, print_fn)
 
-        '''sum_rewards = sum_rewards + keras_sum(r, axis=1)
-        sum_abs_rewards = sum_abs_rewards + keras_sum(keras_abs(r))'''
-        sum_rewards = tf.add(sum_rewards, keras_sum(r, axis=1))
-        sum_abs_rewards = tf.add(sum_abs_rewards, keras_sum(keras_abs(r)))
 
-        return sum_rewards, sum_abs_rewards
+    def reward(self, x):
+        '''
+            x.shape: (batch_size, 1350)
+        '''
+
+        pred = self.model(x)
+
+        r = keras_sum(pred, axis=1)
+
+        # r = keras_sum(pred, axis = 1)
+
+        #r_abs = keras_sum(keras_abs(pred), axis=1)
+        r_abs = keras_sum(keras_abs(pred), axis=1)
+        #r_abs = None #dummy value
+
+        return r, r_abs
 
     def call(self, inputs, training=True, **kwargs):
-        # traj shape (50, 27)
-        # currently: 64(bs), 2, 1350 -> wie bekomme ich 2 Mal 64, 1, 1350
+
+
+
         traj_i, traj_j = inputs
 
-        '''traj_i = inputs[:, 0, :]
-        traj_j = inputs[:, 1, :]'''
+        batch_size = traj_i.shape[0]
 
-        cum_r_i, abs_r_i = self.reward(traj_i)
-        cum_r_j, abs_r_j = self.reward(traj_j)
+        ####################################
+        # TODO get batchsize instead of hardcoded value
+        ####################################
 
-        from tensorflow import argmax as tf_argmax
-        logits = tensorflow.stack([[cum_r_i], [cum_r_j]], axis=1)
-        logits = tf.squeeze(tf_argmax(logits, axis=1))
-        logits = tf.dtypes.cast(logits, tf.float32)
+        traj_i, traj_j = tf.reshape(traj_i, [traj_i.shape[0] * 50, 27]), tf.reshape(traj_i, [traj_j.shape[0] * 50, 27])
 
-        return logits, tf.add(abs_r_i, abs_r_j)
-        # return tensorflow.stack([[cum_r_i],[cum_r_j]], axis=1), abs_r_i + abs_r_j
+        rew_obs_i, rew_obs_abs_i = self.reward(traj_i)
+        rew_obs_j, rew_obs_abs_j = self.reward(traj_j)
+
+        rew_obs_i, rew_obs_abs_i = tf.reshape(rew_obs_i, [batch_size, 50]), tf.reshape(rew_obs_abs_i, [batch_size, 50])
+        rew_obs_j, rew_obs_abs_j = tf.reshape(rew_obs_j, [batch_size, 50]), tf.reshape(rew_obs_abs_j, [batch_size, 50])
+
+        cum_r_i, cum_r_i_abs = keras_sum(rew_obs_i, axis=1), keras_sum(rew_obs_abs_i, axis=1)
+        cum_r_j, cum_r_j_abs = keras_sum(rew_obs_j, axis=1), keras_sum(rew_obs_abs_j, axis=1)
+
+        #cum_r_i, traj_j = tf.reshape(traj_i, [cum_r_i.shape[0] * 50, ]), tf.reshape(traj_i, [traj_j.shape[0] * 50, ])
+
+
+        ####################################
+        #cum_r_i, cum_r_i_abs = self.reward(traj_i)
+        #cum_r_j, cum_r_j_abs = self.reward(traj_j)
+
+
+
+        x = tf.subtract(cum_r_i, cum_r_j)
+
+        x = tf.keras.activations.sigmoid(x)
+
+        return x, cum_r_i_abs + cum_r_j_abs
 
 
 class SimpleNet(tf.keras.Model):
@@ -115,11 +159,12 @@ class SimpleNet(tf.keras.Model):
             x.shape: (batch_size, 1350)
         '''
 
-        r = self.model(x)
+        pred = self.model(x)
 
-        r = keras_sum(r, axis=1)
+        r = keras_sum(pred, axis=1)
         #r_abs = keras_sum(keras_abs(r), axis=1)
-        r_abs = None #dummy value
+        r_abs = keras_sum(keras_abs(pred), axis=1)
+        #r_abs = None #dummy value
 
         return r, r_abs
 
@@ -134,4 +179,65 @@ class SimpleNet(tf.keras.Model):
 
         x = tf.keras.activations.sigmoid(x)
 
-        return x, None
+        return x, cum_r_i_abs + cum_r_j_abs
+
+
+class TransferNet(tf.keras.Model):
+
+    def __init__(self):
+        super(TransferNet, self).__init__()
+
+        # self.optimizer = optimizer
+        # self.loss = loss
+        # self.accuracy = accuracy
+
+        self.dense1 = Dense(256, nn.relu, input_shape=(1350,))
+        self.dense2 = Dense(256, nn.relu)
+        self.dense3 = Dense(256, nn.relu)
+        self.dense4 = Dense(1)
+        self.flatten = Flatten()
+
+        self.model = tf.keras.Sequential([
+            Dense(256, nn.relu, input_shape=(1350,)),
+            Dense(256, nn.relu),
+            #Dense(256, nn.relu),
+            #Flatten(),
+            Dense(1)
+        ])
+
+
+
+        self.model_v2 = tf.keras.Sequential([
+            Dense(256, nn.relu, input_shape=(1350,)),
+            Dense(256, nn.relu),
+            Dense(256, nn.relu),
+            Dense(1)
+        ])
+
+
+    def reward(self, x):
+        '''
+            x.shape: (batch_size, 1350)
+        '''
+
+        pred = self.model(x)
+
+        r = keras_sum(pred, axis=1)
+        #r_abs = keras_sum(keras_abs(r), axis=1)
+        r_abs = keras_sum(keras_abs(pred), axis=1)
+        #r_abs = None #dummy value
+
+        return r, r_abs
+
+    def call(self, inputs, training=True, **kwargs):
+
+        traj_i, traj_j = inputs
+
+        cum_r_i, cum_r_i_abs = self.reward(traj_i)
+        cum_r_j, cum_r_j_abs = self.reward(traj_j)
+
+        x = tf.subtract(cum_r_i, cum_r_j)
+
+        x = tf.keras.activations.sigmoid(x)
+
+        return x, cum_r_i_abs + cum_r_j_abs
