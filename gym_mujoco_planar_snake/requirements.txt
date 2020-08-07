@@ -1,8 +1,0 @@
-mujoco-py>=1.50.1
-gym[mujoco]>=0.9.6
-glfw>=1.4.0
-Cython>=0.27.2
-Baselines
-Pandas
-
-#new ones

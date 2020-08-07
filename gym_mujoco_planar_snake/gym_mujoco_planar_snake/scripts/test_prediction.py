@@ -9,7 +9,7 @@ from gym_mujoco_planar_snake.common.dataset import Dataset, SubTrajectory
 
 #/home/andreas/LRZ_Sync+Share/BachelorThesis/gym_mujoco_planar_snake/gym_mujoco_planar_snake/log/SubTrajectoryDataset/
 
-file = '/home/andreas/LRZ_Sync+Share/BachelorThesis/gym_mujoco_planar_snake/gym_mujoco_planar_snake/log/SubTrajectoryDataset'
+file = '/gym_mujoco_planar_snake/gym_mujoco_planar_snake/log/TrajectoryDataset'
 name = 'Dataset500_Sun Jul 12 17:21:36 2020'
 files = get_data_from_file(file, name)
 

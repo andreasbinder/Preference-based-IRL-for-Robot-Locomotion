@@ -9,7 +9,7 @@ from gym_mujoco_planar_snake.common.dataset import Dataset, SubTrajectory
 
 #/home/andreas/LRZ_Sync+Share/BachelorThesis/gym_mujoco_planar_snake/gym_mujoco_planar_snake/log/SubTrajectoryDataset/
 
-file = '/home/andreas/LRZ_Sync+Share/BachelorThesis/gym_mujoco_planar_snake/gym_mujoco_planar_snake/log/SubTrajectoryDataset'
+file = '/gym_mujoco_planar_snake/gym_mujoco_planar_snake/log/TrajectoryDataset'
 name = 'Dataset500_Sun Jul 12 17:21:36 2020'
 files = get_data_from_file(file, name)
 
@@ -47,7 +47,7 @@ def change_model(model, new_input_shape=(None, 27)):
 
     # test new model on a random input image
     X = np.random.rand(10, 27)
-    y_pred = new_model.predict(X)
+    y_pred = new_model.predict(X, )
     print(y_pred)
 
     return new_model

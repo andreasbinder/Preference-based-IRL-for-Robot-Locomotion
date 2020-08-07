@@ -2,12 +2,14 @@
 from gym.core import ActionWrapper
 import numpy as np
 
-class AcWrapper(ActionWrapper):
+class ClipActionWrapper(ActionWrapper):
 
-    def __init__(self, env, clip_value):
+    def __init__(self, env, clip_value, joints):
         ActionWrapper.__init__(self, env)
 
         self.env = env
+
+        self.joints = joints
 
         self.clip_value = np.abs(clip_value)
 
@@ -22,12 +24,8 @@ class AcWrapper(ActionWrapper):
 
     def action(self, action):
 
-        fixed = [4,5,6,7]
-
-        for joint in fixed:
+        for joint in self.joints:
             action[joint] = np.clip(action[joint], self.neg_clip_value, self.clip_value)
-
-        #action = np.clip(action, self.neg_clip_value, self.clip_value)
 
         return action
 

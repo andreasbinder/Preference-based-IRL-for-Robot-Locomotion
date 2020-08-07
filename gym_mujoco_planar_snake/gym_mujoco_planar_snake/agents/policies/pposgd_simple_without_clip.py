@@ -195,6 +195,9 @@ def traj_segment_generator(pi, env, horizon, stochastic, fixed_joints, clip_valu
         # run action
         ob, rew, new, _ = env.step(ac)
 
+        # TODO eval either inside wrapper or here
+        rew = rew.eval()[0]
+
         #print("reward", str(rew))
 
         # TODO render training
@@ -396,7 +399,8 @@ def learn(env, policy_func, *,
         schedule='constant', # annealing for stepsize parameters (epsilon and adam)
         fixed_joints=None,
         run=1,
-        clip_value=1.5
+        clip_value=1.5,
+          model=None
         ):
     # Setup losses and stuff
     # ----------------------------------------
@@ -498,7 +502,36 @@ def learn(env, policy_func, *,
         # get random obs sequence out of seg["ob"]
 
         print("seg ob shape")
-        print(seg["ob"].shape)
+        '''        print(seg["ob"].shape)
+        observations = seg["ob"]
+        print(seg["rew"].shape)
+        print(len(seg["ep_rets"]))
+        print(seg["ep_rets"])
+        print(np.sum(seg["rew"][:1023]))
+        print(np.sum(seg["rew"][1024:2047]))'''
+        #ep_rets
+
+        ####################################
+        # TODO replace predicted reward
+        ####################################
+        '''observations = seg["ob"]
+        res = np.concatenate((np.zeros((50,27)),observations), axis=0)
+        res = [res[i:i+50, :] for i in range(2048)]
+        #print(np.array(res).shape)
+        #print([observations[i:i + 5, :] for i in range(0, 3)])
+        res = np.reshape(res, (2048, 1350))
+
+        reward, abs_reward = model.reward(res)'''
+        '''
+        print(abs_reward.shape)
+
+        print(seg["rew"][:5])
+        print(abs_reward[:5].eval())'''
+        # seg["rew"] = abs_reward.eval()
+
+        '''        import sys
+        sys.exit(0)'''
+        ####################################
 
         ##Test
         visualize = False

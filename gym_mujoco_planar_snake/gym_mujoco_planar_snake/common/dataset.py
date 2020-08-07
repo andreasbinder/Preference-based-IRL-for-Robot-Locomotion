@@ -117,9 +117,52 @@ class Dataset(object):
         return [data[i:i + 2] for i, _ in enumerate(data[::2])]
 
     @staticmethod
-    def get_triplets(data):
-        pass
+    def data_triplets(data):
+        demos = [data[i:i + 3] for i, _ in enumerate(data[::3])]
+
         # (anchor, positive, negative)
+
+        triplets = []
+
+        for demo_triplets in demos:
+            obs1, obs2, obs3 = demo_triplets[0].observations, demo_triplets[1].observations, demo_triplets[2].observations
+            obs1, obs2, obs3 = np.array(obs1), np.array(obs2), np.array(obs3)
+            rew1, rew2, rew3 = demo_triplets[0].cum_reward, demo_triplets[1].cum_reward, demo_triplets[2].cum_reward
+
+            rew12 = np.abs(rew1 - rew2)
+
+            rew23 = np.abs(rew3 - rew2)
+
+            rew13 = np.abs(rew3 - rew1)
+
+            distances = np.array([np.abs(rew1 - rew2), np.abs(rew3 - rew2), np.abs(rew3 - rew1)])
+
+            if np.argmin(distances) == 0:
+                triplets.append([obs1, obs2, obs3])
+            elif np.argmin(distances) == 1:
+                triplets.append([obs2, obs3, obs1])
+            elif np.argmin(distances) == 2:
+                triplets.append([obs3, obs1, obs2])
+            else:
+                assert False, "Operation not Defined"
+
+
+
+
+        return np.array(triplets)
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 

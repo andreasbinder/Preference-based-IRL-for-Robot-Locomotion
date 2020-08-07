@@ -1,8 +1,15 @@
 /venv
 /gym_mujoco_planar_snake/gym_mujoco_planar_snake/log
+/gym_mujoco_planar_snake/gym_mujoco_planar_snake.egg-info
+/gym_mujoco_planar_snake/gym_mujoco_planar_snake/old_files
+/gym_mujoco_planar_snake/gym_mujoco_planar_snake/Goo_version
 /gym_mujoco_planar_snake/gym_mujoco_planar_snake/BrownGooFiles
 /gym_mujoco_planar_snake/gym_mujoco_planar_snake/LemkeFiles
 /gym_mujoco_planar_snake/gym_mujoco_planar_snake/common/__pycache__
 .idea
 .PowerFolder
 .vscode
+
+/gym_mujoco_planar_snake/dist
+/gym_mujoco_planar_snake/build
+/gym_mujoco_planar_snake/gym_mujoco_planar_snake.egg-info

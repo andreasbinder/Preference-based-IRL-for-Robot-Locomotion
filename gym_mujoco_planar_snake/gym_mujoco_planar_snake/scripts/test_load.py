@@ -90,7 +90,7 @@ def run_environment_episode(env, pi, seed, model_file, max_timesteps, render, st
     images = []
     #################
     # TODO imageio test
-    img = env.render(mode='rgb_array')
+    # img = env.render(mode='rgb_array')
 
     #################
 
@@ -121,7 +121,7 @@ def run_environment_episode(env, pi, seed, model_file, max_timesteps, render, st
     while (not done) and number_of_timestep < max_timesteps:
     #while number_of_timestep < max_timesteps:
 
-        images.append(img)
+        #images.append(img)
 
         #print("Timesteps: ", str(number_of_timestep))
         # TODO!!!
@@ -155,14 +155,14 @@ def run_environment_episode(env, pi, seed, model_file, max_timesteps, render, st
         info_collector.add_info(info)
 
         ### TODO imagio
-        img = env.render(mode='rgb_array')
+        #img = env.render(mode='rgb_array')
         ###
 
 
 
         # render
-        # if render:
-        #     env.render()
+        if render:
+            env.render()
 
         number_of_timestep += 1
 
@@ -182,8 +182,8 @@ def enjoy(env_id, seed):
         print(env.observation_space)
         print(env.observation_space.high)
         print(env.observation_space.low)
-        if True:
-            return
+        '''if True:
+            return'''
 
 
 
@@ -201,8 +201,8 @@ def enjoy(env_id, seed):
 
 
 
-        #max_timesteps = 3000000
-        max_timesteps = 10000
+        max_timesteps = 3000000
+        #max_timesteps = 10000
         #max_timesteps = 1
 
         modelverion_in_k_ts = 2510  # better
@@ -219,7 +219,13 @@ def enjoy(env_id, seed):
         #gym.logger.setLevel(logging.DEBUG)
 
         run = 0
-        model_dir = '/home/andreas/LRZ_Sync+Share/BachelorThesis/gym_mujoco_planar_snake/gym_mujoco_planar_snake/log/clip_test/InjuryIndex_/Sun Jul 26 22:07:24 2020/models/Mujoco-planar-snake-cars-angle-line-v1/ppo'
+        model_dir = '/home/andreas/LRZ_Sync+Share/BachelorThesis/gym_mujoco_planar_snake/gym_mujoco_planar_snake/log/improved_PPO_runs/Thu Aug  6 11:36:19 2020/models/Mujoco-planar-snake-cars-angle-line-v1/ppo'
+        #'/home/andreas/LRZ_Sync+Share/BachelorThesis/gym_mujoco_planar_snake/gym_mujoco_planar_snake/log/PPOAgent_test/Sun Aug  2 22:25:17 2020/models/Mujoco-planar-snake-cars-angle-line-v1/ppo'
+        #'/home/andreas/LRZ_Sync+Share/BachelorThesis/gym_mujoco_planar_snake/gym_mujoco_planar_snake/log/improved_PPO_runs/InjuryIndex_0/Sat Aug  1 23:06:06 2020/models/Mujoco-planar-snake-cars-angle-line-v1/ppo'
+        #'/home/andreas/LRZ_Sync+Share/BachelorThesis/gym_mujoco_planar_snake/gym_mujoco_planar_snake/log/initial_PPO_runs/InjuryIndex_2/Thu Jun 25 18:58:00 2020/models/Mujoco-planar-snake-cars-angle-line-v1/ppo'
+        #'/home/andreas/LRZ_Sync+Share/BachelorThesis/gym_mujoco_planar_snake/gym_mujoco_planar_snake/log/improved_PPO_runs/InjuryIndex_0/Sat Aug  1 19:00:58 2020/models/Mujoco-planar-snake-cars-angle-line-v1/ppo'
+        #'/home/andreas/LRZ_Sync+Share/BachelorThesis/gym_mujoco_planar_snake/gym_mujoco_planar_snake/log/clip_test/InjuryIndex_0/Fri Jul 31 14:48:04 2020/models/Mujoco-planar-snake-cars-angle-line-v1/ppo'
+        #'/home/andreas/LRZ_Sync+Share/BachelorThesis/gym_mujoco_planar_snake/gym_mujoco_planar_snake/log/clip_test/InjuryIndex_/Sun Jul 26 22:07:24 2020/models/Mujoco-planar-snake-cars-angle-line-v1/ppo'
         #'/home/andreas/LRZ_Sync+Share/BachelorThesis/gym_mujoco_planar_snake/gym_mujoco_planar_snake/log/initial_PPO_runs/InjuryIndex_6/Fri Jun 26 11:59:30 2020/models/Mujoco-planar-snake-cars-angle-line-v1/ppo'
         #'/home/andreas/LRZ_Sync+Share/BachelorThesis/gym_mujoco_planar_snake/gym_mujoco_planar_snake/log/clip_test/InjuryIndex_7/Sat Jun 27 03:59:02 2020/models/Mujoco-planar-snake-cars-angle-line-v1/ppo'
         #'/home/andreas/LRZ_Sync+Share/BachelorThesis/gym_mujoco_planar_snake/gym_mujoco_planar_snake/log/clip_test/InjuryIndex_7/Mon Jun 29 11:36:26 2020/models/Mujoco-planar-snake-cars-angle-line-v1/ppo'
@@ -237,7 +243,8 @@ def enjoy(env_id, seed):
         logger.log("load model_file: %s" % model_file)
 
         sum_info = None
-        pi = policy_fn('pi'+str(run), env.observation_space, env.action_space)
+        pi = policy_fn('pi', env.observation_space, env.action_space)
+        #pi = policy_fn('pi'+str(run), env.observation_space, env.action_space)
 
         sum_reward = []
 
@@ -268,8 +275,8 @@ def enjoy(env_id, seed):
                                                                                 stochastic=False)
 
 
-            if True:
-                break
+            '''if True:
+                break'''
 
             info_collector.episode_info_print()
 

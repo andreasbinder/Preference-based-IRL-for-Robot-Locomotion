@@ -18,6 +18,7 @@ class ModelSaverWrapper(ObservationWrapper):
 
         self.model_dir = model_dir
 
+    @staticmethod
     def gen_model_dir_path(folder_path, env_id, algorithm_name):
         print("Path: " +folder_path)
         dir = folder_path

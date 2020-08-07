@@ -1,5 +1,5 @@
 # Preference-based Inverse Reinforcement Learning Approach for Robot Locomotion under Suboptimal Learning Conditions
-**Bachelor's Thesis in Informatics**
+**Bachelor's Thesis in Robotics**
 
 ## Abstract
 
@@ -9,10 +9,22 @@ We want to implement those ideas for a snake-like robot that can be simulated on
 
 
 ## Installation 
+All code was written and tested on Linux Mint 19.2 and inside an virtual Python environment.
 
-### Requirements
+For dependencies to install, please refer to the requirements.txt file.
+
+(NOTE!! Not all requirements are needed, there have to be done some checks of what is indispensable)
+
+```bash
+    cd gym_mujoco_planar_snake/
+    pip install -r requirements.txt
+```
 
 ## Usage
+
+
+
+
 
 ## Author
 Andreas Binder, Information Systems (B.Sc.), Technical University Munich

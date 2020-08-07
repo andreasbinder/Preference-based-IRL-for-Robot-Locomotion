@@ -152,7 +152,7 @@ def initialize_dataset(env_id, original_dataset, horizon, num_samples_per_trajec
     return Dataset(final_dataset)
 
 
-def adjust_dataset(original_dataset, exclude_joints=None, min_time_step=100000, max_time_step=800000, max_num_traj=1000000):
+def adjust_dataset(original_dataset, exclude_joints=None, min_time_step=300000, max_time_step=600000, max_num_traj=1000000):
 
     # create copy of dataset, list copy function
     dataset = original_dataset.copy()
@@ -250,9 +250,9 @@ def main():
     #########################################################################
     max_num_traj = 500
     horizon = 50
-    num_samples_per_trajectories = 3
+    num_samples_per_trajectories = 5
     #save_path = "/home/andreas/Desktop/"
-    save_path = "/home/andreas/LRZ_Sync+Share/BachelorThesis/gym_mujoco_planar_snake/gym_mujoco_planar_snake/log/SubTrajectoryDataset"
+    save_path = "/gym_mujoco_planar_snake/gym_mujoco_planar_snake/log/TrajectoryDataset"
     min_time_step = 200000
     max_time_step = 750000
     Save=True
