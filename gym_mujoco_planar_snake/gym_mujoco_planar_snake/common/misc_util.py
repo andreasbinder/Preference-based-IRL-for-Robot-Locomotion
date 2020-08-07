@@ -7,9 +7,10 @@ def get_data_from_file(path, name="Dataset"):
 def get_all_files_from_dir(path):
     import os
     from itertools import chain
-    path = '/gym_mujoco_planar_snake/gym_mujoco_planar_snake/log/TrajectoryDataset'
+    path = 'gym_mujoco_planar_snake/log/TrajectoryDataset'
 
     files = os.listdir(path)
+    files = [file for file in files if os.path.isfile(os.path.join(path, file))]
     print("Source Files: ", files)
 
     '''import shutil

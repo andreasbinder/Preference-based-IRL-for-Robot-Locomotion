@@ -219,7 +219,8 @@ def enjoy(env_id, seed):
         #gym.logger.setLevel(logging.DEBUG)
 
         run = 0
-        model_dir = '/home/andreas/LRZ_Sync+Share/BachelorThesis/gym_mujoco_planar_snake/gym_mujoco_planar_snake/log/improved_PPO_runs/Thu Aug  6 11:36:19 2020/models/Mujoco-planar-snake-cars-angle-line-v1/ppo'
+        model_dir = '/home/andreas/LRZ_Sync+Share/BachelorThesis/gym_mujoco_planar_snake/gym_mujoco_planar_snake/log/improved_PPO_runs/Fri Aug  7 13:58:04 2020/models/Mujoco-planar-snake-cars-angle-line-v1/ppo'
+        #'/home/andreas/LRZ_Sync+Share/BachelorThesis/gym_mujoco_planar_snake/gym_mujoco_planar_snake/log/improved_PPO_runs/Thu Aug  6 11:36:19 2020/models/Mujoco-planar-snake-cars-angle-line-v1/ppo'
         #'/home/andreas/LRZ_Sync+Share/BachelorThesis/gym_mujoco_planar_snake/gym_mujoco_planar_snake/log/PPOAgent_test/Sun Aug  2 22:25:17 2020/models/Mujoco-planar-snake-cars-angle-line-v1/ppo'
         #'/home/andreas/LRZ_Sync+Share/BachelorThesis/gym_mujoco_planar_snake/gym_mujoco_planar_snake/log/improved_PPO_runs/InjuryIndex_0/Sat Aug  1 23:06:06 2020/models/Mujoco-planar-snake-cars-angle-line-v1/ppo'
         #'/home/andreas/LRZ_Sync+Share/BachelorThesis/gym_mujoco_planar_snake/gym_mujoco_planar_snake/log/initial_PPO_runs/InjuryIndex_2/Thu Jun 25 18:58:00 2020/models/Mujoco-planar-snake-cars-angle-line-v1/ppo'
@@ -328,6 +329,8 @@ def main():
 
     # save_frequency_steps
     parser.add_argument('--sfs', help='save_frequency_steps', default=10000)  # for mujoco
+
+    parser.add_argument('--model_dir', help='model to render')
 
     args = parser.parse_args()
     logger.configure()

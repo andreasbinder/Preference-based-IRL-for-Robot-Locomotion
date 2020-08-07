@@ -101,7 +101,8 @@ class PPOAgent(object):
 
 def set_configs(args):
     gym.logger.setLevel(logging.WARN)
-    logger.configure(dir=args.log_dir + "/" + ctime())
+    logger.configure(dir=args.log_dir + "/" + args.name_dir)
+    #logger.configure(dir=args.log_dir + "/" + ctime())
     set_global_seeds(args.seed)
     torch.manual_seed(0)
 
@@ -148,6 +149,23 @@ def prepare_env(args, wrap_action, wrap_reward, wrap_observation, wrap_monitor, 
 
     return env
 
+def final_logs(args, env, model_dir):
+
+    if args.custom_reward:
+        # TODO use wrapper
+        rewards = env.get_episode_rewards()
+
+        with open(os.path.join(args.log_dir + "/" + args.name_dir, 'rewards.npy'), 'wb') as f:
+            np.save(f, rewards)
+
+    else:
+        rewards = env.get_episode_rewards()
+
+        with open(os.path.join(args.log_dir + "/" + args.name_dir, 'rewards.npy'), 'wb') as f:
+            np.save(f, rewards)
+
+
+
 
 
 def main():
@@ -156,12 +174,14 @@ def main():
     parser.add_argument('--num-timesteps', type=int, default=int(1e6))  # 1e6
     parser.add_argument('--sfs', help='save_frequency_steps', type=int, default=10000)  # for mujoco
     parser.add_argument('--env', help='environment ID', default='Mujoco-planar-snake-cars-angle-line-v1')
-    parser.add_argument('--log_dir', help='log directory', default='gym_mujoco_planar_snake/log/improved_PPO_runs/')
+    parser.add_argument('--log_dir', help='log directory', default='gym_mujoco_planar_snake/log/initial_PPO_runs/')
     parser.add_argument('--injured', type=bool, default=False)
     parser.add_argument('--clip_value', type=float, default=1.5)
     parser.add_argument('--fixed_joints', nargs='*', type=int, default=None)
     parser.add_argument('--custom_reward', type=bool, default=False)
-    parser.add_argument('--reward_net_dir', default='/home/andreas/Desktop/Wed Aug  5 13:56:18 2020/Wed Aug  5 13:56:18 2020')
+    parser.add_argument('--reward_net_dir', default='gym_mujoco_planar_snake/log/PyTorch_Models/Thu Aug  6 20:30:12 2020/model')
+    parser.add_argument('--name_dir', default=ctime())
+
 
 
     args = parser.parse_args()
@@ -183,7 +203,7 @@ def main():
 
     env = prepare_env(args=args,
                       wrap_action=False,
-                      wrap_reward=True,
+                      wrap_reward=args.custom_reward,
                       wrap_observation=False,
                       wrap_monitor=True,
                       model_dir=model_dir
@@ -200,11 +220,15 @@ def main():
 
     pi = agent.learn(args.num_timesteps)
 
+    # TODO as numpy
+
     logger.log(env.get_episode_rewards())
     logger.log(env.get_episode_lengths())
 
     '''print(env.get_episode_rewards())
     print(env.get_episode_lengths())'''
+
+    final_logs(args,env, model_dir)
 
 
 if __name__ == '__main__':

@@ -22,8 +22,21 @@ For dependencies to install, please refer to the requirements.txt file.
 
 ## Usage
 
+1. Run PPO
 
+```bash
+    python3 gym_mujoco_planar_snake/agents/run_ppo.py --sfs 50000
+```
 
+2. Learn Reward
+
+beat loss: Epoch 30, Loss:     0.0693
+
+2. Run PPO with custom reward
+
+```bash
+    python3 gym_mujoco_planar_snake/agents/run_ppo.py --sfs 50000 --custom_reward True --log_dir gym_mujoco_planar_snake/log/improved_PPO_runs/
+```
 
 
 ## Author

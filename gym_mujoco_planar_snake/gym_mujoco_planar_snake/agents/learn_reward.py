@@ -61,6 +61,7 @@ def main():
     parser.add_argument('--net_save_path', help='subtrajectory dataset',
                         default='gym_mujoco_planar_snake/log/PyTorch_Models/') # /home/andreas/LRZ_Sync+Share/BachelorThesis/gym_mujoco_planar_snake/
     parser.add_argument('--hparams_path', default="gym_mujoco_planar_snake/agents/hparams.json")
+    parser.add_argument('--results_path', default="gym_mujoco_planar_snake/agents/results.json")
     parser.add_argument('--mode', type=str, default="pair")
     parser.add_argument('--save_model', type=bool, default="True")
 
