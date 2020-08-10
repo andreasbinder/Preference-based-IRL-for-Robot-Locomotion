@@ -7,11 +7,29 @@ Recent improvements in Reinforcement Learning (RL) have gained huge attention by
 The motivation to use suboptimal trajectories reflects the fact that generally they are easier to obtain and can be derived for most tasks relatively cheaply. In addition, it can be argued that the reward function is of higher quality since it mirrors the intention instead of plainly trying to explain the presented trajectories. 
 We want to implement those ideas for a snake-like robot that can be simulated on the Mujoco environment. Those autonomous robots are used in catastrophic situation in terrain that is hardly accessible to human beings. For instance, it can be made use of at collapsed houses after an earthquake where it can help finding buried humans.
 
+## Setup
 
-## Installation 
-All code was written and tested on Linux Mint 19.2 and inside an virtual Python environment.
 
-For dependencies to install, please refer to the requirements.txt file.
+### System:
+- Linux Mint 19.2 
+- Python 3.6.8
+Note: anything higher than Ubuntu 16.4 does the job as well
+
+### Requirements:
+- Tensorflow
+  - If GPU version: Might need cuda version 8. Might need specific nvidia driver "nvidia-384".
+
+- mujoco 1.50
+- mujoco-py >=1.50.1
+- gym[mujoco]>=0.9.6'
+- glfw>=1.4.0
+- Cython>=0.27.2
+- Baselines
+- Pandas
+
+
+
+For further dependencies to install, please refer to the requirements.txt file.
 
 (NOTE!! Not all requirements are needed, there have to be done some checks of what is indispensable)
 
@@ -19,6 +37,49 @@ For dependencies to install, please refer to the requirements.txt file.
     cd gym_mujoco_planar_snake/
     pip install -r requirements.txt
 ```
+
+
+
+### Installation:
+For MuJoCo and mujoco-py follow the install instructions at https://github.com/openai/mujoco-py. Try to run the 
+Install Gym at https://github.com/openai/gym. Try to run a mujoco example.
+
+
+```bash
+git clone https://github.com/Superchicken1/MasterThesis.git
+cd gym_mujoco_planar_snake
+pip install -e .
+```
+or add it in the PYTHONPATH like below.
+
+### System Variables:
+I can recomend to use the ~/.bashrc file to set system variables.
+
+Add the following line to the end of the file:
+```bash
+# Used for tensorboard logs, benchmarks and models
+export OPENAI_LOGDIR=$HOME/openai_logdir/tensorboard/x_new
+export OPENAI_LOG_FORMAT="stdout,log,csv,json,tensorboard"
+
+# Maybe needed for mujoco
+export MUJOCO_PY_MJPRO_PATH=$HOME/.mujoco/mjpro150
+export LD_LIBRARY_PATH=${LD_LIBRARY_PATH}:~/.mujoco/mjpro150/bin
+#LD_LIBRARY_PATH=$HOME/.mujoco/mjpro150/bin pip install mujoco-py
+
+# Alternative to pip
+#export GYM_MUJOCO_PATH={path to project}/gym-mujoco-planar-snake
+#export PYTHONPATH="$GYM_MUJOCO_PATH/gym-mujoco-planar-snake:$PYTHONPATH"
+
+# Some fixes to get GLEW to work. Uncomment if needed
+# GODLIKE FIX ... GLEW init error
+#export LD_PRELOAD=/usr/lib/x86_64-linux-gnu/libGLEW.so:/usr/lib/nvidia-384/libGL.so
+# X Error of failed request:  BadAccess (attempt to access private resource denied)
+#export QT_X11_NO_MITSHM=1
+
+```
+
+
+
 
 ## Usage
 

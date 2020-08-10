@@ -40,7 +40,7 @@ def train(args):
 
     if mode == "pair":
         data = preprocess_pairs(trajectories)
-        trainer.fit_pair(data)
+        trainer.fit_pair_bce(data)
     elif mode == "triplet":
         triplets = Dataset.data_triplets(trajectories)
         trainer.fit_triplet(triplets)

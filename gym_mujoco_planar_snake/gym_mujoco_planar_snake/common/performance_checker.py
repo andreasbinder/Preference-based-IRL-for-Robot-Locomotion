@@ -1,11 +1,67 @@
 import tensorflow as tf
 
-tf.compat.v1.enable_eager_execution()
+#tf.compat.v1.enable_eager_execution()
 from tensorflow import keras
-from gym_mujoco_planar_snake.common.reward_net import SimpleNet
+#from gym_mujoco_planar_snake.common.reward_net import SimpleNet
 #from gym_mujoco_planar_snake.agents.run_reward_learning import get_data_from_file
 from gym_mujoco_planar_snake.common.dataset import Dataset, SubTrajectory
 import numpy as np
+import torch
+from baselines.common import set_global_seeds
+import gym
+
+
+def evaluate_policy(env, pi, max_timesteps=5000, custom=True, render=True, seed=0):
+
+    env = gym.make(env)
+
+    number_of_timestep = 0
+    done = False
+
+
+    # set seed
+    set_global_seeds(seed)
+    env.seed(seed)
+    torch.manual_seed(seed)
+
+    obs = env.reset()
+
+    rewards = []
+
+    while (not done) and number_of_timestep < max_timesteps:
+
+
+
+        action, v_pred = pi.act( True, obs)
+
+        #action = action[0]  # TODO check
+
+        # print(action)
+
+
+
+        obs, reward, done, info = env.step(action)
+
+        rewards.append(reward)
+
+
+        # render
+        if render:
+            env.render()
+
+        number_of_timestep += 1
+
+    import os
+    rewards = np.array(rewards)
+    dir = "/home/andreas/Desktop"
+    name = 'custom.npy' if custom else 'original.npy'
+
+    with open(os.path.join(dir, name), 'wb') as f:
+        np.save(f, rewards)
+
+
+
+
 
 def reward_prediction(model, trajectory):
 

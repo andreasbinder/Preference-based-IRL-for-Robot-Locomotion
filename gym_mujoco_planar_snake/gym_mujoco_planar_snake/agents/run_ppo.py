@@ -22,8 +22,11 @@ from time import ctime
 
 from gym_mujoco_planar_snake.common.model_saver_wrapper import ModelSaverWrapper
 from gym_mujoco_planar_snake.common.custom_action_wrapper import ClipActionWrapper
+from gym_mujoco_planar_snake.common.custom_observation_wrapper import CustomObservationWrapper
 from gym_mujoco_planar_snake.common.reward_wrapper_pytorch import MyRewardWrapper
-from gym_mujoco_planar_snake.common.reward_nets import PairNet as Net
+from gym_mujoco_planar_snake.common.reward_nets import PairNet as Net, TripletNet
+
+from gym_mujoco_planar_snake.common.performance_checker import evaluate_policy
 
 
 class PPOAgent(object):
@@ -106,11 +109,13 @@ def set_configs(args):
     set_global_seeds(args.seed)
     torch.manual_seed(0)
 
-    name = 'ppo'
-    model_dir = osp.join(logger.get_dir(), 'models')
-    os.mkdir(model_dir)
-    model_dir = ModelSaverWrapper.gen_model_dir_path(model_dir, args.env, name)
-    logger.log("model_dir: %s" % model_dir)
+    model_dir = None
+    if args.save:
+        name = 'ppo'
+        model_dir = osp.join(logger.get_dir(), 'models')
+        os.mkdir(model_dir)
+        model_dir = ModelSaverWrapper.gen_model_dir_path(model_dir, args.env, name)
+        logger.log("model_dir: %s" % model_dir)
     return model_dir
 
 
@@ -132,7 +137,7 @@ def prepare_env(args, wrap_action, wrap_reward, wrap_observation, wrap_monitor, 
         env = ClipActionWrapper(env, args.clip_value, joints)
 
     if wrap_reward:
-        net = Net()
+        net = Net() if args.mode == 'pair' else TripletNet()
         net.load_state_dict(torch.load(args.reward_net_dir))
         # env = HorizonRewardWrapper_v3(env, self.reward_net_dir, model)
         env = MyRewardWrapper(env, net)
@@ -141,9 +146,10 @@ def prepare_env(args, wrap_action, wrap_reward, wrap_observation, wrap_monitor, 
         log_dir = osp.join(logger.get_dir(), 'log_ppo')
         logger.log("log_dir: %s" % log_dir)
         env = bench.Monitor(env, log_dir)
-        env = ModelSaverWrapper(env, args.model_dir, args.sfs)
+        env = ModelSaverWrapper(env, model_dir, args.sfs)
 
-    env = ModelSaverWrapper(env, model_dir, args.sfs)
+    '''if args.save:
+        env = ModelSaverWrapper(env, model_dir, args.sfs)'''
 
     env = Monitor(env, None)
 
@@ -181,6 +187,9 @@ def main():
     parser.add_argument('--custom_reward', type=bool, default=False)
     parser.add_argument('--reward_net_dir', default='gym_mujoco_planar_snake/log/PyTorch_Models/Thu Aug  6 20:30:12 2020/model')
     parser.add_argument('--name_dir', default=ctime())
+    parser.add_argument('--save', default=True)
+    parser.add_argument('--mode', default='pair')
+
 
 
 
@@ -204,10 +213,12 @@ def main():
     env = prepare_env(args=args,
                       wrap_action=False,
                       wrap_reward=args.custom_reward,
-                      wrap_observation=False,
+                      wrap_observation=args.save,
                       wrap_monitor=True,
                       model_dir=model_dir
                       )
+
+    env = CustomObservationWrapper(env, 500)
 
     #env = Monitor(env, None)
 
@@ -220,15 +231,23 @@ def main():
 
     pi = agent.learn(args.num_timesteps)
 
+    #pi = agent.policy
+
+    #print(pi)
+
+    #assert False, "policy"
+
     # TODO as numpy
 
-    logger.log(env.get_episode_rewards())
-    logger.log(env.get_episode_lengths())
+    #logger.log(env.get_episode_rewards())
+    #logger.log(env.get_episode_lengths())
 
     '''print(env.get_episode_rewards())
     print(env.get_episode_lengths())'''
 
-    final_logs(args,env, model_dir)
+    #evaluate_policy(args.env, pi, custom=False)
+
+    #final_logs(args,env, model_dir)
 
 
 if __name__ == '__main__':

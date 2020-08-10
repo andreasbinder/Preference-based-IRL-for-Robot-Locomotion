@@ -118,6 +118,9 @@ class Dataset(object):
 
     @staticmethod
     def data_triplets(data):
+        from random import shuffle
+        shuffle(data)
+
         demos = [data[i:i + 3] for i, _ in enumerate(data[::3])]
 
         # (anchor, positive, negative)
@@ -129,11 +132,6 @@ class Dataset(object):
             obs1, obs2, obs3 = np.array(obs1), np.array(obs2), np.array(obs3)
             rew1, rew2, rew3 = demo_triplets[0].cum_reward, demo_triplets[1].cum_reward, demo_triplets[2].cum_reward
 
-            rew12 = np.abs(rew1 - rew2)
-
-            rew23 = np.abs(rew3 - rew2)
-
-            rew13 = np.abs(rew3 - rew1)
 
             distances = np.array([np.abs(rew1 - rew2), np.abs(rew3 - rew2), np.abs(rew3 - rew1)])
 
