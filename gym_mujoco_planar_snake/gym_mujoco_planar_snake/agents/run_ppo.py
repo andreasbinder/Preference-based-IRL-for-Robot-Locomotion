@@ -218,7 +218,7 @@ def main():
                       model_dir=model_dir
                       )
 
-    env = CustomObservationWrapper(env, 500)
+    #env = CustomObservationWrapper(env, 500)
 
     #env = Monitor(env, None)
 

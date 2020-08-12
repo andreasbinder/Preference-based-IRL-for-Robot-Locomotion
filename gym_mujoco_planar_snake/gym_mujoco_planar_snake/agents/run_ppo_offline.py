@@ -107,11 +107,13 @@ def train_ppo1(env_id, num_timesteps, sfs, seed, fixed_joints, run):
     from gym_mujoco_planar_snake.common.reward_net import RewardNet, TestNet, SimpleNet
 
     # 1350
-    model_dir = '/home/andreas/Desktop/Sat Aug  1 14:18:02 2020/Sat Aug  1 14:18:02 2020.h5'
+    #model_dir = '/home/andreas/Desktop/Sat Aug  1 14:18:02 2020/Sat Aug  1 14:18:02 2020.h5'
+
+    model = None
 
 
-    model = SimpleNet()
-    model.load_weights(model_dir)
+    '''model = SimpleNet()
+    model.load_weights(model_dir)'''
     '''    from tensorflow import keras
 
     mod = keras.Sequential([
@@ -124,7 +126,7 @@ def train_ppo1(env_id, num_timesteps, sfs, seed, fixed_joints, run):
 
 
     # TODO current test
-    env = HorizonRewardWrapper_v2(env, model_dir, sess, model)
+    #env = HorizonRewardWrapper_v2(env, model_dir, sess, model)
 
     #env = Dummywrapper(env, model_dir, sess)
 
