@@ -71,7 +71,7 @@ def policy_fn(name, ob_space, ac_space):
 
 # also for benchmark
 # run untill done
-def run_environment_episode(env, pi, seed, model_file, max_timesteps, render, stochastic=True):
+def run_environment_episode(env, pi, seed, model_file, max_timesteps, render, stochastic=False):
     number_of_timestep = 0
     done = False
 
@@ -219,7 +219,8 @@ def enjoy(env_id, seed):
         #gym.logger.setLevel(logging.DEBUG)
 
         run = 0
-        model_dir = '/home/andreas/LRZ_Sync+Share/BachelorThesis/gym_mujoco_planar_snake/gym_mujoco_planar_snake/log/initial_PPO_runs/Sat Aug  8 13:46:47 2020/models/Mujoco-planar-snake-cars-angle-line-v1/ppo'
+        model_dir = "/home/andreas/LRZ_Sync+Share/BachelorThesis/gym_mujoco_planar_snake/gym_mujoco_planar_snake/log/improved_PPO_runs/Wed Aug 12 19:24:18 2020/models/Mujoco-planar-snake-cars-angle-line-v1/ppo"
+        #'/home/andreas/LRZ_Sync+Share/BachelorThesis/gym_mujoco_planar_snake/gym_mujoco_planar_snake/log/initial_PPO_runs/Sat Aug  8 13:46:47 2020/models/Mujoco-planar-snake-cars-angle-line-v1/ppo'
         #'/home/andreas/LRZ_Sync+Share/BachelorThesis/gym_mujoco_planar_snake/gym_mujoco_planar_snake/log/initial_PPO_runs/Sat Aug  8 13:46:47 2020/models/Mujoco-planar-snake-cars-angle-line-v1/ppo'
         #'/home/andreas/LRZ_Sync+Share/BachelorThesis/gym_mujoco_planar_snake/gym_mujoco_planar_snake/log/initial_PPO_runs/Sat Aug  8 11:58:55 2020/models/Mujoco-planar-snake-cars-angle-line-v1/ppo'
         #'/home/andreas/LRZ_Sync+Share/BachelorThesis/gym_mujoco_planar_snake/gym_mujoco_planar_snake/log/improved_PPO_runs/Thu Aug  6 11:36:19 2020/models/Mujoco-planar-snake-cars-angle-line-v1/ppo'

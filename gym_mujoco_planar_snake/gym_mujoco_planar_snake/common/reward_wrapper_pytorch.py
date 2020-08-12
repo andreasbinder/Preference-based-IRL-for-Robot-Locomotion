@@ -75,3 +75,36 @@ class MyRewardWrapper(RewardWrapper):
     def reward(self, reward):
         return reward
 
+
+class SingleStepRewardWrapper(RewardWrapper):
+
+    def __init__(self, venv, net):
+        RewardWrapper.__init__(self, venv)
+
+        # TODO need seed for consistency
+
+        self.venv = venv
+        self.counter = 0
+
+        self.net = net
+
+        #self.horizon = torch.zeros(50, 27)
+
+        self.time_measure = []
+
+    def step(self, action):
+
+        obs, rews, news, infos = self.venv.step(action)
+
+        with torch.no_grad():
+            rews, _ = self.net.cum_return(torch.from_numpy(obs).float())
+
+        # TODO return reward or abs_reward
+        return obs, rews.item(), news, infos
+
+    def reset(self, **kwargs):
+        return self.venv.reset(**kwargs)
+
+    def reward(self, reward):
+        return reward
+

@@ -11,10 +11,12 @@ import torch.nn as nn
 import torch.optim as optim
 import torch.nn.functional as F
 
-from gym_mujoco_planar_snake.common.reward_nets import TripletNet, PairNet, PairBCENet
+from gym_mujoco_planar_snake.common.reward_nets import *
 
 from time import ctime
 
+
+import os
 
 class Trainer:
 
@@ -64,8 +66,15 @@ class Trainer:
     def results(self, value):
         self._results = value
 
-    # https://www.tensorflow.org/tensorboard/get_started
-    # @tf.function
+    def save(self, net, result_name="hparams_and_results.json"):
+
+        path = os.path.join(self.save_path, self.time)
+        os.mkdir(path)
+        torch.save(net.state_dict(), os.path.join(path, "model"))
+        self.hparams.save(os.path.join(path, result_name))
+
+
+
     def initialize_tensorboard(self, time):
 
         if self.use_tensorboard:
@@ -265,6 +274,7 @@ class Trainer:
 
         # print(x_train.shape)
 
+
         # training
         print("Start Training")
         for epoch in range(epochs):
@@ -330,9 +340,10 @@ class Trainer:
                 epoch + 1,
                 running_loss / train_labels.size
             )
-            print(stats)
+            #print(stats)
             #self.train_summary_writer.add_scalar('train_loss', running_loss / train_labels.size, epoch)
 
+        # needs save_path, time, net, hparams, torch, os
 
         if self.Save:
             from time import ctime
@@ -429,7 +440,7 @@ class Trainer:
                     running_loss = 0.0'''
             print('[%d] loss: %.3f' % (epoch + 1, running_loss / 500))
             running_loss = 0.0
-            # self.train_summary_writer.add_scalar('train_loss', running_loss, epoch)
+
 
         if self.Save:
             from time import ctime
@@ -440,3 +451,85 @@ class Trainer:
             torch.save(net.state_dict(), os.path.join(path, "model"))
             # self.model.save_weights(os.path.join(path, ctime()) + ".h5")
             self.hparams.save(os.path.join(path, "hparams.json"))
+
+    def fit_test(self, dataset):
+
+        # get hyperparameters
+        batch_size = self.hparams.dict["batch_size"]
+        time = self.time
+        lr = self.hparams.dict["lr"]
+        epochs = self.hparams.dict["epochs"]
+        self.hparams.dict["mode"] = "test"
+
+        # get data
+        pairs, labels = dataset
+
+
+        # split dataset
+        length = pairs.shape[0]
+        split_factor = 0.8
+        train_pairs, test_pairs = pairs[:int(split_factor * length)], pairs[int(split_factor * length):]
+        train_labels, test_labels = labels[:int(split_factor * length)], labels[int(split_factor * length):]
+
+        # start tensorboard
+        if self.Save:
+            self.initialize_tensorboard(time)
+
+        # TODO test how to add hparams
+
+        '''self.hparams_summary_writer.add_hparams({'lr': 0.1, 'bsize': 10},
+                                                {'hparam/accuracy': 100, 'hparam/loss': 0.1})'''
+
+        net = SingleStepPairNet()
+        criterion = nn.CrossEntropyLoss()
+        optimizer = optim.Adam(net.parameters(), lr=lr)
+
+        # print(x_train.shape)
+
+        running_loss = 0.0
+
+        # training
+        print("Start Training")
+        for epoch in range(epochs):
+
+            # epoch_loss = 0.0
+            running_loss = 0.0
+            for step in range(train_labels.size):
+                traj_i, traj_j = torch.from_numpy(train_pairs[step, 0, :]).float().view(50, 27), torch.from_numpy(
+                    train_pairs[step, 1, :]).float().view(50, 27)
+                y = torch.from_numpy(np.array(train_labels[step]))
+
+
+                # zero the parameter gradients
+                optimizer.zero_grad()
+
+                # forward + backward + optimize
+                rewards, abs_rewards = net(traj_i, traj_j)
+
+                rewards = rewards.unsqueeze(0)
+                y = y.unsqueeze(0)
+
+                loss = criterion(rewards, y)
+
+                loss.backward()
+                optimizer.step()
+
+                # print statistics
+                running_loss += loss.item()
+                if step % 500 == 0:
+                    print(step)
+
+
+            template = 'Epoch {}, Loss: {:10.4f}'
+            stats = template.format(
+                epoch + 1,
+                running_loss / train_labels.size
+                #counter / test_labels.size
+            )
+            print(stats)
+            if self.Save:
+                self.train_summary_writer.add_scalar('train_loss', running_loss / train_labels.size, epoch)
+
+        if self.Save:
+            self.hparams.dict["final_train_loss"] = running_loss / train_labels.size
+            self.save(net=net)

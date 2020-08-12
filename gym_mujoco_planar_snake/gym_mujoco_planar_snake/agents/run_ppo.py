@@ -23,8 +23,8 @@ from time import ctime
 from gym_mujoco_planar_snake.common.model_saver_wrapper import ModelSaverWrapper
 from gym_mujoco_planar_snake.common.custom_action_wrapper import ClipActionWrapper
 from gym_mujoco_planar_snake.common.custom_observation_wrapper import CustomObservationWrapper
-from gym_mujoco_planar_snake.common.reward_wrapper_pytorch import MyRewardWrapper
-from gym_mujoco_planar_snake.common.reward_nets import PairNet as Net, TripletNet
+from gym_mujoco_planar_snake.common.reward_wrapper_pytorch import *
+from gym_mujoco_planar_snake.common.reward_nets import *
 
 from gym_mujoco_planar_snake.common.performance_checker import evaluate_policy
 
@@ -137,10 +137,12 @@ def prepare_env(args, wrap_action, wrap_reward, wrap_observation, wrap_monitor, 
         env = ClipActionWrapper(env, args.clip_value, joints)
 
     if wrap_reward:
-        net = Net() if args.mode == 'pair' else TripletNet()
+        #net = Net() if args.mode == 'pair' else TripletNet()
+        net = SingleStepPairNet()
         net.load_state_dict(torch.load(args.reward_net_dir))
         # env = HorizonRewardWrapper_v3(env, self.reward_net_dir, model)
-        env = MyRewardWrapper(env, net)
+        #env = MyRewardWrapper(env, net)
+        env = SingleStepRewardWrapper(env, net)
 
     if wrap_observation:
         log_dir = osp.join(logger.get_dir(), 'log_ppo')

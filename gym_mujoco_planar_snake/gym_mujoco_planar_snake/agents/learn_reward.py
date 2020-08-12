@@ -40,10 +40,13 @@ def train(args):
 
     if mode == "pair":
         data = preprocess_pairs(trajectories)
-        trainer.fit_pair_bce(data)
+        trainer.fit_pair(data)
     elif mode == "triplet":
         triplets = Dataset.data_triplets(trajectories)
         trainer.fit_triplet(triplets)
+    elif mode == "test":
+        data = preprocess_pairs(trajectories)
+        trainer.fit_test(data)
     else:
         assert False, "Mode not Defined"
 

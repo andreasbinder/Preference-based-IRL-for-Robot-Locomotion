@@ -1,58 +1,28 @@
-import tensorflow as tf
-tf.compat.v1.enable_eager_execution()
-
-from tensorflow import keras
-from gym_mujoco_planar_snake.common.reward_net import SimpleNet
-from gym_mujoco_planar_snake.agents.run_reward_learning import get_data_from_file
-from gym_mujoco_planar_snake.common.dataset import Dataset, SubTrajectory
-
-
-#/home/andreas/LRZ_Sync+Share/BachelorThesis/gym_mujoco_planar_snake/gym_mujoco_planar_snake/log/SubTrajectoryDataset/
-
-file = '/gym_mujoco_planar_snake/gym_mujoco_planar_snake/log/TrajectoryDataset'
-name = 'Dataset500_Sun Jul 12 17:21:36 2020'
-files = get_data_from_file(file, name)
-
-file1 = files[0]
-
+import torch
 import numpy as np
+from gym_mujoco_planar_snake.common.reward_nets import *
+from gym_mujoco_planar_snake.common.misc_util import *
 
+files = get_all_files_from_dir(None)[30:60]
 
-obs1 = np.array(file1.observations).reshape((1350,))
+# files sort by
+files.sort(key=lambda x: x.cum_reward)
 
-obs1 = tf.convert_to_tensor(obs1)
+model_path = "gym_mujoco_planar_snake/log/PyTorch_Models/Wed Aug 12 21:06:21 2020/model"
 
-obs1 = tf.expand_dims(obs1, axis=0)
+#print(len(files))
 
-file2 = files[1]
+net = SingleStepPairNet()
+net.load_state_dict(torch.load(model_path))
 
+#pred = net.cum_return(torch.from_numpy(np.array(files[0].observations)).float())
 
+#print(pred)
 
-obs2 = np.array(file2.observations).reshape((1350,))
+for file in files:
+    obs = torch.from_numpy(np.array(file.observations)).float()
+    true_rew = file.cum_reward
+    with torch.no_grad():
+        pred, pred_abs = net.cum_return(obs)
 
-obs2 = tf.convert_to_tensor(obs2)
-
-obs2 = tf.expand_dims(obs2, axis=0)
-
-#path = '/home/andreas/LRZ_Sync+Share/BachelorThesis/gym_mujoco_planar_snake/gym_mujoco_planar_snake/log/models/Tue Jul 21 12:47:05 2020/Tue Jul 21 12:47:05 2020'
-
-path = '/home/andreas/LRZ_Sync+Share/BachelorThesis/gym_mujoco_planar_snake/gym_mujoco_planar_snake/log/models/Wed Jul 22 17:37:45 2020/Wed Jul 22 17:37:45 2020.h5'
-
-#model = keras.Model()
-
-model = SimpleNet()
-
-model.load_weights(path)
-
-inp = tf.random.normal([1,1350])
-
-res1, _ = model.reward(obs1)
-
-res2, _ = model.reward(obs2)
-
-x, _ = model((obs1, obs2))
-
-test = res1.numpy()
-
-
-
+    print("True: ", true_rew, "Pred: ", pred, "Pred_Abs: ", pred_abs)
