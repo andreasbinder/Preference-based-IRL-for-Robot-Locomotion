@@ -4,16 +4,21 @@
 
 ## Introduction
 
-- AI, Snake-like Robots, RL, Structure
+- AI, Snake-like Robots, RL (Go etc), Structure
 
 ## Theoretical Background
 
 ### Markov Decision Process
 - Markov Property
 
+### Snake-like Robots
+
+### Simulation
+- agent, environment
+
 ### Deep Reinforcement Learning
 
-### Preference Learning
+### Learning to Rank
 
 ### Imitation Learning
 - BC, GAIL
@@ -23,13 +28,10 @@
 ## Related Work
 
 ### Snake-like Robots
+- Hirose + Mr. Bings work
 
-### Reinforcement Learning
-- Go
-
-### Proximal Policy Optimization
-
-### Imitation Learning??
+### PPO
+- include cases where getting optimal trajectories is difficult
 
 ### Inverse Optimal Control
 
