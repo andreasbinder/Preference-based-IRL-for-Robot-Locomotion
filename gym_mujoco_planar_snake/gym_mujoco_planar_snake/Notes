@@ -1,0 +1,109 @@
+Test Cases:
+- Dataset has few low and no middleground trajectories
+    Start with ground truth and change after a some timesteps
+- Does not work on just a single observation
+
+!! some information in the observation array might be useless or irritating
+
+Struktur Bachelorarbeit (especially since I do not know final results) 20:00
+trainer 21:00
+- save method
+- hparams+results
+
+possible reason for bad performance:
+- dataset corrupt, create new data
+- wrapper bei test_load ergänzen
+- visualisieren direkt bei trainieren
+- ggf vorherige obs miteinbeziehen
+
+script für einen durchlauf
+
+
+
+
+
+saven über observationwrapper ggf.
+triplet test
+PPO Paper nochmal lesen
+
+triplet data + triplet repo
+
+Julian nach Infos wg Forschungsarbeit fragen
+
+nächste Schritte:
+-evaluate nachstellen mit Hilfe von test_drex
+
+data with time_step
+-Dataset1500_Sat Jul 25 19:19:47 2020
+-test!!
+
+die großen Fragen:
+- wo füge ich reward function ein (trex, drex etc)
+https://github.com/hiwonjoon/ICML2019-TREX/blob/master/mujoco/learner/baselines/baselines/run.py
+https://github.com/hiwonjoon/ICML2019-TREX/blob/master/mujoco/learner/baselines/baselines/common/custom_reward_wrapper.py
+https://github.com/dsbrown1331/CoRL2019-DREX/blob/master/drex-mujoco/learner/baselines/baselines/run.py
+https://github.com/dsbrown1331/CoRL2019-DREX/blob/master/drex-mujoco/learner/baselines/baselines/common/custom_reward_wrapper.py
+atari
+https://github.com/dsbrown1331/CoRL2019-DREX/blob/master/drex-atari/baselines/baselines/common/custom_reward_wrapper.py
+bayesian
+https://github.com/dsbrown1331/bayesianrex/blob/master/code/baselines/baselines/common/custom_reward_wrapper.py
+
+!metrics +  tensorboard
+https://www.tensorflow.org/tensorboard/get_started
+
+UML Modell!
+Presentation
+
+Ziele bis Freitag:
+- wo als reward function verwenden
+- verschiede loss functions
+- Teil von intro schreiben
+
+Random Model as Baseline
+UML Diagramm oder wie macht man das bei python
+Zeitplan
+include time_step information
+
+Can I use siamese nets?
+
+LearnAtariReward:
+- check preprocessing: from baselines.common.trex_utils import preprocess
+- make dataset  trainable!!!! create_training_data: training_data(tuple of two trag + label describing the relationship)
+- Net: cum_return  traj.permute(0,3,1,2) function, forward torch.cat((cum_r_i.unsqueeze(0), cum_r_j.unsqueeze(0)),0), abs_r_i + abs_r_j
+- learn_reward: training_obs, training_labels = zip(*training_data) was macht der Stern, outputs = outputs.unsqueeze(0),
+    warum brauche ich optimizer zero_grad
+- main: torch.save(reward_net.state_dict(), args.reward_model_path), torch save function
+
+-> reward der gesamten episode verwenden
+-> zu pairs zusammenführen
+-> Labelauswahl: traj ungleich, die mehr reward hat muss später sein
+-> timesteps speichern zum vergleichen
+-> Speicherbedarf zwischen Liste and Klasse vergleichen
+
+Brown Setup:
+- PPO with the ground-truth reward
+- for 500 training steps (64,000 simulation steps)
+- checkpointed its policy after every 5 training
+steps. For each checkpoint, we generated a trajectory of
+length 1,000. This provides us with different demonstra-
+tions of varying quality which are then ranked based on
+the ground truth returns. To evaluate the effect of different
+levels of suboptimality, we divided the trajectories into dif-
+ferent overlapping stages. We used 3 stages for HalfCheetah
+and Hopper. For HalfCheetah, we used the worst 9, 12, and
+24 trajectories, respectively. For Hopper, we used the worst
+9, 12, and 18 trajectories. For Ant, we used two stages con-
+sisting of the worst 12 and 40 trajectories. We used the PPO
+implementation from OpenAI Baselines (Dhariwal et al.,
+2017) with the given default hyperparameters.
+
+We trained the reward network using 5,000 random pairs
+of partial trajectories of length 50, with preference labels
+based on the trajectory rankings, not the ground-truth re-
+turns. To prevent overfitting, we represented the reward
+function using an ensemble of five deep neural networks,
+trained separately with different random pairs. Each net-
+work has 3 fully connected layers of 256 units with ReLU
+nonlinearities. We train the reward network using the Adam
+optimizer (Kingma & Ba, 2014) with a learning rate of 1e-4
+and a minibatch size of 64 for 10,000 timesteps.

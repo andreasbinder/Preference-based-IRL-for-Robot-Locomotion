@@ -1,12 +1,9 @@
-class Test:
+import numpy as np
 
-    def __init__(self):
-        self.var = 10
-
+path = "/home/andreas/LRZ_Sync+Share/BachelorThesis/gym_mujoco_planar_snake/gym_mujoco_planar_snake/results/initial_runs/Hopper-v2/Aug 23 19:29:24/trajectories.npy"
 
 
-    def method(self):
-        return self.var
+with open(path, 'rb') as f:
+    d = np.load(f, allow_pickle=True)
 
-
-print(Test.method(self))
+pass

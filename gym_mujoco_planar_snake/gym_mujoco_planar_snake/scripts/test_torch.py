@@ -14,8 +14,24 @@ class Net(nn.Module):
         self.fc1 = nn.Linear(784, 64)
         self.fc2 = nn.Linear(64, 1)
 
+loss = nn.MarginRankingLoss()
+'''input1 = torch.randn(3, requires_grad=True)
+input2 = torch.randn(3, requires_grad=True)
+target = torch.randn(3).sign()'''
+input1 = torch.tensor([1.,1.,1.], requires_grad=True)
+input2 = torch.tensor([1.1,0.,0.], requires_grad=True)
+target = torch.tensor([0,1,1])
 
-linear = nn.Linear(27, 1)
+print(input1, input2, target)
+output = loss(input1, input2, target)
+print(output)
+output.backward()
+
+'''from torch.utils.tensorboard import SummaryWriter
+
+writer = SummaryWriter()'''
+
+'''linear = nn.Linear(27, 1)
 
 anchor = torch.randn(100, 27, requires_grad=True)
 
@@ -28,7 +44,7 @@ net = nn.Sequential(
 )
 
 out = net(anchor)
-print(out.shape)
+print(out.shape)'''
 
 
 '''m = nn.Sigmoid()

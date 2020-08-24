@@ -179,9 +179,7 @@ def enjoy(env_id, seed):
         env = gym.make(env_id)
 
         #obs = env.observation_space.sample()
-        print(env.observation_space)
-        print(env.observation_space.high)
-        print(env.observation_space.low)
+
         '''if True:
             return'''
 
@@ -219,7 +217,32 @@ def enjoy(env_id, seed):
         #gym.logger.setLevel(logging.DEBUG)
 
         run = 0
-        model_dir = "/home/andreas/LRZ_Sync+Share/BachelorThesis/gym_mujoco_planar_snake/gym_mujoco_planar_snake/log/improved_PPO_runs/Wed Aug 12 19:24:18 2020/models/Mujoco-planar-snake-cars-angle-line-v1/ppo"
+
+        model_dir = "/home/andreas/LRZ_Sync+Share/BachelorThesis/gym_mujoco_planar_snake/gym_mujoco_planar_snake/results/improved_runs/crossentropy/ensemble_v1/ppo_Sun Aug 23 12:34:39 2020/models/Mujoco-planar-snake-cars-angle-line-v1/ppo"
+        #"/home/andreas/LRZ_Sync+Share/BachelorThesis/gym_mujoco_planar_snake/gym_mujoco_planar_snake/results/improved_runs/crossentropy/ensemble_v1/Aug 24 00:41:05/models/Mujoco-planar-snake-cars-angle-line-v1/ppo"
+        #"/home/andreas/LRZ_Sync+Share/BachelorThesis/gym_mujoco_planar_snake/gym_mujoco_planar_snake/results/improved_runs/crossentropy/Sun Aug 23 15:05:05 2020/models/Mujoco-planar-snake-cars-angle-line-v1/ppo"
+        #"/home/andreas/LRZ_Sync+Share/BachelorThesis/gym_mujoco_planar_snake/gym_mujoco_planar_snake/results/improved_runs/crossentropy/Sun Aug 23 12:34:39 2020/models/Mujoco-planar-snake-cars-angle-line-v1/ppo"
+        #"/home/andreas/LRZ_Sync+Share/BachelorThesis/gym_mujoco_planar_snake/gym_mujoco_planar_snake/log/initial_PPO_runs/Thu Aug 20 01:08:05 2020/models/Mujoco-planar-snake-cars-angle-line-v1/ppo"
+        #"/home/andreas/LRZ_Sync+Share/BachelorThesis/gym_mujoco_planar_snake/gym_mujoco_planar_snake/log/initial_PPO_runs/Sat Aug 22 12:25:41 2020/models/Mujoco-planar-snake-cars-angle-line-v1/ppo"
+        #"/home/andreas/LRZ_Sync+Share/BachelorThesis/gym_mujoco_planar_snake/gym_mujoco_planar_snake/log/initial_PPO_runs/Fri Aug 21 21:58:39 2020/models/Mujoco-planar-snake-cars-angle-line-v1/ppo"
+        #"/home/andreas/LRZ_Sync+Share/BachelorThesis/gym_mujoco_planar_snake/gym_mujoco_planar_snake/log/improved_PPO_runs/Fri Aug  7 13:58:04 2020/models/Mujoco-planar-snake-cars-angle-line-v1/ppo"
+        #"/home/andreas/LRZ_Sync+Share/BachelorThesis/gym_mujoco_planar_snake/gym_mujoco_planar_snake/log/improved_PPO_runs/Fri Aug 21 13:12:26 2020/models/Mujoco-planar-snake-cars-angle-line-v1/ppo"
+
+        # TODO best model
+        #"/home/andreas/LRZ_Sync+Share/BachelorThesis//gym_mujoco_planar_snake/gym_mujoco_planar_snake/log/improved_PPO_runs/single_triplet_unnormalized/models/Mujoco-planar-snake-cars-angle-line-v1/ppo"
+
+
+        #"/home/andreas/LRZ_Sync+Share/BachelorThesis/gym_mujoco_planar_snake/gym_mujoco_planar_snake/log/initial_PPO_runs/Hopper/Thu Aug 20 17:17:36 2020/models/Hopper-v2/ppo"
+        #"/home/andreas/LRZ_Sync+Share/BachelorThesis/gym_mujoco_planar_snake/gym_mujoco_planar_snake/log/improved_PPO_runs/hinge_ensemble_unnormalized_v1/models/Mujoco-planar-snake-cars-angle-line-v1/ppo"
+        #"/home/andreas/LRZ_Sync+Share/BachelorThesis/gym_mujoco_planar_snake/gym_mujoco_planar_snake/log/improved_PPO_runs/Tue Aug 18 23:44:37 2020/models/Mujoco-planar-snake-cars-angle-line-v1/ppo"
+        #"/home/andreas/LRZ_Sync+Share/BachelorThesis/gym_mujoco_planar_snake/gym_mujoco_planar_snake/log/improved_PPO_runs/Tue Aug 18 23:43:36 2020/models/Mujoco-planar-snake-cars-angle-line-v1/ppo"
+        #"/home/andreas/LRZ_Sync+Share/BachelorThesis/gym_mujoco_planar_snake/gym_mujoco_planar_snake/log/initial_PPO_runs/ensemble_normalized/models/Mujoco-planar-snake-cars-angle-line-v1/ppo"
+        #"/home/andreas/LRZ_Sync+Share/BachelorThesis/gym_mujoco_planar_snake/gym_mujoco_planar_snake/log/improved_PPO_runs/newer/Mon Aug 17 17:16:38 2020/models/Mujoco-planar-snake-cars-angle-line-v1/ppo"
+        #"/home/andreas/LRZ_Sync+Share/BachelorThesis/gym_mujoco_planar_snake/gym_mujoco_planar_snake/log/initial_PPO_runs/ensemble_normalized/models/Mujoco-planar-snake-cars-angle-line-v1/ppo"
+        #"/home/andreas/LRZ_Sync+Share/BachelorThesis/gym_mujoco_planar_snake/gym_mujoco_planar_snake/log/initial_PPO_runs/unnormalized/models/Mujoco-planar-snake-cars-angle-line-v1/ppo"
+        #"/home/andreas/LRZ_Sync+Share/BachelorThesis/gym_mujoco_planar_snake/gym_mujoco_planar_snake/log/improved_PPO_runs/newer/Mon Aug 17 17:16:38 2020/models/Mujoco-planar-snake-cars-angle-line-v1/ppo"
+        #"/home/andreas/LRZ_Sync+Share/BachelorThesis/gym_mujoco_planar_snake/gym_mujoco_planar_snake/log/improved_PPO_runs/new/Mon Aug 17 17:16:38 2020/models/Mujoco-planar-snake-cars-angle-line-v1/ppo"
+        #model_dir = "/home/andreas/LRZ_Sync+Share/BachelorThesis/gym_mujoco_planar_snake/gym_mujoco_planar_snake/log/improved_PPO_runs/Wed Aug 12 19:24:18 2020/models/Mujoco-planar-snake-cars-angle-line-v1/ppo"
         #'/home/andreas/LRZ_Sync+Share/BachelorThesis/gym_mujoco_planar_snake/gym_mujoco_planar_snake/log/initial_PPO_runs/Sat Aug  8 13:46:47 2020/models/Mujoco-planar-snake-cars-angle-line-v1/ppo'
         #'/home/andreas/LRZ_Sync+Share/BachelorThesis/gym_mujoco_planar_snake/gym_mujoco_planar_snake/log/initial_PPO_runs/Sat Aug  8 13:46:47 2020/models/Mujoco-planar-snake-cars-angle-line-v1/ppo'
         #'/home/andreas/LRZ_Sync+Share/BachelorThesis/gym_mujoco_planar_snake/gym_mujoco_planar_snake/log/initial_PPO_runs/Sat Aug  8 11:58:55 2020/models/Mujoco-planar-snake-cars-angle-line-v1/ppo'
@@ -282,7 +305,7 @@ def enjoy(env_id, seed):
             '''if True:
                 break'''
 
-            info_collector.episode_info_print()
+            #info_collector.episode_info_print()
 
             sum_reward.append(rewards)
 

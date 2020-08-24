@@ -109,12 +109,6 @@ class Dataset(object):
 
         return [data[i:i + 2] for i, _ in enumerate(data[::2])]
 
-    @staticmethod
-    def get_pairs_v2(data):
-        from random import shuffle
-        shuffle(data)
-
-        return [data[i:i + 2] for i, _ in enumerate(data[::2])]
 
     @staticmethod
     def data_triplets(data):

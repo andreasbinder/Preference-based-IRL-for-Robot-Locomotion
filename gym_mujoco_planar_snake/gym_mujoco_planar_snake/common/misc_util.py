@@ -4,29 +4,19 @@ from gym_mujoco_planar_snake.common.dataset import Dataset, SubTrajectory
 def get_data_from_file(path, name="Dataset"):
     return Dataset.load(path=path, name=name)
 
-def get_all_files_from_dir(path):
+def get_all_files_from_dir(path='gym_mujoco_planar_snake/log/TrajectoryDataset'):
     import os
     from itertools import chain
-    path = 'gym_mujoco_planar_snake/log/TrajectoryDataset'
+
 
     files = os.listdir(path)
     files = [file for file in files if os.path.isfile(os.path.join(path, file))]
     print("Source Files: ", files)
 
-    '''import shutil
-    for name in files:
-        if hasattr(get_data_from_file(path=path, name=name)[0], "time_step") is False:
-            shutil.move(os.path.join(path, name), "/home/andreas/Desktop/Speicher")'''
-
-
-    #files = [get_data_from_file(path=path, name=name) for name in files ]
-
 
     files = [get_data_from_file(path=path, name=name) for name in files if hasattr(get_data_from_file(path=path, name=name)[0], "time_step") ]
     result = list(chain.from_iterable(files))
     print("Total number of files", len(result))
-
-    #Dataset(result).save(path=path, name="Dataset_"+str(len(result)))
 
 
 
