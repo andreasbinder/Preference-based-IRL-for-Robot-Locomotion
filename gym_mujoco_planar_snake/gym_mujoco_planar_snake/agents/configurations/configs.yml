@@ -1,0 +1,26 @@
+# define hyperparameters for IRL training
+reward_learning:
+  hparams:
+    lr: 0.00005
+    epochs: 10
+    ranking_approach: 2
+    dataset_size: 0
+
+ppo:
+  general:
+    env_id: Mujoco-planar-snake-cars-angle-line-v1
+    seed: 0
+    log_dir: gym_mujoco_planar_snake/results/
+  initial:
+    create_trajectories: true #if false you need to provide training data
+    num_agents: 5
+    num_timesteps: 300000
+    sfs: 50000
+    save_checkpoints: true
+  improved:
+    num_agents: 3
+    num_timesteps: 500000
+    sfs: 50000
+    save_checkpoints: true
+
+

@@ -57,5 +57,5 @@ class Params():
 
     @property
     def dict(self):
-        """Gives dict-like acce ss to Params instance by `params.dict['learning_rate']`"""
+        """Gives dict-like access to Params instance by `params.dict['learning_rate']`"""
         return self.__dict__

@@ -219,6 +219,8 @@ def main():
 
     data = np.concatenate(trajectories)
 
+    print(data.shape[0])
+
     initial_df = DataFrame(np.array(true_rews))
 
     ########################################################################################
@@ -228,7 +230,7 @@ def main():
     improved_log_dir = os.path.join(base_log_dir, "improved_runs")
     if not os.path.exists(improved_log_dir):
         os.mkdir(improved_log_dir)
-    net_save_path = os.path.join(improved_log_dir, "ensemble" + ctime()[4:19]).replace(" ", "_")
+    net_save_path = os.path.join(improved_log_dir, "ensemble" + str(args.ranking_loss) + "_"+ ctime()[4:19]).replace(" ", "_")
 
     os.mkdir(net_save_path)
     # create Ensemble mit args
@@ -236,7 +238,10 @@ def main():
     ensemble = Ensemble(args, net_save_path)
     ensemble.fit(data)
 
-    # print(net_save_path)
+    # TODO breaks for testing triplet training
+    '''print("System Exit")
+    import sys
+    sys.exit()'''
 
     ########################################################################################
     # Step 3: run ppo on learnt reward function
@@ -273,50 +278,7 @@ def main():
 
     #improved_df = DataFrame(np.array(true_rews), np.array(preds), initial=False)
 
-    '''print(initial_df.get_mean_true_rew())
-    print(initial_df.get_max_true_rew())'''
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-        #print(dirs[-args.num_initial_runs:])
-
-
-
-
-    '''U.make_session(num_cpu=1, make_default=True)  # interactive
-
-    model_dir = set_configs(args)
-
-    env = gym.make(args.env)
-    env.seed(args.seed)
-
-    #
-    env = GenTrajWrapper(env, args.log_dir + "/" + args.name_dir, args.num_timesteps)
-
-    env = prepare_env(args=args,
-                      model_dir=model_dir)
-
-    agent = PPOAgent(env=env)
-
-    agent.learn(args.num_timesteps)
-
-    with open(os.path.join(args.log_dir, args.name_dir, "rewards.npy"), 'wb') as f:
-        np.save(f, env.get_episode_rewards())'''
 
 
 

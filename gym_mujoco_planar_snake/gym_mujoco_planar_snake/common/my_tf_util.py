@@ -37,3 +37,5 @@ def save_state(fname, var_list=None):
     #saver.save(get_session(), fname)
     # to save memory
     saver.save(get_session(), fname, write_meta_graph=False)
+
+

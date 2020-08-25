@@ -1,4 +1,31 @@
 from gym_mujoco_planar_snake.common.dataset import Dataset, SubTrajectory
+import json
+import yaml
+
+class Configs():
+    """
+        class that stores run configurations
+    """
+
+    def __init__(self, yaml_path):
+        self.update(yaml_path)
+
+    def save(self, json_path):
+        """Saves parameters to json file"""
+        with open(json_path, 'w') as f:
+            json.dump(self.__dict__, f, indent=4)
+
+    def update(self, yaml_path):
+        """Loads parameters from json file"""
+        with open(yaml_path) as f:
+            self.config_file = yaml.load(yaml_path)
+            #self.__dict__.update(params)
+
+    @property
+    def dict(self):
+        """Gives dict-like access to Params instance by `params.dict['learning_rate']`"""
+        return self.__dict__
+
 
 # load data
 def get_data_from_file(path, name="Dataset"):

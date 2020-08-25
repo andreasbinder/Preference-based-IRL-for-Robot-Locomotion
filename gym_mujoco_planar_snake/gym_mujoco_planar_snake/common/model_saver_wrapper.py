@@ -10,6 +10,9 @@ class ModelSaverWrapper(ObservationWrapper):
     def __init__(self, env, model_dir, save_frequency_steps):
         ObservationWrapper.__init__(self, env=env)
 
+        '''self.id = str(id)
+        self.sess = sess'''
+
         self.save_frequency_steps = save_frequency_steps
         self.total_steps = 0
         self.total_steps_save_counter = 0
@@ -39,7 +42,14 @@ class ModelSaverWrapper(ObservationWrapper):
             file_name = osp.join(self.model_dir, '%s-%0*d' % (self.str_time_start, 9, self.total_steps))
             #U.save_state(file_name)
 
-            U.save_state(file_name )
+            import tensorflow as tf
+            '''with tf.variable_scope(self.id):
+                U.save_state_v2(file_name, self.sess)'''
+
+            #U.save_state_v2(file_name, self.sess)
+
+            U.save_state(file_name)
+
             logger.log('Saved model to: ' + file_name)
 
             self.total_steps_save_counter = 0
