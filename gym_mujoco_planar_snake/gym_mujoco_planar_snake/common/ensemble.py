@@ -4,7 +4,6 @@ from gym_mujoco_planar_snake.common.results import *
 
 import os
 
-
 import torch
 import torch.nn as nn
 import torch.optim as optim
@@ -34,11 +33,16 @@ class Net(nn.Module):
 
         return sum_rewards
 
-    def forward(self, traj_i, traj_j):
+    def forward(self, trajs):
+        cum_rs = [self.cum_return(traj).unsqueeze(0) for traj in trajs]
+
+        return torch.cat(tuple(cum_rs), 0).unsqueeze(0)
+
+    '''def forward(self, traj_i, traj_j):
         cum_r_i = self.cum_return(traj_i)
         cum_r_j = self.cum_return(traj_j)
 
-        return torch.cat((cum_r_i.unsqueeze(0), cum_r_j.unsqueeze(0)), 0).unsqueeze(0)
+        return torch.cat((cum_r_i.unsqueeze(0), cum_r_j.unsqueeze(0)), 0).unsqueeze(0)'''
 
 
 class Ensemble(object):
@@ -51,12 +55,13 @@ class Ensemble(object):
         self.hparams = Params(args.hparams_path)
         self.lr = self.hparams.lr
         self.epochs = self.hparams.epochs
+        self.hparams.ranking_approach = args.ranking_loss
         self.split_ratio = 0.8
         # TODO change for hopper
         self.input_dim = 27
 
         # TODO Test Phase only for 2 and 3
-        assert self.ranking_loss in [2, 3], "Test Phase only for 2 and 3"
+        # assert self.ranking_loss in [2, 3], "Test Phase only for 2 and 3"
 
     def preprocess_data(self, raw_data):
         data = build_trainset(raw_data, self.ranking_loss)
@@ -124,12 +129,15 @@ class Ensemble(object):
         self.save(index=index, net=net)
 
     def forward_pass(self, net, optimizer, criterion, inputs, label):
-        traj_i, traj_j = torch.from_numpy(inputs[0]).float(), torch.from_numpy(inputs[1]).float()
+
+        #traj_i, traj_j = torch.from_numpy(inputs[0]).float(), torch.from_numpy(inputs[1]).float()
+        trajs = [torch.from_numpy(inp).float() for inp in inputs]
         y = torch.tensor([label])
 
         optimizer.zero_grad()
 
-        rewards = net(traj_i, traj_j)
+        rewards = net(trajs)
+        #rewards = net(traj_i, traj_j)
 
         loss = criterion(rewards, y)
 
@@ -137,8 +145,7 @@ class Ensemble(object):
 
     def save(self, index, net, result_name="hparams_and_results.json"):
 
-        #path = os.path.join(self.net_save_path, self.time)
-        #os.mkdir(path)
-        torch.save(net.state_dict(), os.path.join(self.net_save_path, "model_"+str(index)))
-        self.hparams.save(os.path.join(self.net_save_path, "hparams_and_results"+str(index)+".json"))
-
+        # path = os.path.join(self.net_save_path, self.time)
+        # os.mkdir(path)
+        torch.save(net.state_dict(), os.path.join(self.net_save_path, "model_" + str(index)))
+        self.hparams.save(os.path.join(self.net_save_path, "hparams_and_results" + str(index) + ".json"))

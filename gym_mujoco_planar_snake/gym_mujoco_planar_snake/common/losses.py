@@ -6,16 +6,36 @@ def build_trainset(raw_data, ranking):
 
     data = np.array([raw_data[i:i + ranking] for i, _ in enumerate(raw_data[::ranking])])
 
+    available_labels = np.arange(ranking)
+
 
     # TODO only for pairs!!
-    num_pairs = data.shape[0]
+    num_elements_per_metric = data.shape[0]
 
     final_dataset = []
 
-    for index in range(num_pairs):
-        pair = data[index,:,:]
-        label = 0 if pair[0,1] > pair[1,1] else 1
-        obs = (pair[0,0], pair[1,0])
+    for index in range(num_elements_per_metric):
+        element = data[index,:,:]
+
+#        for label in available_labels:
+
+        obs = tuple(element[label,0] for label in available_labels )
+        # obs = (element[0,0], element[1,0])
+
+
+        # TODO do multiclass classification instead
+        label = element[:, 1].argmax()
+        #label = 0 if element[0,1] > element[1,1] else 1
+
+        # TODO
+        '''print(element[:, 1])
+        print(label)'''
+
+        '''import sys
+        sys.exit()'''
+
+
+
         item = (obs, label)
         final_dataset.append(item)
 
