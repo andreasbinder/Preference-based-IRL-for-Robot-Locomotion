@@ -47,15 +47,17 @@ class Net(nn.Module):
 
 class Ensemble(object):
 
-    def __init__(self, args, net_save_path):
-        self.num_nets = args.num_nets
-        self.ranking_loss = args.ranking_loss
+    def __init__(self, configs, net_save_path):
+        self.num_nets = configs.get_num_nets()
+        self.ranking_approach = configs.get_ranking_approach()
         self.net_save_path = net_save_path
 
-        self.hparams = Params(args.hparams_path)
-        self.lr = self.hparams.lr
-        self.epochs = self.hparams.epochs
-        self.hparams.ranking_approach = args.ranking_loss
+        #
+        # TODO save training results
+        #self.hparams = Params(args.hparams_path)
+        self.lr = configs.get_learning_rate()
+        self.epochs = configs.get_epochs()
+
         self.split_ratio = 0.8
         # TODO change for hopper
         self.input_dim = 27
@@ -64,22 +66,44 @@ class Ensemble(object):
         # assert self.ranking_loss in [2, 3], "Test Phase only for 2 and 3"
 
     def preprocess_data(self, raw_data):
-        data = build_trainset(raw_data, self.ranking_loss)
+        data = build_trainset(raw_data, self.ranking_approach)
         data = split_dataset_for_nets(data, self.num_nets)
+
         return data
 
     def fit(self, raw_data):
 
         whole_dataset = self.preprocess_data(raw_data)
 
+        #print(whole_dataset.shape)
+
+
+
         nets = [Net(self.input_dim)] * self.num_nets
 
-        for index, (net, dataset) in enumerate(zip(nets, whole_dataset)):
-            self.train(index, net, dataset)
+        for index, net in enumerate(nets):
+            self.train(index, net, whole_dataset[:,index,:])
+
+        '''for index, (net, dataset) in enumerate(zip(nets, whole_dataset)):
+            self.train(index, net, dataset)'''
 
     def train(self, index, net, dataset):
 
+        #print(len(dataset))
+        #from sklearn.model_selection import train_test_split
+        #train_test_split(X, y, test_size=0.2, random_state=0)
         train_set, val_set = split_into_train_val(dataset, self.split_ratio)
+        '''print(train_set.shape)
+        print(val_set.shape)
+
+        import sys
+        sys.exit()'''
+
+
+
+
+        '''import sys
+        sys.exit()'''
 
         criterion = nn.CrossEntropyLoss()
         optimizer = optim.Adam(net.parameters(), lr=self.lr)
@@ -105,7 +129,7 @@ class Ensemble(object):
 
             ##########
             running_val_loss = 0.0
-            for item in train_set:
+            for item in val_set:
                 inputs, label = item
 
                 loss = self.forward_pass(net, optimizer, criterion, inputs, label)
@@ -124,8 +148,8 @@ class Ensemble(object):
             )
             print(stats)
 
-        self.hparams.dict["final_train_loss"] = running_loss / len(train_set)
-        self.hparams.dict["final_val_loss"] = running_val_loss / len(val_set)
+        #self.hparams.dict["final_train_loss"] = running_loss / len(train_set)
+        #self.hparams.dict["final_val_loss"] = running_val_loss / len(val_set)
         self.save(index=index, net=net)
 
     def forward_pass(self, net, optimizer, criterion, inputs, label):
@@ -137,6 +161,8 @@ class Ensemble(object):
         optimizer.zero_grad()
 
         rewards = net(trajs)
+        '''print(rewards)
+        print(y)'''
         #rewards = net(traj_i, traj_j)
 
         loss = criterion(rewards, y)
@@ -148,4 +174,16 @@ class Ensemble(object):
         # path = os.path.join(self.net_save_path, self.time)
         # os.mkdir(path)
         torch.save(net.state_dict(), os.path.join(self.net_save_path, "model_" + str(index)))
-        self.hparams.save(os.path.join(self.net_save_path, "hparams_and_results" + str(index) + ".json"))
+        #self.hparams.save(os.path.join(self.net_save_path, "hparams_and_results" + str(index) + ".json"))
+
+    @staticmethod
+    def load(log_dir, num_nets, input_dim=27):
+
+        nets = []
+        for index in range(num_nets):
+            path = os.path.join(log_dir, "model_" + str(index))
+            net = Net(input_dim)
+            net.load_state_dict(torch.load(path))
+            nets.append(net)
+
+        return nets

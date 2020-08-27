@@ -14,18 +14,33 @@ class Net(nn.Module):
         self.fc1 = nn.Linear(784, 64)
         self.fc2 = nn.Linear(64, 1)
 
-loss = nn.MarginRankingLoss()
-'''input1 = torch.randn(3, requires_grad=True)
-input2 = torch.randn(3, requires_grad=True)
-target = torch.randn(3).sign()'''
-input1 = torch.tensor([1.,1.,1.], requires_grad=True)
-input2 = torch.tensor([1.1,0.,0.], requires_grad=True)
-target = torch.tensor([0,1,1])
+model = nn.Linear(20, 5) # predict logits for 5 classes
+x = torch.randn(1, 20)
+y = torch.tensor([[1., 0., 1., 0., 0.]]) # get classA and classC as active
+print(x)
+print(y)
 
-print(input1, input2, target)
-output = loss(input1, input2, target)
+criterion = nn.BCEWithLogitsLoss()
+optimizer = torch.optim.SGD(model.parameters(), lr=1e-1)
+
+for epoch in range(20):
+    optimizer.zero_grad()
+    output = model(x)
+    loss = criterion(output, y)
+    loss.backward()
+    optimizer.step()
+    print('Loss: {:.3f}'.format(loss.item()))
+
+torch.manual_seed(0)
+
+loss = nn.CrossEntropyLoss()
+input = torch.randn(3, 5, requires_grad=True)
+target = torch.empty(3, dtype=torch.long).random_(5)
+output = loss(input, target)
+print(input)
+print(target)
 print(output)
-output.backward()
+
 
 '''from torch.utils.tensorboard import SummaryWriter
 

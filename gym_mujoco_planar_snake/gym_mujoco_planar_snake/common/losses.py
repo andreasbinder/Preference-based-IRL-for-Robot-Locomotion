@@ -40,11 +40,26 @@ def build_trainset(raw_data, ranking):
         final_dataset.append(item)
 
     #print(len(final_dataset))
+    '''print(len(final_dataset))
+    print(final_dataset[0][0][0].shape)
+    print(final_dataset[0][1].shape)'''
+
+    print("%i Tuples of %i Trajectories"%(len(final_dataset), ranking))
+
+
 
     return final_dataset
 
 def split_dataset_for_nets(raw_data, num_nets):
+
+    #print(len(raw_data))
+
     final_dataset = np.array([raw_data[i:i + num_nets] for i, _ in enumerate(raw_data[::num_nets])])
+
+    '''print(final_dataset.shape)
+
+    import sys
+    sys.exit()'''
 
     return final_dataset
 

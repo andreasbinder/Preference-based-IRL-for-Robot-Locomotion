@@ -1,7 +1,8 @@
 # define hyperparameters for IRL training
 reward_learning:
+  num_nets: 1
   hparams:
-    lr: 0.00005
+    lr: 0.0005 #0.00005
     epochs: 10
     ranking_approach: 2
     dataset_size: 0
@@ -12,15 +13,19 @@ ppo:
     seed: 0
     log_dir: gym_mujoco_planar_snake/results/
   initial:
-    create_trajectories: true #if false you need to provide training data
-    num_agents: 5
-    num_timesteps: 300000
-    sfs: 50000
+    create_trajectories: false # if false you need to provide training data
+    trajectory_length: 50
+    num_traj_per_episode: 10
+    num_agents: 5 # 5
+    num_timesteps: 300000 #300000
+    sfs: 50000 #50000
     save_checkpoints: true
   improved:
+    validate_learned_reward: false
     num_agents: 3
     num_timesteps: 500000
     sfs: 50000
     save_checkpoints: true
+    ctrl_coeff: 0.0 # should prevent agent from taking too high action values
 
 

@@ -167,7 +167,7 @@ def main():
     parser.add_argument('--save', default=True)
     parser.add_argument('--mode', default='pair')
     parser.add_argument('--monitor', default=True)
-    parser.add_argument('--crtl_coeff', type=float, default=0.1)
+    parser.add_argument('--crtl_coeff', type=float, default=0.0)
     parser.add_argument('--num_nets', type=int, default=5)
 
     args = parser.parse_args()

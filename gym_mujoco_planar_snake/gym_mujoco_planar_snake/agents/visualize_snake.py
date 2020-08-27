@@ -218,7 +218,10 @@ def enjoy(env_id, seed):
 
         run = 0
 
-        model_dir = "/home/andreas/LRZ_Sync+Share/BachelorThesis/gym_mujoco_planar_snake/gym_mujoco_planar_snake/results/improved_runs/crossentropy/ensemble_v1/ppo_Sun Aug 23 12:34:39 2020/models/Mujoco-planar-snake-cars-angle-line-v1/ppo"
+        model_dir = "/home/andreas/LRZ_Sync+Share/BachelorThesis/gym_mujoco_planar_snake/gym_mujoco_planar_snake/results/Mujoco-planar-snake-cars-angle-line-v1/improved_runs/ensemble3_Aug_26_10:47:56/Aug 26 10:48:02/models/Mujoco-planar-snake-cars-angle-line-v1/ppo"
+        #"/home/andreas/LRZ_Sync+Share/BachelorThesis/gym_mujoco_planar_snake/gym_mujoco_planar_snake/results/Mujoco-planar-snake-cars-angle-line-v1/improved_runs/ensemble5_Aug_25_17:22:48/Aug 25 18:47:41/models/Mujoco-planar-snake-cars-angle-line-v1/ppo"
+        #"/home/andreas/LRZ_Sync+Share/BachelorThesis/gym_mujoco_planar_snake/gym_mujoco_planar_snake/results/Mujoco-planar-snake-cars-angle-line-v1/improved_runs/ensemble2_Aug_25_12:35:15/Aug 25 13:20:22/models/Mujoco-planar-snake-cars-angle-line-v1/ppo"
+        #"/home/andreas/LRZ_Sync+Share/BachelorThesis/gym_mujoco_planar_snake/gym_mujoco_planar_snake/results/improved_runs/crossentropy/ensemble_v1/ppo_Sun Aug 23 12:34:39 2020/models/Mujoco-planar-snake-cars-angle-line-v1/ppo"
         #"/home/andreas/LRZ_Sync+Share/BachelorThesis/gym_mujoco_planar_snake/gym_mujoco_planar_snake/results/improved_runs/crossentropy/ensemble_v1/Aug 24 00:41:05/models/Mujoco-planar-snake-cars-angle-line-v1/ppo"
         #"/home/andreas/LRZ_Sync+Share/BachelorThesis/gym_mujoco_planar_snake/gym_mujoco_planar_snake/results/improved_runs/crossentropy/Sun Aug 23 15:05:05 2020/models/Mujoco-planar-snake-cars-angle-line-v1/ppo"
         #"/home/andreas/LRZ_Sync+Share/BachelorThesis/gym_mujoco_planar_snake/gym_mujoco_planar_snake/results/improved_runs/crossentropy/Sun Aug 23 12:34:39 2020/models/Mujoco-planar-snake-cars-angle-line-v1/ppo"
@@ -262,7 +265,7 @@ def enjoy(env_id, seed):
 
         # model_file = get_latest_model_file(model_dir)
 
-        model_index = 0
+        model_index = 10
         model_file = model_files[model_index]
         print('available models: ', len(model_files))
         #model_file = model_files[model_index]
