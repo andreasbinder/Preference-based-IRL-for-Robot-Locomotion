@@ -106,7 +106,7 @@ class AgentSquad(object):
             self.num_agents = configs.get_num_improved_agents()
             self.num_timesteps = configs.get_num_improved_timesteps()
             self.save_check_points = configs.get_save_improved_checkpoints()
-            self.sfs = configs.get_num_improved_timesteps()
+            self.sfs = configs.get_improved_sfs()
         else:
             self.num_agents = configs.get_num_initial_agents()
             self.num_timesteps = configs.get_num_initial_timesteps()

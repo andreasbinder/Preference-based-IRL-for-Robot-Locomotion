@@ -2,8 +2,8 @@
 reward_learning:
   num_nets: 1
   hparams:
-    lr: 0.0005 #0.00005
-    epochs: 10
+    lr: 0.00005 #0.00005
+    epochs: 1 #5
     ranking_approach: 2
     dataset_size: 0
 
@@ -21,10 +21,10 @@ ppo:
     sfs: 50000 #50000
     save_checkpoints: true
   improved:
-    validate_learned_reward: false
-    num_agents: 3
-    num_timesteps: 500000
-    sfs: 50000
+    validate_learned_reward: True
+    num_agents: 1
+    num_timesteps: 2000 #500000
+    sfs: 1000 #50000
     save_checkpoints: true
     ctrl_coeff: 0.0 # should prevent agent from taking too high action values
 

@@ -41,19 +41,20 @@ def prepare_env(env, save_check_points, save_dir, sfs, id, learned_reward, confi
     num_timesteps = extract_configs(configs=configs, learned_reward=learned_reward)
 
     log_dir = osp.join(save_dir, "agent_" + str(id))
+    default_reward_dir = osp.join(save_dir, "default_reward")
 
     if save_check_points:
         env = ModelSaverWrapper(env, log_dir, sfs, id)
 
 
     #save_dir = osp.join(log_dir, ctime()[4:19])
-    save_dir = log_dir
+    #save_dir = log_dir
     if learned_reward:
         # venv, nets, max_timesteps, log_dir, name_dir, ctrl_coeff
-        nets = Ensemble.load(log_dir, configs.get_num_nets())
+        nets = Ensemble.load(save_dir, configs.get_num_nets())
 
         ctrl_coeff = configs.get_ctrl_coeff()
-        env = MyRewardWrapper(env, nets, num_timesteps, log_dir, ctrl_coeff, save_dir, id)
+        env = MyRewardWrapper(env, nets, num_timesteps, log_dir, ctrl_coeff, default_reward_dir, id)
     else:
         trajectory_length = configs.get_trajectory_length()
         num_traj_per_epoch = configs.get_num_traj_per_episode()
@@ -88,15 +89,22 @@ class ModelSaverWrapper(ObservationWrapper):
 
         self.model_dir = model_dir
 
-        #self.model_dir = model_dir
+
+
+
 
 
     def reset(self, **kwargs):
 
         self.total_episodes += 1
 
+
+
         if self.total_steps_save_counter == self.save_frequency_steps or self.total_steps == 1:
 
+            '''print("Inside model saver ")
+            import sys
+            sys.exit()'''
 
             file_name = osp.join(self.model_dir, str(self.total_steps))
 
@@ -180,7 +188,7 @@ class GenTrajWrapper(ObservationWrapper):
             #print(self.last_e_steps)
 
             if self.last_e_steps >= self.max_timesteps and not self.saved:
-                # print("in save")
+                # print("in save")mkdir
                 path = self.path
 
                 with open(os.path.join(path, self.name), 'wb') as f:
@@ -247,7 +255,7 @@ class MyRewardWrapper(RewardWrapper):
         for net,rms in zip(self.nets,self.rew_rms):
             # Preference based reward
             with torch.no_grad():
-                pred_rews, _ = net.cum_return(torch.from_numpy(obs).float())
+                pred_rews = net.cum_return(torch.from_numpy(obs).float())
             r_hat = pred_rews.item()
 
             # Normalization only has influence on predicted reward

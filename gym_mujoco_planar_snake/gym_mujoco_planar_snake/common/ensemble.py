@@ -1,6 +1,6 @@
 from gym_mujoco_planar_snake.common.documentation import *
 from gym_mujoco_planar_snake.common.losses import *
-from gym_mujoco_planar_snake.common.results import *
+from gym_mujoco_planar_snake.common.evaluate import *
 
 import os
 
@@ -62,8 +62,7 @@ class Ensemble(object):
         # TODO change for hopper
         self.input_dim = 27
 
-        # TODO Test Phase only for 2 and 3
-        # assert self.ranking_loss in [2, 3], "Test Phase only for 2 and 3"
+
 
     def preprocess_data(self, raw_data):
         data = build_trainset(raw_data, self.ranking_approach)
@@ -75,7 +74,6 @@ class Ensemble(object):
 
         whole_dataset = self.preprocess_data(raw_data)
 
-        #print(whole_dataset.shape)
 
 
 
@@ -89,21 +87,11 @@ class Ensemble(object):
 
     def train(self, index, net, dataset):
 
-        #print(len(dataset))
+
         #from sklearn.model_selection import train_test_split
         #train_test_split(X, y, test_size=0.2, random_state=0)
         train_set, val_set = split_into_train_val(dataset, self.split_ratio)
-        '''print(train_set.shape)
-        print(val_set.shape)
 
-        import sys
-        sys.exit()'''
-
-
-
-
-        '''import sys
-        sys.exit()'''
 
         criterion = nn.CrossEntropyLoss()
         optimizer = optim.Adam(net.parameters(), lr=self.lr)

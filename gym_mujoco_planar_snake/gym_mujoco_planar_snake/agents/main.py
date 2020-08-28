@@ -4,7 +4,7 @@ import os
 
 from gym_mujoco_planar_snake.common.multi_agents import AgentSquad
 from gym_mujoco_planar_snake.common.misc_util import Configs
-from gym_mujoco_planar_snake.common.results import DataFrame
+from gym_mujoco_planar_snake.common.evaluate import DataFrame
 from gym_mujoco_planar_snake.common.ensemble import Ensemble
 
 from baselines.common import set_global_seeds
@@ -88,7 +88,7 @@ def get_true_rewards_and_predictions_from_default_dir(default_reward_dir):
             preds.append(results[:,1])
 
 
-    return np.concatenate(true_rews), np.concatenate(preds)
+    return np.array(true_rews), np.array(preds)
 
 
 
@@ -123,7 +123,7 @@ def main():
 
     # store initial to compare them to final result
     initial_dataframe = DataFrame(true_initial_rewards, initial=True)
-    print("Initial Mean Reward: %f"%initial_dataframe.get_mean_true_rew())
+    print("Initial Mean Reward: %f" %initial_dataframe.get_mean_true_rew())
     print("Initial Max Reward: %f" % initial_dataframe.get_max_true_rew())
 
     ########################################################################################
@@ -151,7 +151,23 @@ def main():
 
         true_rews, preds = get_true_rewards_and_predictions_from_default_dir(default_reward_dir)
 
-        improved_df = DataFrame(true_rew = true_rews, preds = preds)
+        improved_dataframe = DataFrame(true_rew=true_rews,
+                                preds=preds,
+                                initial=False)
+
+        statistics = 'Initial Mean: {initial_mean}, Improved Mean: {improved_mean}' \
+                          'Initial Max: {initial_max}, Improved Max: {improved_max}'
+
+        output = statistics.format(
+            initial_mean=initial_dataframe.get_mean_true_rew(),
+            initial_max=initial_dataframe.get_max_true_rew(),
+            improved_mean=improved_dataframe.get_mean_true_rew(),
+            improved_max=improved_dataframe.get_max_true_rew()
+
+
+        )
+
+        print(output)
 
 
 

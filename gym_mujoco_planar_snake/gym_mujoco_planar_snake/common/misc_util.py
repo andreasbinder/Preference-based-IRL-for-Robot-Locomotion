@@ -85,28 +85,13 @@ class Configs():
 
 
 
-    def save(self, json_path):
-        """Saves parameters to json file"""
-        with open(json_path, 'w') as f:
-            json.dump(self.__dict__, f, indent=4)
-
-    def update(self, yaml_path):
-        """Loads parameters from json file"""
-        with open(yaml_path) as f:
-            self.config_file = yaml.load(yaml_path)
-            #self.__dict__.update(self.config_file)
-
-    @property
-    def dict(self):
-        """Gives dict-like access to Params instance by `params.dict['learning_rate']`"""
-        return self.__dict__
 
 
 # load data
 def get_data_from_file(path, name="Dataset"):
     return Dataset.load(path=path, name=name)
 
-def get_all_files_from_dir(path='gym_mujoco_planar_snake/log/TrajectoryDataset'):
+def get_all_files_from_dir(path):
     import os
     from itertools import chain
 

@@ -44,10 +44,10 @@ true_relevance = torch.tensor([[3, 2, 1, 0, 0]])
 
 # Releveance scores in output order
 
-relevance_score = torch.tensor([[3, 2, 0, 0, 1]])
+relevance_score = torch.tensor([[1, 1, 0, 0, 3]])
 
 dcg = DCG_Loss()
 
-loss = dcg(true_relevance, true_relevance)
+loss = dcg(true_relevance, relevance_score)
 
 print(loss)

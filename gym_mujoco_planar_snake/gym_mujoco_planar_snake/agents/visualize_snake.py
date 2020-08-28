@@ -218,7 +218,7 @@ def enjoy(env_id, seed):
 
         run = 0
 
-        model_dir = "/home/andreas/LRZ_Sync+Share/BachelorThesis/gym_mujoco_planar_snake/gym_mujoco_planar_snake/results/Mujoco-planar-snake-cars-angle-line-v1/improved_runs/ensemble3_Aug_26_10:47:56/Aug 26 10:48:02/models/Mujoco-planar-snake-cars-angle-line-v1/ppo"
+        model_dir = "/home/andreas/LRZ_Sync+Share/BachelorThesis/gym_mujoco_planar_snake/gym_mujoco_planar_snake/results/Mujoco-planar-snake-cars-angle-line-v1/improved_runs/vf_ensemble2_Aug_28_14:07:03/agent_1"
         #"/home/andreas/LRZ_Sync+Share/BachelorThesis/gym_mujoco_planar_snake/gym_mujoco_planar_snake/results/Mujoco-planar-snake-cars-angle-line-v1/improved_runs/ensemble5_Aug_25_17:22:48/Aug 25 18:47:41/models/Mujoco-planar-snake-cars-angle-line-v1/ppo"
         #"/home/andreas/LRZ_Sync+Share/BachelorThesis/gym_mujoco_planar_snake/gym_mujoco_planar_snake/results/Mujoco-planar-snake-cars-angle-line-v1/improved_runs/ensemble2_Aug_25_12:35:15/Aug 25 13:20:22/models/Mujoco-planar-snake-cars-angle-line-v1/ppo"
         #"/home/andreas/LRZ_Sync+Share/BachelorThesis/gym_mujoco_planar_snake/gym_mujoco_planar_snake/results/improved_runs/crossentropy/ensemble_v1/ppo_Sun Aug 23 12:34:39 2020/models/Mujoco-planar-snake-cars-angle-line-v1/ppo"
@@ -265,7 +265,7 @@ def enjoy(env_id, seed):
 
         # model_file = get_latest_model_file(model_dir)
 
-        model_index = 10
+        model_index = 0
         model_file = model_files[model_index]
         print('available models: ', len(model_files))
         #model_file = model_files[model_index]
@@ -344,22 +344,12 @@ def enjoy(env_id, seed):
 def main():
     import argparse
     parser = argparse.ArgumentParser(formatter_class=argparse.ArgumentDefaultsHelpFormatter)
-    # parser.add_argument('--seed', help='RNG seed', type=int, default=1)
+
     parser.add_argument('--seed', help='RNG seed', type=int, default=0)
 
-    parser.add_argument('--num-timesteps', type=int, default=int(1e6))  # 1e6
-
-    # parser.add_argument('--train', help='do training or load model', type=bool, default=True)
-    parser.add_argument('--train', help='do training or load model', type=bool, default=False)
-
-    # velocity - power test
     parser.add_argument('--env', help='environment ID', default='Mujoco-planar-snake-cars-angle-line-v1')
 
-
-    # save_frequency_steps
-    parser.add_argument('--sfs', help='save_frequency_steps', default=10000)  # for mujoco
-
-    parser.add_argument('--model_dir', help='model to render')
+    parser.add_argument('--model_dir', help='model to render', type=str)
 
     args = parser.parse_args()
     logger.configure()
@@ -368,17 +358,10 @@ def main():
     # CUDA off -> CPU only!
     os.environ['CUDA_VISIBLE_DEVICES'] = ''
 
-
-
-    enjoy(args.env, seed=args.seed)
+    with tf.variable_scope(str(1)):
+        enjoy(args.env, seed=args.seed)
 
 
 
 if __name__ == '__main__':
     main()
-
-# Notes
-# in enjoy aufräumen
-# es gibt 100 models (auswählbar durch modelindex) da 1 Mio/ 10K(sfs)
-# constant 0.5 seems to work better than 1
-# which models are displayed

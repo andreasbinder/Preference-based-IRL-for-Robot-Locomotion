@@ -8,18 +8,42 @@ class DataFrame(object):
                  preds=None,
                  initial = True):
 
+        # TODO episode length
+        episode_length = 1000
 
         if initial:
             # true rew has form (num_runs, collected summed returns per run)
             # eg (2,20) means two agents with 2 checkpoints)
-            self.true_rew = true_rew.sum(axis=0) / true_rew.shape[0]
+            # TODO divide by num agents
+            self.true_rew = true_rew.sum(axis=0) / true_rew.shape[0] #
+
+            print(true_rew.shape)
+            print(self.true_rew.shape)
+
+
             self.preds = None
         else:
             # reshape
+            '''print(true_rew.shape)
+            print(preds.shape)'''
+
 
 
             self.true_rew = true_rew.sum(axis=0) / true_rew.shape[0]
             self.preds = preds.sum(axis=0) / preds.shape[0]
+
+            '''print(true_rew.shape)
+            print(preds.shape)'''
+
+            num_episodes = int(self.true_rew.size / episode_length)
+
+            #print(num_episodes)
+
+            # TODO replace 20 with / (length_episde / length_trajectory)
+            self.true_rew = self.true_rew.reshape(num_episodes,episode_length).sum(axis=1) / 20
+            self.preds = self.preds.reshape(num_episodes,episode_length).sum(axis=1) / 20
+
+
 
 
 
