@@ -1,3 +1,12 @@
+- Rewards plotten
+- Triplet Loss: BCE example,
+
+
+TODO:
+only use the first 8 elements of observation
+change model (not always AngularLine)
+von rew to timestep als metric wechseln
+
 Test Cases:
 - Dataset has few low and no middleground trajectories
     Start with ground truth and change after a some timesteps

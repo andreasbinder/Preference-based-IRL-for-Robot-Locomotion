@@ -8,6 +8,8 @@ import torch
 import torch.nn as nn
 import torch.optim as optim
 
+from tqdm import tqdm
+
 
 class Net(nn.Module):
     def __init__(self, input_dim):
@@ -17,6 +19,8 @@ class Net(nn.Module):
 
         self.model = nn.Sequential(
             nn.Linear(self.input_dim, 256),
+            nn.ReLU(),
+            nn.Linear(256, 256),
             nn.ReLU(),
             nn.Linear(256, 256),
             nn.ReLU(),
@@ -66,6 +70,8 @@ class Ensemble(object):
 
     def preprocess_data(self, raw_data):
         data = build_trainset(raw_data, self.ranking_approach)
+        #data = build_custom_triplet_trainset(raw_data)
+
         data = split_dataset_for_nets(data, self.num_nets)
 
         return data
@@ -93,18 +99,20 @@ class Ensemble(object):
         train_set, val_set = split_into_train_val(dataset, self.split_ratio)
 
 
-        criterion = nn.CrossEntropyLoss()
+        criterion = nn.CrossEntropyLoss() #nn.BCEWithLogitsLoss()
         optimizer = optim.Adam(net.parameters(), lr=self.lr)
 
         running_loss = 0.0
         running_val_loss = 0.0
 
         # training
-        print("Start Training")
+        print("Start Learning")
         for epoch in range(self.epochs):
 
             running_loss = 0.0
-            for item in train_set:
+
+            print("Training")
+            for item in tqdm(train_set):
                 inputs, label = item
 
                 loss = self.forward_pass(net, optimizer, criterion, inputs, label)
@@ -116,8 +124,9 @@ class Ensemble(object):
                 running_loss += loss.item()
 
             ##########
+            print("Validating")
             running_val_loss = 0.0
-            for item in val_set:
+            for item in tqdm(val_set):
                 inputs, label = item
 
                 loss = self.forward_pass(net, optimizer, criterion, inputs, label)
@@ -144,7 +153,18 @@ class Ensemble(object):
 
         #traj_i, traj_j = torch.from_numpy(inputs[0]).float(), torch.from_numpy(inputs[1]).float()
         trajs = [torch.from_numpy(inp).float() for inp in inputs]
+        '''import numpy as np
+        label = np.array(i for i in label if type(i) == float)'''
         y = torch.tensor([label])
+        #print(trajs.shape)
+        '''print(len(trajs))
+        print(trajs[0].shape)
+
+        print(label.shape)
+        print(len(label))
+        print(label)'''
+
+        #y = torch.from_numpy(label)
 
         optimizer.zero_grad()
 

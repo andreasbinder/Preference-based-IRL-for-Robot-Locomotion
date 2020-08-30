@@ -4,8 +4,9 @@ import os
 
 from gym_mujoco_planar_snake.common.multi_agents import AgentSquad
 from gym_mujoco_planar_snake.common.misc_util import Configs
-from gym_mujoco_planar_snake.common.evaluate import DataFrame
+#from gym_mujoco_planar_snake.common.evaluate import DataFrame
 from gym_mujoco_planar_snake.common.ensemble import Ensemble
+from gym_mujoco_planar_snake.common.env_wrapper import MyMonitor
 
 from baselines.common import set_global_seeds
 
@@ -122,9 +123,17 @@ def main():
     # first reproducability, then dataframe, then reward learning
 
     # store initial to compare them to final result
-    initial_dataframe = DataFrame(true_initial_rewards, initial=True)
-    print("Initial Mean Reward: %f" %initial_dataframe.get_mean_true_rew())
-    print("Initial Max Reward: %f" % initial_dataframe.get_max_true_rew())
+    '''initial_dataframe = DataFrame(true_initial_rewards, initial=True)
+
+    print(initial_dataframe.get_max_true_rew())
+    print(initial_dataframe.get_mean_true_rew())'''
+
+
+
+
+
+    # TODO test trajectories
+
 
     ########################################################################################
     # Step 2: Learn Reward Function
@@ -135,6 +144,8 @@ def main():
 
     ensemble = Ensemble(configs, net_save_path)
     ensemble.fit(trajectories)
+
+
 
     ########################################################################################
     # Step 3: Validate IRL through RL
@@ -151,14 +162,21 @@ def main():
 
         true_rews, preds = get_true_rewards_and_predictions_from_default_dir(default_reward_dir)
 
-        improved_dataframe = DataFrame(true_rew=true_rews,
+
+
+
+    if configs.get_validate_learned_reward() and configs.get_create_initial_trajectories():
+        MyMonitor.compare_initial_and_improved_reward(ensemble_dir, net_save_path)
+
+
+        '''improved_dataframe = DataFrame(true_rew=true_rews,
                                 preds=preds,
-                                initial=False)
+                                initial=False)'''
 
         statistics = 'Initial Mean: {initial_mean}, Improved Mean: {improved_mean}' \
                           'Initial Max: {initial_max}, Improved Max: {improved_max}'
 
-        output = statistics.format(
+        '''output = statistics.format(
             initial_mean=initial_dataframe.get_mean_true_rew(),
             initial_max=initial_dataframe.get_max_true_rew(),
             improved_mean=improved_dataframe.get_mean_true_rew(),
@@ -167,7 +185,7 @@ def main():
 
         )
 
-        print(output)
+        print(output)'''
 
 
 

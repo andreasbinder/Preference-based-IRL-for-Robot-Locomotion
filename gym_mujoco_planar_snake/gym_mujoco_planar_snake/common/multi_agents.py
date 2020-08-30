@@ -14,8 +14,8 @@ import gym, logging
 import os
 
 
-from gym_mujoco_planar_snake.common.reward_wrapper import *
-from gym_mujoco_planar_snake.common.reward_nets import *
+#from gym_mujoco_planar_snake.common.reward_wrapper import *
+#from gym_mujoco_planar_snake.common.reward_nets import *
 from gym_mujoco_planar_snake.common.env_wrapper import prepare_env, ModelSaverWrapper
 from gym_mujoco_planar_snake.common.misc_util import Configs
 
@@ -77,6 +77,9 @@ class PPOAgent(object):
                                 gamma=0.99, lam=0.95,
                                 schedule='linear',
                                 )
+
+            # print(self.env.get_episode_rewards())
+
         self.sess.close()
         return self.policy
 
@@ -117,6 +120,7 @@ class AgentSquad(object):
 
     def learn(self):
 
+        num_prev_agents = self.configs.get_num_initial_agents() if self.learned_reward else 0
         agents = [PPOAgent(env=self.env,
                            id=id,
                            log_dir=self.log_dir,
@@ -125,7 +129,7 @@ class AgentSquad(object):
                            learned_reward=self.learned_reward,
                            configs=self.configs)
 
-                  for id in range(self.num_agents)]
+                  for id in range(num_prev_agents, self.num_agents + num_prev_agents)]
 
         for agent in agents:
             agent.learn(self.num_timesteps)
