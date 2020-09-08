@@ -9,24 +9,16 @@ print(input)
 print(target)
 print(output)'''
 
+torch.manual_seed(0)
 
-model = nn.Linear(20, 3) # predict logits for 5 classes
-x = torch.randn(2, 20)
-y = torch.tensor([[1., 0., 1.],
-                  [1., 0., 1.]]) # get classA and classC as active
-print(x)
-print(y)
+val = torch.tensor([3, 5, 1])
 
-criterion = nn.BCEWithLogitsLoss()
-optimizer = torch.optim.SGD(model.parameters(), lr=1e-1)
+indices = torch.tensor([2,1,0])
 
-for epoch in range(5):
-    optimizer.zero_grad()
-    output = model(x)
-    loss = criterion(output, y)
-    loss.backward()
-    optimizer.step()
-    print('Loss: {:.3f}'.format(loss.item()))
+print(val[indices])
+
+
+#print('Loss_Bce: {:.3f}'.format(loss_bce.item()))
 
 
 '''torch.manual_seed(0)

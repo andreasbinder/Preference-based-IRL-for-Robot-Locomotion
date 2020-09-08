@@ -1,3 +1,12 @@
+
+true 500k , gegen 500/1000k vergleichen
+integrate create traj
+ggf coeff
+remove absolute paths
+push
+
+
+
 - Rewards plotten
 - Triplet Loss: BCE example,
 

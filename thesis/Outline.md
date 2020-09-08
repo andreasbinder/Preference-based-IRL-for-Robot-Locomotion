@@ -1,3 +1,6 @@
+- Suboptimality
+- Metrics
+
 # Outline of Thesis
 
 ## Abstract
@@ -8,27 +11,32 @@
 
 ## Theoretical Background
 
-### Markov Decision Process
+### Reinforcement Learning + Markov Decision Process
 - Markov Property
-
-### Snake-like Robots
-
-### Simulation
-- agent, environment
-
-### Deep Reinforcement Learning
-
-### Learning to Rank
-
-### Imitation Learning
-- BC, GAIL
+- Characteristics
+- value function approximation
+- ? policy gradient, actor-critic
 
 ### Inverse Reinforcement Learning
+- Konzept/ intuition
+- advantages of IRL
+- apprenticeship learning
+- difference to Imitation learning (Bsp BC)
+
+'''### Imitation Learning
+- BC, GAIL
+'''
+### Learning to Rank
+
+### Simulation
+- agent/ snake-like robot(Hirose) , environment 
+- Artikel, Bings Paper, Lemke Thesis
+
 
 ## Related Work
 
 ### Snake-like Robots
-- Hirose + Mr. Bings work
+- Mr. Bings work
 
 ### PPO
 - include cases where getting optimal trajectories is difficult
@@ -42,10 +50,7 @@
 ### Preference-based Inverse Reinforcement Learning
 - TREX, DREX, BREX
 
-## Environment
-- Mujoco
-
-## Problem
+## Approach
 
 ## Results
 

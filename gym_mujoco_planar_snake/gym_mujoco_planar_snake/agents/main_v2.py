@@ -7,8 +7,9 @@ import random
 from gym_mujoco_planar_snake.common.multi_agents import AgentSquad
 from gym_mujoco_planar_snake.common.misc_util import Configs
 #from gym_mujoco_planar_snake.common.evaluate import DataFrame
-from gym_mujoco_planar_snake.common.ensemble import Ensemble, Ensemble_Triplet, Ensemble_Base
+from gym_mujoco_planar_snake.common.ensemble import Ensemble, Ensemble_Triplet, Ensemble_Custom
 from gym_mujoco_planar_snake.common.env_wrapper import MyMonitor
+from gym_mujoco_planar_snake.common.ppo_agent import PPOAgent
 
 from baselines.common import set_global_seeds
 
@@ -110,39 +111,31 @@ def main():
 
     set_seeds(configs)
 
-    ########################################################################################
-    # Step 1a: if new trajectories should be created
-    base_log_dir = create_base_log_dir()
 
+    # Step 0: if new trajectories should be created (optional)
+    base_log_dir = create_base_log_dir()
     if configs.get_create_initial_trajectories():
 
         ensemble_dir = create_new_ensemble_dir(base_log_dir)
 
+        # id, log_dir, learned_reward, configs
+        agent = PPOAgent(id=0,
+                         log_dir=ensemble_dir,
+                         learned_reward=False,
+                         configs=configs)
+        agent.learn()
+        #agent.create_trajs_from_checkpoint(default_dataset_dir="/home/andreas/Desktop/")
 
-        agents = AgentSquad(configs = configs,
-                            learned_reward = False,
-                            log_dir = ensemble_dir)
-        agents.learn()
-
-    ########################################################################################
-    # Step 1b: scan default_dataset directory for training data
+    # Step 1: scan default_dataset directory for training data
     default_dataset_dir = os.path.join(base_log_dir, "initial_runs", "default_dataset")
-
     trajectories, true_initial_rewards = get_dataset_and_true_rewards_from_default_dir(default_dataset_dir)
 
-    # first reproducability, then dataframe, then reward learning
 
-    # store initial to compare them to final result
-    '''initial_dataframe = DataFrame(true_initial_rewards, initial=True)
+    print("in main")
 
-    print(initial_dataframe.get_max_true_rew())
-    print(initial_dataframe.get_mean_true_rew())'''
+    import sys
+    sys.exit()
 
-
-    # TODO test trajectories
-
-
-    ########################################################################################
     # Step 2: Learn Reward Function
     print("Start IRL")
 
@@ -150,12 +143,9 @@ def main():
     # create Ensemble mit args
 
     # TODO
-    ensemble = Ensemble(configs, net_save_path)
+    #ensemble = Ensemble(configs, net_save_path)
     #ensemble = Ensemble_Triplet(configs, net_save_path)
-    #ensemble = Ensemble_Custom(configs, net_save_path)
-    #ensemble = Ensemble_Pair(configs, net_save_path)
-    #ensemble = Ensemble_DCG(configs, net_save_path)
-
+    ensemble = Ensemble_Custom(configs, net_save_path)
 
     ensemble.fit(trajectories)
 

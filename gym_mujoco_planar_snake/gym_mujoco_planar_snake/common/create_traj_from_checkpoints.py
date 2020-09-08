@@ -14,9 +14,8 @@ from sklearn.model_selection import ParameterGrid
 
 from gym.envs.registration import register
 
-
 # TODO doesnt work
-#from baselines.common.vec_env import VecVideoRecorder
+# from baselines.common.vec_env import VecVideoRecorder
 
 import imageio
 
@@ -30,8 +29,6 @@ from gym_mujoco_planar_snake.common import my_tf_util
 from gym_mujoco_planar_snake.benchmark.info_collector import InfoCollector, InfoDictCollector
 
 import gym_mujoco_planar_snake.benchmark.plots as import_plots
-
-
 
 
 def get_latest_model_file(model_dir):
@@ -55,20 +52,16 @@ def get_model_dir(env_id, name):
     return model_dir
 
 
-
 # also for benchmark
 # run untill done
-def run_environment_episode(env, pi, seed, model_file, max_timesteps, render, stochastic=False):
+def run_environment_episode(env, pi, seed, model_file, max_timesteps, render, stochastic, current_timestep):
     number_of_timestep = 0
     done = False
-
-
 
     # load model
     my_tf_util.load_state(model_file)
 
-
-
+    # TODO get timestep from model file
 
     # set seed
     set_global_seeds(seed)
@@ -82,16 +75,17 @@ def run_environment_episode(env, pi, seed, model_file, max_timesteps, render, st
     # info_collector = InfoCollector(env, {'target_v': target_v})
     info_collector = InfoCollector(env, {'env': env, 'seed': seed})
 
-    #injured_joint_pos = [None, 7, 5, 3, 1]
+    # injured_joint_pos = [None, 7, 5, 3, 1]
     # injured_joint_pos = [None, 7, 6, 5, 4, 3, 2, 1, 0]
 
-
-    #env.unwrapped.metadata['injured_joint'] = injured_joint_pos[2]
-    #print(env.unwrapped.metadata['injured_joint'])
+    # env.unwrapped.metadata['injured_joint'] = injured_joint_pos[2]
+    # print(env.unwrapped.metadata['injured_joint'])
     print("done")
 
     cum_reward = 0
+
     observations = []
+
     # max_timesteps is set to 1000
     while (not done) and number_of_timestep < max_timesteps:
 
@@ -100,18 +94,7 @@ def run_environment_episode(env, pi, seed, model_file, max_timesteps, render, st
 
         action, _ = pi.act(stochastic, obs)
 
-        #action = action[0]  # TODO check
 
-        #print(action)
-
-        """
-        if number_of_timestep % int(max_timesteps / len(injured_joint_pos)) == 0:
-            index = int(number_of_timestep / int(max_timesteps / (len(injured_joint_pos))))
-            index = min(index, len(injured_joint_pos)-1)
-
-            print("number_of_timestep", number_of_timestep, index)
-            env.unwrapped.metadata['injured_joint'] = injured_joint_pos[index]
-        """
 
         obs, reward, done, info = env.step(action)
 
@@ -122,16 +105,14 @@ def run_environment_episode(env, pi, seed, model_file, max_timesteps, render, st
         info['seed'] = seed
         info['env'] = env.spec.id
 
-        #print(reward)
+        # print(reward)
 
         # add info
         info_collector.add_info(info)
 
         ### TODO imagio
-        #img = env.render(mode='rgb_array')
+        # img = env.render(mode='rgb_array')
         ###
-
-
 
         # render
         if render:
@@ -139,9 +120,9 @@ def run_environment_episode(env, pi, seed, model_file, max_timesteps, render, st
 
         number_of_timestep += 1
 
-    #imageio.mimsave('snake.gif', [np.array(img) for i, img in enumerate(images) if i % 2 == 0], fps=20)
+    # imageio.mimsave('snake.gif', [np.array(img) for i, img in enumerate(images) if i % 2 == 0], fps=20)
 
-    return done, number_of_timestep, info_collector, cum_reward
+    return observations
 
 
 def enjoy(env_id, seed, model_dir):
@@ -154,27 +135,15 @@ def enjoy(env_id, seed, model_dir):
 
         # TODO
         # if I also wanted the newest model
-        check_for_new_models = False
-
-
-
-
-        max_timesteps = 3000000
-
-        '''modelverion_in_k_ts = 2510  # better
-
-        model_index = int(max_timesteps / 1000 / 10 - modelverion_in_k_ts / 10)'''
-
-
+        check_for_new_models = True
         gym.logger.setLevel(logging.WARN)
-        #gym.logger.setLevel(logging.DEBUG)
-
 
         model_files = get_model_files(model_dir)
 
         # model_file = get_latest_model_file(model_dir)
-        #model_files.sort()
+        # model_files.sort()
 
+        #  start with first file
         model_index = 0
         model_file = model_files[model_index]
 
@@ -185,65 +154,49 @@ def enjoy(env_id, seed, model_dir):
         logger.log("load model_file: %s" % model_file)
 
         policy_fn = lambda name, ob_space, ac_space: mlp_policy.MlpPolicy(name=name,
-                                                                                 ob_space=ob_space,
-                                                                                 ac_space=ac_space,
-                                                                                 hid_size=64,
-                                                                                 num_hid_layers=2
-                                                                                 )
+                                                                          ob_space=ob_space,
+                                                                          ac_space=ac_space,
+                                                                          hid_size=64,
+                                                                          num_hid_layers=2
+                                                                          )
 
         sum_info = None
         pi = policy_fn('pi', env.observation_space, env.action_space)
 
         sum_reward = []
 
+        time_step = 995000 # 1000000
+        step_size = 5000 # 10000
+        render = False
+        from time import ctime
+        start_time = ctime()
 
-        while True:
-            # run one episode
+        for model_file in model_files:
 
-            # TODO specify target velocity
-            # only takes effect in angle envs
-            # env.unwrapped.metadata['target_v'] = 0.05
+
             env.unwrapped.metadata['target_v'] = 0.15
-            # env.unwrapped.metadata['target_v'] = 0.25
-
-            # env._max_episode_steps = env._max_episode_steps * 3
 
 
-
-            #########################################################################
-            # TODO:                                                                 #
-            #                                                                       #
-            #########################################################################
-            #env._max_episode_steps = 50
-            #########################################################################
-            #                       END OF YOUR CODE                                #
-            #########################################################################
-
-            done, number_of_timesteps, info_collector, rewards = run_environment_episode(env, pi, seed, model_file,
-                                                                                env._max_episode_steps, render=True,
-                                                                                stochastic=False)
+            observations = run_environment_episode(env, pi, seed, model_file, env._max_episode_steps,
+                                                   render=render, stochastic=False, current_timestep=time_step)
 
 
-            print(rewards)
-            '''if True:
-                print(rewards)
-                break
-            '''
-            #info_collector.episode_info_print()
+            save_subtrajectories(observations, time_step)
 
-            sum_reward.append(rewards)
+            time_step -= step_size
+            #sum_reward.append(rewards)
 
             # TODO
             # loads newest model file, not sure that I want that functionality
 
-            check_model_file = get_latest_model_file(model_dir)
+            '''check_model_file = get_latest_model_file(model_dir)
             if check_model_file != model_file and check_for_new_models:
                 model_file = check_model_file
-                logger.log('loading new model_file %s' % model_file)
+                logger.log('loading new model_file %s' % model_file)'''
 
             # TODO
             # go through saved models
-            if model_index >= 0:
+            '''if model_index > 0:
                 model_index -= 1
                 model_file = model_files[model_index]
                 logger.log('loading new model_file %s' % model_file)
@@ -251,15 +204,29 @@ def enjoy(env_id, seed, model_dir):
             # TODO
             # break if index at -1
             if model_index == -1:
-                break
+                break'''
+
+            #print('timesteps: %d, info: %s' % (number_of_timesteps, str(sum_info)))
+
+        print(start_time)
+        print(ctime())
+
+def save_subtrajectories(observations, time_step):
+
+    print("Saving Timestep %i"%(time_step))
+
+    starts = np.random.randint(0, 950, size=100)
+    starts.sort()
+
+    trajectories = np.array([(np.array(observations)[start:start + 50], time_step  + start) for start in starts])
+
+    path = "/home/andreas/LRZ_Sync+Share/BachelorThesis/gym_mujoco_planar_snake/gym_mujoco_planar_snake/results/Mujoco-planar-snake-cars-angle-line-v1/initial_runs/default_dataset"
+    name = "trajectories_{time_step}.npy".format(time_step=time_step)
+
+    with open(os.path.join(path, name), 'wb') as f:
+        np.save(f, np.array(trajectories))
 
 
-            print('timesteps: %d, info: %s' % (number_of_timesteps, str(sum_info)))
-
-
-
-
-            
 
 
 
@@ -280,10 +247,6 @@ def main():
 
     with tf.variable_scope(agent_id):
         enjoy(args.env, seed=args.seed, model_dir=args.model_dir)
-
-    '''with tf.variable_scope(agent_id):
-        enjoy(args.env, seed=int(agent_id), model_dir=args.model_dir)'''
-
 
 
 if __name__ == '__main__':

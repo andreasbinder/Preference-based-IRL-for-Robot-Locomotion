@@ -1,7 +1,7 @@
 import numpy as np
 
 # hinge
-path1 = "/home/andreas/LRZ_Sync+Share/BachelorThesis/gym_mujoco_planar_snake/gym_mujoco_planar_snake/log/improved_PPO_runs/Test_True_Reward/hinge_ensemble_unnormalized.npy"
+path1 = "/home/andreas/LRZ_Sync+Share/BachelorThesis/gym_mujoco_planar_snake/gym_mujoco_planar_snake/results/Mujoco-planar-snake-cars-angle-line-v1/improved_runs/vf_ensemble2_triplet_coeff0.2/default_reward/results1Sep__6_18:44:48.npy"
 
 # cross
 path2 = "/home/andreas/LRZ_Sync+Share/BachelorThesis/gym_mujoco_planar_snake/gym_mujoco_planar_snake/log/improved_PPO_runs/Test_True_Reward/crossentropy_ensemble_unnormalized.npy"
@@ -9,8 +9,8 @@ path2 = "/home/andreas/LRZ_Sync+Share/BachelorThesis/gym_mujoco_planar_snake/gym
 with open(path1, 'rb') as f:
     d1 = np.load(f, allow_pickle=True)
 
-with open(path2, 'rb') as f:
-    d2 = np.load(f, allow_pickle=True)
+'''with open(path2, 'rb') as f:
+    d2 = np.load(f, allow_pickle=True)'''
 
 #num_episodes = int(d1[:,0].size / 1000)
 
@@ -20,8 +20,15 @@ with open(path2, 'rb') as f:
 
 
 
-rew1 = d1[:, 0].sum()
-rew2 = d2[:, 0].sum()
-print(int(d1[:,0].size / 1000), int(d2[:,0].size / 1000))
-print(rew1, rew2)
+rew1 = d1[:, 0].reshape((1000,1000)).sum(axis=1)
+
+import matplotlib.pyplot as plt
+
+indices = np.arange(1000)
+
+plt.plot(indices, rew1)
+
+plt.show()
+
+
 

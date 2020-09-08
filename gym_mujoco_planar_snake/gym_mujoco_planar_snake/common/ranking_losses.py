@@ -2,52 +2,89 @@
 # https://www.kaggle.com/davidgasquez/ndcg-scorer
 
 import torch
+import torch.nn as nn
 import numpy as np
 
-class DCG_Loss(object):
+from scipy.spatial.distance import cdist
+
+# TEMPLATE: https://discuss.pytorch.org/t/custom-rank-loss-function/81885
+class MultiLabelDCGLoss(nn.Module):
+
+    """ Mean Reciprocal Rank Loss """
 
     def __init__(self):
-        pass
+        super(MultiLabelDCGLoss, self).__init__()
 
-    def __call__(self, y_true, y_score, k=5):
-        """Discounted cumulative gain (DCG) at rank K.
+    def forward(self, prediction, target):
+        target = target[0]
+        prediction = prediction[0]
 
-        Parameters
-        ----------
-        y_true : array, shape = [n_samples]
-            Ground truth (true relevance labels).
-        y_score : array, shape = [n_samples, n_classes]
-            Predicted scores.
-        k : int
-            Rank.
+        gain = prediction[target]
 
-        Returns
-        -------
-        score : float
-        """
-        '''order = torch.argsort(y_score)#[::-1]
-        y_true = torch.take(y_true, order[:k])
+        # TODO normalize
 
-        gain = 2 ** y_true - 1
 
-        len_yt_true = y_true.shape[0]
-        discounts = torch.log2(torch.arange(len_yt_true).float() + 2.)'''
-
-        gain = y_score
-        i = torch.arange(2,7).float()
+        i = torch.arange(2, 2 + target.shape[0]).float()
         discounts = torch.log2(i)
 
-        return torch.sum(gain / discounts)
+        '''print(gain)
+        print(discounts)'''
+
+        #assert False, "Success"
+
+        sigmoid = nn.Sigmoid()
+
+        #gain = sigmoid(gain)
+
+        dcg_sore = torch.sum(gain / discounts)
 
 
-true_relevance = torch.tensor([[3, 2, 1, 0, 0]])
 
-# Releveance scores in output order
+        dcg_sore = sigmoid(dcg_sore)
 
-relevance_score = torch.tensor([[1, 1, 0, 0, 3]])
+        return -dcg_sore
 
-dcg = DCG_Loss()
 
-loss = dcg(true_relevance, relevance_score)
 
-print(loss)
+class ExplicitRankingLoss(object):
+    def __init__(self):
+        self.loss_fn = nn.MSELoss()
+
+    def __call__(self, prediction, target):
+
+
+
+        target = target[0]
+        prediction = prediction[0]
+
+        target_values = prediction[target]
+
+        #print(target_values)
+
+
+        #loss_unnormlized = torch.square(torch.pow(target_values - prediction, 2))
+
+        #print(loss_unnormlized)
+
+        # TODO normalize
+        #mean = loss_unnormlized.mean()
+        #var = loss_unnormlized.var()
+        #loss = (loss_unnormlized - mean) / var
+
+
+        #loss = torch.sum(loss_unnormlized)
+
+        loss = self.loss_fn(prediction, target_values)
+
+        return loss
+
+
+
+
+
+
+
+
+
+
+

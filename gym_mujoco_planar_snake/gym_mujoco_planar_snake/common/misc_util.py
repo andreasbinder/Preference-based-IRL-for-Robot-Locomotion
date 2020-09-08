@@ -83,6 +83,12 @@ class Configs():
     def get_ctrl_coeff(self):
         return self.data["ppo"]["improved"]["ctrl_coeff"]
 
+    def get_split_ratio(self):
+        return self.data["reward_learning"]["split_ratio"]
+
+    def get_input_dim(self):
+        return self.data["reward_learning"]["input_dim"]
+
 
 
 

@@ -65,19 +65,6 @@ def prepare_env(env, save_check_points, save_dir, sfs, id, learned_reward, confi
                              trajectory_length,
                              num_traj_per_epoch)
 
-    # TODO monitor
-    # create monitor file from which I load the results
-
-    #monitor_file = os.path.join(log_dir, "/")
-    #monitor_dir = "/home/andreas/Desktop"
-
-
-    #env = Monitor(env, log_dir)
-    '''os.makedirs(save_dir, exist_ok=True)
-
-    env = Monitor(env, save_dir)'''
-
-    # TODO use my own Monitor
 
     return env
 
@@ -92,14 +79,14 @@ class MyMonitor(Monitor):
         # get run dirs
         run_dirs = [dir for dir in os.listdir(ensemble_dir) if name_run_dir in dir]
 
-        #print(run_dirs)
+
 
 
 
         # get monitor files
         #monitorfiles = [get_monitor_files(os.path.join(ensemble_dir, dir)) for dir in run_dirs]
         monitorfiles = [os.path.join(ensemble_dir, dir) for dir in run_dirs]
-        #print(monitorfiles)
+
 
         # load results
         dfs = [load_results(monitorfile) for monitorfile in monitorfiles]
@@ -123,18 +110,31 @@ class MyMonitor(Monitor):
         max_initial = np.max(initial_arrays, axis=1)
         max_improved = np.max(improved_arrays, axis=1)
 
+        print("Compare Initial Max to Improved Max")
         print(max_initial)
         print(max_improved)
 
         initial_averaged = np.average(initial_arrays, axis=0)
         improved_averaged = np.average(improved_arrays, axis=0)
 
-        print(initial_averaged.shape)
-        print(improved_averaged.shape)
+        '''print(initial_averaged.shape)
+        print(improved_averaged.shape)'''
 
+        print("Compare Initial Mean to Improved Mean")
         print(initial_averaged.mean())
         print(improved_averaged.mean())
 
+        import matplotlib.pyplot as plt
+
+        indices1 = 1001
+
+        plt.plot(indices1, initial_arrays[:, 1])
+
+        '''indices2 = 801
+
+        plt.plot(indices2, improved_arrays[1, 1])'''
+
+        plt.show()
 
 
 
@@ -168,12 +168,19 @@ class ModelSaverWrapper(ObservationWrapper):
     def reset(self, **kwargs):
         self.total_episodes += 1
 
-        if self.total_steps_save_counter == self.save_frequency_steps or self.total_steps == 1:
-            '''print("Inside model saver ")
-            import sys
-            sys.exit()'''
 
-            file_name = osp.join(self.model_dir, str(self.total_steps))
+        # todo start saving after 100k timesteps
+        if self.total_steps_save_counter == self.save_frequency_steps or self.total_steps == 1:
+            
+
+
+            buffer = 9
+
+            len_total_steps = len(str(self.total_steps))
+
+            zeros = (buffer - len_total_steps) * "0"
+
+            file_name = osp.join(self.model_dir, zeros+str(self.total_steps))
 
             U.save_state(file_name)
 
@@ -186,6 +193,7 @@ class ModelSaverWrapper(ObservationWrapper):
     def step(self, action):
         self.total_steps += 1
         self.total_steps_save_counter += 1
+
         return self.env.step(action)
 
     def observation(self, observation):
@@ -301,6 +309,8 @@ class MyRewardWrapper(RewardWrapper):
 
         self.reward_list = []
 
+
+
     def step(self, action):
 
         self.counter += 1
@@ -340,10 +350,15 @@ class MyRewardWrapper(RewardWrapper):
         '''if self.counter >= 200000:
             self.venv.render()'''
 
+
+
         # TODO return reward or abs_reward
         return obs, pred, news, infos
 
     def reset(self, **kwargs):
+
+
+
 
         if self.counter == self.max_timesteps:
             with open(os.path.join(self.save_dir, "results.npy"), 'wb') as f:
