@@ -1,3 +1,4 @@
+*.pyc
 /venv
 /gym_mujoco_planar_snake/gym_mujoco_planar_snake/log
 /gym_mujoco_planar_snake/gym_mujoco_planar_snake/__pycache__
