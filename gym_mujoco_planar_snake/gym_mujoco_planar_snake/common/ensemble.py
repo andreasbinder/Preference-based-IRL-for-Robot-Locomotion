@@ -19,6 +19,14 @@ class Net(nn.Module):
 
         self.input_dim = input_dim
 
+        '''self.model = nn.Sequential(
+            nn.Linear(self.input_dim, 256),
+            nn.Sigmoid(),
+            nn.Linear(256, 256),
+            nn.Sigmoid(),
+            nn.Linear(256, 1)
+        )'''
+
         self.model = nn.Sequential(
             nn.Linear(self.input_dim, 256),
             nn.ReLU(),
@@ -27,13 +35,23 @@ class Net(nn.Module):
             nn.Linear(256, 1)
         )
 
+        self.sigmoid = nn.Sigmoid()
+
     def cum_return(self, traj):
         # return of one traj
         sum_rewards = 0
         # sum_abs_rewards = 0
         r = self.model(traj)
+
+        # TODO sigmoid
+        #r = self.sigmoid(r)
+
         sum_rewards += torch.sum(r)
         # sum_abs_rewards += torch.sum(torch.abs(r))
+
+        # TODO use sigmoid only when having BCELoss and not BCEwithLogitsLoss
+        #sum_rewards = self.sigmoid(sum_rewards)
+
 
         return sum_rewards
 
@@ -68,7 +86,7 @@ class Ensemble_Base(object):
 
         self.train_summary_writer = None
         self.val_summary_writer = None
-        self.initialize_tensorboard()
+        #        self.initialize_tensorboard()
 
 
 
@@ -93,6 +111,7 @@ class Ensemble_Base(object):
         nets = [Net(self.input_dim)] * self.num_nets
 
         for index, net in enumerate(nets):
+
             self.train(index, net, whole_dataset[:,index,:])
 
         '''for index, (net, dataset) in enumerate(zip(nets, whole_dataset)):
@@ -367,23 +386,9 @@ class Ensemble_Triplet(object):
 
 
         trajs = [torch.from_numpy(inp).float() for inp in inputs]
-        '''import numpy as np
-        label = np.array(i for i in label if type(i) == float)'''
-
-        #print(label)
-
-
-
-        #y = torch.tensor([label])
 
         y = torch.tensor(label).unsqueeze(0)
-        #print(trajs.shape)
-        '''print(len(trajs))
-        print(trajs[0].shape)
 
-        print(label.shape)
-        print(len(label))
-        print(label)'''
 
         #y = torch.from_numpy(label)
 
@@ -391,22 +396,11 @@ class Ensemble_Triplet(object):
 
         rewards = net(trajs)
 
-        '''print(rewards)
-        print(y)
-
-        import sys
-        sys.exit()'''
-
         #rewards = net(traj_i, traj_j)
 
         loss = criterion(rewards, y)
 
-        '''print(label)
 
-        print("preprocess")
-
-        import sys
-        sys.exit()'''
 
         return loss
 
@@ -473,7 +467,7 @@ class Ensemble(object):
 
 
         # TODO for every mode
-        self.loss_fn, self.preprocess_fn, self.forward_pass_fn = self.initialize_mode("explicit")
+        self.loss_fn, self.preprocess_fn, self.forward_pass_fn = self.initialize_mode("triplet")
 
 
         self.train_summary_writer = None
@@ -506,6 +500,26 @@ class Ensemble(object):
                 lambda raw_data: data.build_custom_triplet_trainset(raw_data, ranking=3),
                 lambda net, optimizer, inputs, label: self.forward_pass_custom_triplet(net, optimizer, inputs, label)
                     )
+        if mode == "triplet_sigmoid":
+            return (
+                nn.BCELoss(),
+                lambda raw_data: data.build_custom_triplet_trainset(raw_data, ranking=3),
+                lambda net, optimizer, inputs, label: self.forward_pass_custom_triplet_sigmoid(net, optimizer, inputs, label)
+                    )
+
+        if mode == "triplet_margin":
+            return (
+                nn.BCEWithLogitsLoss(),
+                lambda raw_data: data.build_test_margin_triplet_trainset(raw_data, ranking=3),
+                lambda net, optimizer, inputs, label: self.forward_pass_custom_triplet(net, optimizer, inputs, label)
+                    )
+        if mode == "triplet_better":
+            return (
+                nn.BCEWithLogitsLoss(),
+                lambda raw_data: data.build_test_better_triplet_trainset(raw_data, ranking=3),
+                lambda net, optimizer, inputs, label: self.forward_pass_custom_triplet(net, optimizer, inputs, label)
+            )
+
 
 
 
@@ -515,16 +529,34 @@ class Ensemble(object):
         data = self.preprocess_fn(raw_data)
 
         #data = split_dataset_for_nets(data, self.num_nets)
+
         return data
 
     def fit(self, raw_data):
 
         whole_dataset = self.preprocess_data(raw_data)
 
+        '''print(whole_dataset[0].shape)
+        print(len(whole_dataset))
+
+        import sys
+        sys.exit()'''
 
         nets = [Net(self.input_dim)] * self.num_nets
 
-        self.train(0, nets[0], whole_dataset)
+
+        #nets = [Net(self.input_dim), Net(self.input_dim), Net(self.input_dim), Net(self.input_dim),Net(self.input_dim)]
+        #final_dataset = [raw_data[i:i + self.num_nets] for i, _ in enumerate(raw_data[::self.num_nets])]
+
+        #self.train(0, nets[0], whole_dataset[0])
+        import numpy as np
+
+        for index, net in enumerate(nets):
+            self.initialize_tensorboard()
+            self.train(index, net, whole_dataset)
+
+            #np.random.shuffle(whole_dataset)
+            whole_dataset = self.preprocess_data(raw_data)
 
         '''for index, net in enumerate(nets):
             self.train(index, net, whole_dataset[:,index,:])'''
@@ -627,6 +659,20 @@ class Ensemble(object):
         trajs = [torch.from_numpy(inp).float() for inp in inputs]
 
         y = torch.tensor(label).unsqueeze(0)
+
+        optimizer.zero_grad()
+
+        rewards = net(trajs)
+
+        loss = self.loss_fn(rewards, y)
+
+        return loss
+
+    def forward_pass_custom_triplet_sigmoid(self, net, optimizer, inputs, label):
+
+        trajs = [torch.from_numpy(inp).float() for inp in inputs]
+
+        y = torch.tensor(label).unsqueeze(0).float()
 
         optimizer.zero_grad()
 

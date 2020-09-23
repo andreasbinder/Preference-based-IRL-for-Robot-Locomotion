@@ -1,17 +1,52 @@
-import yaml
+import numpy as np
+import matplotlib.pyplot as plt
+import os
 
-path = "/home/andreas/LRZ_Sync+Share/BachelorThesis/gym_mujoco_planar_snake/gym_mujoco_planar_snake/agents/configurations/configs.yml"
+data_path = "/home/andreas/Documents/pbirl-bachelorthesis/gym_mujoco_planar_snake/gym_mujoco_planar_snake/results/Mujoco-planar-snake-cars-angle-line-v1/initial_runs/default_dataset"
 
-with open(path) as file:
-    documents = yaml.load(file)
+paths = os.listdir(data_path)
 
-    '''for item, doc in documents.items():
-        print(item, ":", doc)'''
+paths.sort()
 
-    #documents.update({'reward_learning': {'hparams': {'lr': 5}}})
+#print(paths)
 
-    #yaml.dump(documents)
+#assert False, "Test"
 
-'''with open(path, 'w') as f:
-    data = yaml.dump(documents, f)
-    print(documents)'''
+rewards = []
+
+for path in paths:
+
+    with open(os.path.join(data_path,path), 'rb') as f:
+        data = np.load(f, allow_pickle=True)
+
+    #rewards.append(data[0][1])
+    rewards.append(data)
+
+rewards = np.concatenate(rewards)
+
+obs, rew = rewards[:, 0], rewards[:, 1]
+
+sort = np.argsort(rew)
+
+rewards = rewards[sort]
+
+
+
+print(obs.shape)
+indices = range(len(rewards[:,1]))
+
+#rewards.sort()
+
+plt.plot(indices, rewards[:, 1])
+
+plt.show()
+
+
+with open(os.path.join(data_path, "train.npy"), 'wb') as f:
+    np.save(f, np.array(rewards[:10000]))
+
+with open(os.path.join(data_path, "test.npy"), 'wb') as f:
+    np.save(f, np.array(rewards[10000:]))
+
+
+

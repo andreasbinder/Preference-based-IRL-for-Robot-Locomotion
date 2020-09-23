@@ -10,18 +10,21 @@ from baselines import logger
 import tensorflow as tf
 import numpy as np
 
-#from sklearn.model_selection import ParameterGrid
+import torch
+
+# from sklearn.model_selection import ParameterGrid
 
 from gym.envs.registration import register
 
-
 # TODO doesnt work
-#from baselines.common.vec_env import VecVideoRecorder
+# from baselines.common.vec_env import VecVideoRecorder
 
 import imageio
 
 import os
 import os.path as osp
+
+from gym_mujoco_planar_snake.common.ensemble import Net
 
 from gym_mujoco_planar_snake.common.env_wrapper import ModelSaverWrapper
 
@@ -30,8 +33,6 @@ from gym_mujoco_planar_snake.common import my_tf_util
 from gym_mujoco_planar_snake.benchmark.info_collector import InfoCollector, InfoDictCollector
 
 import gym_mujoco_planar_snake.benchmark.plots as import_plots
-
-
 
 
 def get_latest_model_file(model_dir):
@@ -55,20 +56,14 @@ def get_model_dir(env_id, name):
     return model_dir
 
 
-
 # also for benchmark
 # run untill done
-def run_environment_episode(env, pi, seed, model_file, max_timesteps, render, stochastic=False):
+def run_environment_episode(env, pi, triplet_net, pair_net, seed, model_file, max_timesteps, render, stochastic=False):
     number_of_timestep = 0
     done = False
 
-
-
     # load model
     my_tf_util.load_state(model_file)
-
-
-
 
     # set seed
     set_global_seeds(seed)
@@ -82,12 +77,11 @@ def run_environment_episode(env, pi, seed, model_file, max_timesteps, render, st
     # info_collector = InfoCollector(env, {'target_v': target_v})
     info_collector = InfoCollector(env, {'env': env, 'seed': seed})
 
-    #injured_joint_pos = [None, 7, 5, 3, 1]
+    # injured_joint_pos = [None, 7, 5, 3, 1]
     # injured_joint_pos = [None, 7, 6, 5, 4, 3, 2, 1, 0]
 
-
-    #env.unwrapped.metadata['injured_joint'] = injured_joint_pos[2]
-    #print(env.unwrapped.metadata['injured_joint'])
+    # env.unwrapped.metadata['injured_joint'] = injured_joint_pos[2]
+    # print(env.unwrapped.metadata['injured_joint'])
     print("done")
 
     cum_reward = 0
@@ -97,28 +91,37 @@ def run_environment_episode(env, pi, seed, model_file, max_timesteps, render, st
     observations = []
     cum_velocity = []
     cum_rew = []
+
+    cum_triplet = []
+    cum_pair = []
+
+    cum_pred = []
+
     # max_timesteps is set to 1000
     while (not done) and number_of_timestep < max_timesteps:
 
         # TODO!!!
         # obs[-1] = target_v
 
-        action, _ = pi.act(stochastic, obs)
+        action, predv = pi.act(stochastic, obs)
 
-        #action = action[0]  # TODO check
+        # action = action[0]  # TODO check
 
-        #print(action)
+        # print(action)
 
-        """
-        if number_of_timestep % int(max_timesteps / len(injured_joint_pos)) == 0:
-            index = int(number_of_timestep / int(max_timesteps / (len(injured_joint_pos))))
-            index = min(index, len(injured_joint_pos)-1)
-
-            print("number_of_timestep", number_of_timestep, index)
-            env.unwrapped.metadata['injured_joint'] = injured_joint_pos[index]
-        """
 
         obs, reward, done, info = env.step(action)
+
+        triplet_rew = triplet_net.model(torch.from_numpy(obs).float())
+
+        '''"""print(triplet_rew.shape)
+
+        assert False, "Success""""'''
+
+        cum_triplet.append(triplet_rew)
+
+        pair_rew = pair_net.model(torch.from_numpy(obs).float())
+        cum_pair.append(pair_rew)
 
         cum_rew_p.append(info["rew_p"])
         cum_rew_v.append(info["rew_v"])
@@ -129,21 +132,23 @@ def run_environment_episode(env, pi, seed, model_file, max_timesteps, render, st
 
         observations.append(obs)
 
+        cum_pred.append(predv)
+
         cum_reward += reward
 
         info['seed'] = seed
         info['env'] = env.spec.id
 
-        #print(reward)
+        # print(reward)
 
         # add info
-        #info_collector.add_info(info)
+        # info_collector.add_info(info)
 
         ### TODO imagio
-        #img = env.render(mode='rgb_array')
+        # img = env.render(mode='rgb_array')
         ###
 
-        #render = False
+        render = False
 
         # render
         if render:
@@ -151,8 +156,58 @@ def run_environment_episode(env, pi, seed, model_file, max_timesteps, render, st
 
         number_of_timestep += 1
 
-    #imageio.mimsave('snake.gif', [np.array(img) for i, img in enumerate(images) if i % 2 == 0], fps=20)
-    print(sum(cum_velocity) / len(cum_velocity))
+    print(sum(cum_pair))
+    print(sum(cum_triplet))
+    print(sum(cum_rew))
+
+    import matplotlib.pyplot as plt
+
+    #plt.axis('scaled')
+
+    indices = [i for i in range(len(cum_rew))]
+
+    # plt.plot(indices, cum_velocity)
+
+    fig, (ax2, ax1,  ax3,ax4, ax5, ax6) = plt.subplots(1, 6)
+    fig.suptitle("Pair vs Triplet")
+    ax1.plot(indices, cum_rew)
+    ax1.set_title("True")
+    ax1.set_xlim(0, 1000)
+    ax1.set_ylim(-1, 1)
+    ax2.plot(indices, cum_pair)
+    ax2.set_title("pair")
+    ax2.set_xlim(0, 1000)
+    ax2.set_ylim(-1, 1)
+
+    ax3.plot(indices, cum_triplet)
+    ax3.set_title("triplet")
+
+    ax3.set_xlim(0, 1000)
+    ax3.set_ylim(-1, 1)
+
+    ax4.plot(indices, cum_rew_v)
+    ax4.set_title("velocity")
+
+    ax4.set_xlim(0, 1000)
+    ax4.set_ylim(-1, 1)
+
+    ax5.plot(indices, cum_rew_p)
+    ax5.set_title("power")
+
+    ax5.set_xlim(0, 1000)
+    ax5.set_ylim(-1, 1)
+
+    ax6.plot(indices, cum_pred)
+    ax6.set_title("predv")
+
+    '''ax6.set_xlim(0, 1000)
+    ax6.set_ylim(-1, 1)'''
+
+    plt.show()
+
+
+    # imageio.mimsave('snake.gif', [np.array(img) for i, img in enumerate(images) if i % 2 == 0], fps=20)
+    '''print(sum(cum_velocity) / len(cum_velocity))
     print(sum(cum_rew_p))
     print(sum(cum_rew_v))
 
@@ -160,9 +215,9 @@ def run_environment_episode(env, pi, seed, model_file, max_timesteps, render, st
 
     indices = [i for i in range(len(cum_velocity))]
 
-    #plt.plot(indices, cum_velocity)
+    # plt.plot(indices, cum_velocity)
 
-    fig, ((ax1, ax4), (ax2, ax3)) = plt.subplots(2,2)
+    fig, ((ax1, ax4), (ax2, ax3)) = plt.subplots(2, 2)
     fig.suptitle("Metrics improved")
     ax1.plot(indices, cum_velocity)
     ax1.set_title("Velocity")
@@ -173,8 +228,7 @@ def run_environment_episode(env, pi, seed, model_file, max_timesteps, render, st
     ax3.plot(indices, cum_rew_v)
     ax3.set_title("Reward Velocity")
 
-
-    plt.show()
+    plt.show()'''
 
     return done, number_of_timestep, info_collector, cum_reward
 
@@ -186,13 +240,23 @@ def enjoy(env_id, seed, model_dir):
 
         env = gym.make(env_id)
 
-
         # TODO
+        #
+        import torch
+        triplet_path = "/home/andreas/Documents/pbirl-bachelorthesis/gym_mujoco_planar_snake/gym_mujoco_planar_snake/results/Mujoco-planar-snake-cars-angle-line-v1/improved_runs/vf_ensemble2_triplet_good_one/model_0"
+
+        triplet_net = Net(27)
+        triplet_net.load_state_dict(torch.load(triplet_path))
+
+        pair_path = "/home/andreas/Documents/pbirl-bachelorthesis/gym_mujoco_planar_snake/gym_mujoco_planar_snake/results/Mujoco-planar-snake-cars-angle-line-v1/improved_runs/vf_ensemble5_pair/model_0"
+
+        pair_net = Net(27)
+        pair_net.load_state_dict(torch.load(pair_path))
+
+
+
         # if I also wanted the newest model
         check_for_new_models = False
-
-
-
 
         max_timesteps = 3000000
 
@@ -200,15 +264,13 @@ def enjoy(env_id, seed, model_dir):
 
         model_index = int(max_timesteps / 1000 / 10 - modelverion_in_k_ts / 10)'''
 
-
         gym.logger.setLevel(logging.WARN)
-        #gym.logger.setLevel(logging.DEBUG)
-
+        # gym.logger.setLevel(logging.DEBUG)
 
         model_files = get_model_files(model_dir)
 
         # model_file = get_latest_model_file(model_dir)
-        #model_files.sort()
+        # model_files.sort()
 
         model_index = 0
         model_file = model_files[model_index]
@@ -220,17 +282,16 @@ def enjoy(env_id, seed, model_dir):
         logger.log("load model_file: %s" % model_file)
 
         policy_fn = lambda name, ob_space, ac_space: mlp_policy.MlpPolicy(name=name,
-                                                                                 ob_space=ob_space,
-                                                                                 ac_space=ac_space,
-                                                                                 hid_size=64,
-                                                                                 num_hid_layers=2
-                                                                                 )
+                                                                          ob_space=ob_space,
+                                                                          ac_space=ac_space,
+                                                                          hid_size=64,
+                                                                          num_hid_layers=2
+                                                                          )
 
         sum_info = None
         pi = policy_fn('pi', env.observation_space, env.action_space)
 
         sum_reward = []
-
 
         while True:
             # run one episode
@@ -239,32 +300,31 @@ def enjoy(env_id, seed, model_dir):
             # only takes effect in angle envs
             env.unwrapped.metadata['target_v'] = 0.1
             #env.unwrapped.metadata['target_v'] = 0.15
-            # env.unwrapped.metadata['target_v'] = 0.25
+            #env.unwrapped.metadata['target_v'] = 0.25
 
             # env._max_episode_steps = env._max_episode_steps * 3
-
-
 
             #########################################################################
             # TODO:                                                                 #
             #                                                                       #
             #########################################################################
-            #env._max_episode_steps = 50
+            # env._max_episode_steps = 50
             #########################################################################
             #                       END OF YOUR CODE                                #
             #########################################################################
 
-            done, number_of_timesteps, info_collector, rewards = run_environment_episode(env, pi, seed, model_file,
-                                                                                env._max_episode_steps, render=True,
-                                                                                stochastic=False)
-
+            done, number_of_timesteps, info_collector, rewards = run_environment_episode(env, pi, triplet_net, pair_net,
+                                                                                         seed, model_file,
+                                                                                         env._max_episode_steps,
+                                                                                         render=True,
+                                                                                         stochastic=False)
 
             print(rewards)
             '''if True:
                 print(rewards)
                 break
             '''
-            #info_collector.episode_info_print()
+            # info_collector.episode_info_print()
 
             sum_reward.append(rewards)
 
@@ -288,14 +348,7 @@ def enjoy(env_id, seed, model_dir):
             if model_index == -1:
                 break
 
-
             print('timesteps: %d, info: %s' % (number_of_timesteps, str(sum_info)))
-
-
-
-
-            
-
 
 
 def main():
@@ -318,7 +371,6 @@ def main():
 
     '''with tf.variable_scope(agent_id):
         enjoy(args.env, seed=int(agent_id), model_dir=args.model_dir)'''
-
 
 
 if __name__ == '__main__':

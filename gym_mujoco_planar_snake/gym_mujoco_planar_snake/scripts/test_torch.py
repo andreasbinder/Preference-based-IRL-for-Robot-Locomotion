@@ -11,11 +11,31 @@ print(output)'''
 
 torch.manual_seed(0)
 
-val = torch.tensor([3, 5, 1])
+input1 = torch.tensor([[3, 4]]).float() #torch.randn(1, 2)
+input2 = torch.tensor([[4, 3]]).float()
+cos = nn.CosineSimilarity(dim=1, eps=1e-6)
+output = cos(input1, input2)
+print(input1)
+print(input2)
+print(output)
 
-indices = torch.tensor([2,1,0])
+'''def init_weights(m):
+    if type(m) == nn.Linear:
+        torch.nn.init.xavier_uniform(m.weight)
+        m.bias.data.fill_(0.01)
 
-print(val[indices])
+#net = nn.Sequential(nn.Linear(2, 2), nn.Linear(2, 2))
+
+
+linear = nn.Linear(1, 1)
+linear.apply(init_weights)
+
+
+nets = [linear, linear]
+
+inp = torch.tensor([2.])
+
+print([net(inp) for net in nets])'''
 
 
 #print('Loss_Bce: {:.3f}'.format(loss_bce.item()))

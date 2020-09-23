@@ -35,7 +35,7 @@ import numpy as np
 
 
 
-path = "/home/andreas/LRZ_Sync+Share/BachelorThesis/gym_mujoco_planar_snake/gym_mujoco_planar_snake/results/initial_runs/Hopper-v2/Aug 23 21:21:03/trajectories.npy"
+path = "/home/andreas/Documents/pbirl-bachelorthesis/gym_mujoco_planar_snake/gym_mujoco_planar_snake/results/Mujoco-planar-snake-cars-angle-line-v1/improved_runs/vf_ensemble5_Sep_13_16:04:26/default_reward/results1Sep_13_16:39:45.npy"
 
 with open(path, 'rb') as f:
     d = np.load(f, allow_pickle=True)
@@ -49,10 +49,10 @@ pred = d[:,1].reshape((num_episodes,1000)).sum(axis=1)
 
 #rew.sort()
 
-rew = rew[:300]
+#rew = rew[:300]
 
 #rew.sort()
-num_episodes  = 300
+#num_episodes  = 300
 print(rew.mean(), rew.max())
 '''rew = rew[200:300,]
 pred = pred[200:300,]
@@ -65,7 +65,7 @@ indices = np.arange(num_episodes)
 
 
 plt.plot(indices, rew, color='b')
-#äplt.plot(indices, pred, color='r')
+#plt.plot(indices, pred, color='r')
 
 plt.show()
 

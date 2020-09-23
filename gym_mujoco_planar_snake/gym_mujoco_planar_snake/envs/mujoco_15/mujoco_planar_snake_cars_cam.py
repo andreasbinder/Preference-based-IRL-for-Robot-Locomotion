@@ -351,6 +351,7 @@ class MujocoPlanarSnakeCarsAngleEnv(MujocoPlanarSnakeCarsEnv):
         else:
             return None
 
+    # TODO delete reset and uncomment
     def reset_model(self):
 
         #if self.target_v >= 0.8:
@@ -378,6 +379,21 @@ class MujocoPlanarSnakeCarsAngleEnv(MujocoPlanarSnakeCarsEnv):
 
         print(self.target_v)
         return super().reset_model()
+
+    '''def reset_model(self):
+
+        #if self.target_v >= 0.8:
+        #    self.target_v = -0.15
+
+        #self.target_v += 0.05
+        #self.target_v += 0.2
+
+        self.target_v = 0.1
+
+        self.update += 1
+
+        print(self.target_v)
+        return super().reset_model()'''
 
     def get_obs(self):
         # joint angles
@@ -421,7 +437,8 @@ class MujocoPlanarSnakeCarsAngleEnv(MujocoPlanarSnakeCarsEnv):
 
         return ob
 
-    def step(self, a):
+    # TODO delete step and uncomment
+    '''def step(self, a):
         # first init
         if self.sliders_idx == None:
             self.init_idx_values()
@@ -478,6 +495,95 @@ class MujocoPlanarSnakeCarsAngleEnv(MujocoPlanarSnakeCarsEnv):
         ob = self.get_obs()
 
         return ob, reward, False, dict(reward=reward,
+                                       power=power,
+                                       power_normalized=power_normalized,
+                                       velocity=velocity,
+                                       distance_delta=distance,
+                                       joint_powers=joint_powers,
+                                       joint_velocities= joint_velocities,
+                                       abs_joint_velocities=np.abs(joint_velocities),
+                                       max_joint_velocities=np.max(np.abs(joint_velocities)),
+                                       actuatorfrcs=sensor_actuatorfrcs,
+                                       mean_actuatorfrcs=mean_actuatorfrcs,
+                                       energy0=energy0,
+                                       total_power_sec=total_power_sec,
+                                       power_array_sec=power_array_sec,
+                                       target_v=self.target_v,
+                                       angle_difference_normalized=angle_difference_normalized,
+                                       sensor_head_velocity=self.get_sencor_head_velocity(),
+                                       head_x=self.sim.data.qpos.flat[self.sliders_idx[0]],
+                                       head_y=self.sim.data.qpos.flat[self.sliders_idx[1]],
+                                       joints_pos=self.get_joint_positions(),
+                                       joint_head_pos=self.sim.data.qpos[self.joint_head_pos_idx],
+                                       )'''
+
+    def step(self, a):
+        # first init
+        if self.sliders_idx == None:
+            self.init_idx_values()
+
+        # careful position before step
+        self.move_ball()
+
+
+        distbefore = self.calc_distance()
+        self.do_simulation(a, self.frame_skip)
+        distafter = self.calc_distance()
+
+
+        angle_difference = self.get_head_to_target_degree_angle_difference() # no + or - , no left right
+
+        # normalize it use squared
+        max_angle = 60
+        angle_difference_normalized = angle_difference**2 / max_angle**2  if angle_difference < max_angle else 1.0
+
+
+        # efficiency
+        energy0 = self.unwrapped.data.energy #kinetic and potential energy
+        sensor_actuatorfrcs = self.get_sensor_actuatorfrcs()
+        mean_actuatorfrcs = np.mean(np.abs(sensor_actuatorfrcs))
+        joint_velocities = self.get_joint_velocities()
+
+        #self.get_sensor_actuatorfrcs()
+        power_normalized, power = self.calculate_energy_usage_normalized()
+
+        # efficiency
+        distance = distbefore - distafter
+        velocity = distance / self.dt # in m/s
+        joint_powers = np.abs(np.multiply(sensor_actuatorfrcs, joint_velocities))
+
+        # watt per sec
+        total_power_sec, power_array_sec = self.calculate_total_energy_usage_sec()
+
+
+        # see old git version for all the parameter tries
+        #new 15
+        # works great, min max must be trained
+        a1 = 0.2
+        a2 = 0.2
+        rew_v = (1.0 - (np.abs(self.target_v - velocity) / a1)) ** (1 / a2)
+
+
+        # see old git version for all the parameter tries
+        #new 15
+        b1 = 0.6
+        rew_p = np.abs(1.0 - power_normalized) ** (b1 ** (-2.0))
+
+        '''rew_v = np.clip(rew_v, 0, 1)
+        rew_p = np.clip(rew_p, 0, 1)'''
+
+        reward = rew_v * rew_p
+
+        #reward = np.clip(reward, 0, 1)
+
+
+        ob = self.get_obs()
+
+        return ob, reward, False,  dict(reward=reward,
+                                        rew_p=rew_p,
+                                        rew_v=rew_v,
+
+
                                        power=power,
                                        power_normalized=power_normalized,
                                        velocity=velocity,

@@ -7,6 +7,8 @@ import numpy as np
 
 from scipy.spatial.distance import cdist
 
+
+
 # TEMPLATE: https://discuss.pytorch.org/t/custom-rank-loss-function/81885
 class MultiLabelDCGLoss(nn.Module):
 
@@ -32,7 +34,7 @@ class MultiLabelDCGLoss(nn.Module):
 
         #assert False, "Success"
 
-        sigmoid = nn.Sigmoid()
+        #sigmoid = nn.Sigmoid()
 
         #gain = sigmoid(gain)
 
@@ -40,7 +42,7 @@ class MultiLabelDCGLoss(nn.Module):
 
 
 
-        dcg_sore = sigmoid(dcg_sore)
+        #dcg_sore = sigmoid(dcg_sore)
 
         return -dcg_sore
 

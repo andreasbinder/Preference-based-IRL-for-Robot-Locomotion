@@ -275,8 +275,9 @@ class GenTrajWrapper(ObservationWrapper):
                 # TODO give as parameter
                 default_path = "/home/andreas/LRZ_Sync+Share/BachelorThesis/gym_mujoco_planar_snake/gym_mujoco_planar_snake/results/Mujoco-planar-snake-cars-angle-line-v1/initial_runs/default_dataset/"
                 default = os.path.join(default_path, self.name)
-                with open(default, 'wb') as f:
-                    np.save(f, np.array(self.trajectories))
+                # TODO remove completely
+                '''with open(default, 'wb') as f:
+                    np.save(f, np.array(self.trajectories))'''
 
                 self.trajectories = []
                 self.saved = True
@@ -338,6 +339,8 @@ class MyRewardWrapper(RewardWrapper):
             r_hats += r_hat
 
         pred = r_hats / len(self.nets) - self.ctrl_coeff * np.sum(action ** 2)
+
+        #pred = r_hats / len(self.nets) * np.abs(1.0 - infos["power_normalized"])
 
         # TODO normalize
 
