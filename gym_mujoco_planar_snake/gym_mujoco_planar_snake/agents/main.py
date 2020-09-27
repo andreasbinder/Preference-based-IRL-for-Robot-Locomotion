@@ -2,12 +2,14 @@ import argparse
 from time import ctime
 import os
 
+import shutil
+
 import random
 
 from gym_mujoco_planar_snake.common.multi_agents import AgentSquad
 from gym_mujoco_planar_snake.common.misc_util import Configs
 #from gym_mujoco_planar_snake.common.evaluate import DataFrame
-from gym_mujoco_planar_snake.common.ensemble import Ensemble, Ensemble_Triplet, Ensemble_Base
+from gym_mujoco_planar_snake.common.ensemble import Ensemble
 from gym_mujoco_planar_snake.common.env_wrapper import MyMonitor
 
 from baselines.common import set_global_seeds
@@ -24,9 +26,9 @@ def set_seeds(configs):
 
     set_global_seeds(seed)
 
-    tf.set_random_seed(seed)
+    '''tf.set_random_seed(seed)
     np.random.seed(seed)
-    random.seed(seed)
+    random.seed(seed)'''
 
     torch.manual_seed(seed)
 
@@ -48,6 +50,13 @@ def create_new_vf_ensemble(base_log_dir):
     # TODO write reward to one specific dir
     default_reward = os.path.join(net_save_path, "default_reward")
     os.mkdir(default_reward)
+
+    # save config file
+
+    # TODO modify src path
+    src = "/home/andreas/Documents/pbirl-bachelorthesis/gym_mujoco_planar_snake/gym_mujoco_planar_snake/agents/configurations/configs.yml"
+
+    shutil.copyfile(src, os.path.join(net_save_path, "configs_copy.yml"))
 
     return net_save_path, default_reward
 
