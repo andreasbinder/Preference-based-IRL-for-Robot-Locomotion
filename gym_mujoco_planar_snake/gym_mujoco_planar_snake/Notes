@@ -1,3 +1,25 @@
+TODO
+extrapolate 20:45
+cloud 21:05
+Thesis 21:25
+IRL 22:55
+
+
+
+runs:
+    1000 Mio mit weniger epochs
+    750 mit 5
+    750 mit 15
+
+eval multiple runs
+    for _ loop +  take mean
+
+pair
+triplet_margin
+!pure velocity
+
+documentation in yml file
+
 
 true 500k , gegen 500/1000k vergleichen
 integrate create traj

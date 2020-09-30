@@ -5,28 +5,13 @@ import torch
 from gym_mujoco_planar_snake.common.ensemble import Net
 from gym_mujoco_planar_snake.common.misc_util import merge_saved_numpy_arrays
 
+log_dir = "/home/andreas/Documents/pbirl-bachelorthesis/gym_mujoco_planar_snake/gym_mujoco_planar_snake/results/Mujoco-planar-snake-cars-angle-line-v1/initial_runs/default_dataset"
+train_data = merge_saved_numpy_arrays(log_dir, None)
+
+log_dir = "/home/andreas/Documents/pbirl-bachelorthesis/gym_mujoco_planar_snake/gym_mujoco_planar_snake/results/Mujoco-planar-snake-cars-angle-line-v1/initial_runs/test"
+test_data = merge_saved_numpy_arrays(log_dir, None)
 
 
-train_path = "/home/andreas/Documents/pbirl-bachelorthesis/gym_mujoco_planar_snake/gym_mujoco_planar_snake/results/Mujoco-planar-snake-cars-angle-line-v1/initial_runs/default_dataset/train.npy"
-
-test_path = "/home/andreas/Documents/pbirl-bachelorthesis/gym_mujoco_planar_snake/gym_mujoco_planar_snake/results/Mujoco-planar-snake-cars-angle-line-v1/initial_runs/test/test.npy"
-
-rewards = []
-
-
-with open(train_path, 'rb') as f:
-    train_data = np.load(f, allow_pickle=True)
-
-with open(test_path, 'rb') as f:
-    test_data = np.load(f, allow_pickle=True)
-
-#rewards.append(data[0][1])
-'''print([train_data[index, 1] for index in range(15)])
-print([test_data[index, 1] for index in range(15)])
-
-assert False, "Test"'''
-
-#rewards = np.concatenate((train_data, test_data))
 rewards = train_data
 
 
@@ -40,7 +25,7 @@ import torch
 
 torch.manual_seed(0)
 
-triplet_path = "/home/andreas/Documents/pbirl-bachelorthesis/gym_mujoco_planar_snake/gym_mujoco_planar_snake/results/Mujoco-planar-snake-cars-angle-line-v1/improved_runs/vf_ensemble5_Sep_21_14:34:37/model_0"
+triplet_path = "/home/andreas/Documents/pbirl-bachelorthesis/gym_mujoco_planar_snake/gym_mujoco_planar_snake/results/Mujoco-planar-snake-cars-angle-line-v1/improved_runs/vf_ensemble2_triplet_good_one/model_0"
 
 
 triplet_net = Net(27)
@@ -53,18 +38,18 @@ len1 = rewards.shape[0]
 len2 = test_data.shape[0]
 
 obs = np.array([rewards[index, 0] for index in range(len1)]) #19900
-rews = np.array([rewards[index, 1] for index in range(len1)])
+rews = np.array([rewards[index, 2] for index in range(len1)]) #1
 
 obs2 = np.array([test_data[index, 0] for index in range(len2)]) #19900
-rews2 = np.array([test_data[index, 1] for index in range(len2)])
+rews2 = np.array([test_data[index, 2] for index in range(len2)]) #1
 
 #print(obs[0].shape)
 
 #assert False, "Test"
-starts = np.random.randint(0, len1, size=500)
+starts = np.random.randint(0, len1, size=200) # 500
 starts.sort()
 
-starts2 = np.random.randint(0, len2, size=500)
+starts2 = np.random.randint(0, len2, size=200) # 500
 starts2.sort()
 '''obs = obs[-500:]
 rews = rews[-500:]
@@ -90,8 +75,8 @@ print(predictions)
 
 
 #plt.plot(rews, predictions)
-plt.scatter(rews, predictions, color='b')
-plt.scatter(rews2, predictions2, color="r")
+plt.scatter(rews, predictions*20, color='b')
+plt.scatter(rews2, predictions2*20, color="r")
 
 plt.show()
 

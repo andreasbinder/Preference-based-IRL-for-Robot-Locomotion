@@ -1,7 +1,3 @@
-# TODO
-# fix order of get models: sees 50K as > then 450k
-
-
 from baselines.common import set_global_seeds, tf_util as U
 from baselines.ppo1 import mlp_policy
 from baselines import bench
@@ -105,7 +101,11 @@ def run_environment_episode(env, pi, seed, model_file, max_timesteps, render, st
         observations.append(obs)
 
 
-        reward = info["rew_p"] * info["velocity"]
+        #reward = info["rew_p"] * info["velocity"]
+        #  distance_delta
+        reward = info["distance_head"]
+
+        #reward = info["rew_p"]
 
         cum_reward += reward
 
@@ -147,9 +147,12 @@ def enjoy(env_id, seed, model_dir):
                                                                           num_hid_layers=2
                                                                           )
 
+
+
         sum_info = None
         reverse = True
         render = False
+
 
         if reverse:
             model_files.reverse()
@@ -158,11 +161,13 @@ def enjoy(env_id, seed, model_dir):
 
         episode_rewards = []
 
-        print(model_files)
+        #print(model_files)
 
 
 
         for model_file in model_files:
+
+            print("Modelfile %s"%model_file[-9:])
 
 
             done, number_of_timesteps, info_collector, rewards = run_environment_episode(env, pi, seed, model_file,
@@ -175,9 +180,22 @@ def enjoy(env_id, seed, model_dir):
         # plot results
         indices = range(len(episode_rewards))
 
+        indices = range(0, 1000000, 100000)
         plt.plot(indices, episode_rewards)
 
+        plt.xlim(100000, 1000000)
+
+        plt.ylim(0, 15)
+
+        plt.xlabel('Timesteps')
+        plt.ylabel('Distance in Meters')
+        #plt.ylabel('Power Consumption')
+        '''plt.xlim(100000, 1000000)
+
+        plt.ylim(400, 1000)'''
         plt.show()
+
+        return episode_rewards
 
 
 
@@ -198,8 +216,30 @@ def main():
 
     agent_id = args.model_dir[-1]
 
+    '''agent_id = "0"
+
+    args.model_dir = "/home/andreas/Documents/pbirl-bachelorthesis/gym_mujoco_planar_snake/gym_mujoco_planar_snake/compare_results"
+
     with tf.variable_scope(agent_id):
-        enjoy(args.env, seed=args.seed, model_dir=args.model_dir)
+        original = enjoy(args.env, seed=args.seed, model_dir=args.model_dir)'''
+
+    agent_id = "1"
+    args.model_dir = "/home/andreas/Documents/pbirl-bachelorthesis/gym_mujoco_planar_snake/gym_mujoco_planar_snake/results/Mujoco-planar-snake-cars-angle-line-v1/improved_runs/vf_ensemble2_triplet_good_one/agent_1"
+
+    with tf.variable_scope(agent_id):
+        created = enjoy(args.env, seed=args.seed, model_dir=args.model_dir)
+
+
+    '''indices = range(len(original))
+
+
+    plt.plot(indices, original, color='b')
+    plt.plot(indices, created, color='r')
+    plt.xlabel('Timesteps')
+    plt.ylabel('Distance in Meters')
+
+    plt.show()'''
+
 
 
 

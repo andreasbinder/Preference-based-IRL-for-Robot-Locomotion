@@ -258,7 +258,7 @@ def build_test_better_triplet_trainset(raw_data, ranking=3):
 
     num_trajectories = raw_data.shape[0]
 
-    num_final_trajectories = 6666
+    num_final_trajectories = num_trajectories / ranking
 
     available_labels = np.arange(ranking)
 
@@ -450,10 +450,9 @@ def build_custom_triplet_trainset(raw_data, ranking=3):
         print(label)
 
         if index == 10:
+
             import sys
             sys.exit()'''
-
-
 
         item = (obs, label)
         final_dataset.append(item)
@@ -496,23 +495,64 @@ def build_custom_ranking_trainset(raw_data, ranking=3):
 
 
 
-        # TODO
-        '''print(element[:, 1])
-        print(label)
-
-
-
-        import sys
-        sys.exit()'''
-
         item = (obs, label)
         final_dataset.append(item)
 
-    # print(len(final_dataset))
-    '''print(len(final_dataset))
-    print(final_dataset[0][0][0].shape)
-    print(final_dataset[0][1].shape)'''
+
 
     print("%i Tuples of %i Trajectories" % (len(final_dataset), ranking))
 
     return final_dataset
+
+def generate_dataset_from_full_episodes(all_episodes, trajectory_length, n):
+    """
+    Divides full episodes into n snippets of k length and returns it
+
+    Parameters
+    ----------
+    file_path : str
+        The file location
+    all_episodes
+        index 0 contains list of observations
+        index 1 contains the timestep
+        index 2 contains list of distance
+
+
+    Returns
+    -------
+    numpy array
+        array containing the training data
+    """
+    '''epi = all_episodes[0]
+    print(len(list(epi[0])) )
+    print(epi.shape)
+    #print(all_episodes.shape)
+
+    import sys
+    sys.exit()'''
+
+    training_set = []
+
+    for index, episode in enumerate(all_episodes):
+        episode_length = len(episode[0])
+        print(episode_length)
+        print(trajectory_length)
+        starts = np.random.randint(0, episode_length - trajectory_length, size=n)
+        starts.sort()
+
+        # TODO time_step or reward, time_step  + start
+        # trajectories = np.array([(np.array(observations)[start:start + TRAJECTORY_LENGTH], sum(cum_reward[start:start + TRAJECTORY_LENGTH])) for start in starts])
+        training_set.append(np.array(
+            [(np.array(episode[0][start:start + trajectory_length]), episode[1] + start) for start in starts]))
+
+    # path = "/home/andreas/Documents/pbirl-bachelorthesis/gym_mujoco_planar_snake/gym_mujoco_planar_snake/results/Mujoco-planar-snake-cars-angle-line-v1/initial_runs/default_dataset"
+    '''name = "trajectories_{time_step}.npy".format(time_step=time_step)
+
+    with open(os.path.join(SAVE_PATH, name), 'wb') as f:
+        np.save(f, np.array(trajectories))'''
+
+    training_set = np.concatenate(training_set)
+
+    return training_set
+
+

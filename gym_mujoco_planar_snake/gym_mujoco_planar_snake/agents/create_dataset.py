@@ -9,6 +9,7 @@ from baselines.ppo1.pposgd_simple import learn
 from baselines import logger
 
 import gym, logging
+from gym.core import ObservationWrapper
 import os
 
 from gym_mujoco_planar_snake.common.env_wrapper import prepare_env, ModelSaverWrapper
@@ -18,9 +19,11 @@ from gym_mujoco_planar_snake.benchmark.info_collector import InfoCollector, Info
 
 class PPOAgent(object):
 
-    def __init__(self, env):
+    def __init__(self, env, policy_func):
+        self.env = env
+        self.policy_func = policy_func
 
-        self.sess = U.make_session(num_cpu=1, make_default=False)
+        '''self.sess = U.make_session(num_cpu=1, make_default=False)
         self.sess.__enter__()
         self.sess.run(tf.initialize_all_variables())
         #U.initialize()
@@ -36,7 +39,7 @@ class PPOAgent(object):
                                                                                      ac_space=ac_space,
                                                                                      hid_size=64,
                                                                                      num_hid_layers=2
-                                                                                     )
+                                                                                     )'''
 
     def learn(self, num_timesteps):
 
@@ -51,8 +54,52 @@ class PPOAgent(object):
                             schedule='linear',
                             )
 
-        self.sess.close()
 
+
+
+class ModelSaverWrapper(ObservationWrapper):
+
+    def __init__(self, env, model_dir, save_frequency_steps):
+        ObservationWrapper.__init__(self, env=env)
+
+
+        self.save_frequency_steps = save_frequency_steps
+        self.total_steps = 0
+        self.total_steps_save_counter = 0
+        self.total_episodes = 0
+
+
+        self.model_dir = model_dir
+
+    def reset(self, **kwargs):
+        self.total_episodes += 1
+
+        # todo start saving after 100k timesteps
+        if self.total_steps_save_counter == self.save_frequency_steps or self.total_steps == 1:
+            buffer = 9
+
+            len_total_steps = len(str(self.total_steps))
+
+            zeros = (buffer - len_total_steps) * "0"
+
+            file_name = osp.join(self.model_dir, zeros + str(self.total_steps))
+
+            U.save_state(file_name)
+
+            logger.log('Saved model to: ' + file_name)
+
+            self.total_steps_save_counter = 0
+
+        return self.env.reset(**kwargs)
+
+    def step(self, action):
+        self.total_steps += 1
+        self.total_steps_save_counter += 1
+
+        return self.env.step(action)
+
+    def observation(self, observation):
+        return observation
 
 def get_latest_model_file(model_dir):
     return get_model_files(model_dir)[0]
@@ -233,6 +280,76 @@ if __name__ == '__main__':
     TRAJECTORY_LENGTH = 50 #50 100
     EPISODE_MAX_LENGTH = 1000
 
+    SAVE_DIR = "/tmp/test_create/"
+
     with tf.variable_scope(str(args.seed)):
-        enjoy(args.env, seed=args.seed, model_dir=args.model_dir)
+
+        sess = U.make_session(num_cpu=1)
+        sess.__enter__()
+
+        env = gym.make(args.env_id)
+        env = ModelSaverWrapper(env, SAVE_DIR, 1000)
+
+        policy_fn = lambda name, ob_space, ac_space: mlp_policy.MlpPolicy(name=name,
+                                                                          ob_space=ob_space,
+                                                                          ac_space=ac_space,
+                                                                          hid_size=64,
+                                                                          num_hid_layers=2
+                                                                          )
+
+        agent = PPOAgent(env, policy_fn)
+        agent.learn(3000)
+        sess.close()
+
+        sess = U.make_session(num_cpu=1)
+        sess.__enter__()
+
+
+
+        model_files = get_model_files(SAVE_DIR)
+
+        model_index = 0
+        model_file = model_files[model_index]
+
+        print("Model Files")
+        print(model_files)
+
+        print('available models: ', len(model_files))
+        logger.log("load model_file: %s" % model_file)
+
+
+        sum_info = None
+        pi = policy_fn('pi', env.observation_space, env.action_space)
+
+        sum_reward = []
+
+        for model_file in model_files:
+            # run one episode
+
+            # TODO specify target velocity
+            # only takes effect in angle envs
+            env.unwrapped.metadata['target_v'] = 0.1
+            # env.unwrapped.metadata['target_v'] = 0.15
+            # env.unwrapped.metadata['target_v'] = 0.25
+
+            # env._max_episode_steps = env._max_episode_steps * 3
+
+            #########################################################################
+            # TODO:                                                                 #
+            #                                                                       #
+            #########################################################################
+            # env._max_episode_steps = 50
+            #########################################################################
+            #                       END OF YOUR CODE                                #
+            #########################################################################
+
+            # env, pi, seed, model_file, max_timesteps, render, stochastic, current_timestep)
+            observations, cum_reward = run_environment_episode(env, pi, args.seed, model_file,
+                                                                                         env._max_episode_steps,
+                                                                                         render=True,
+                                                                                         stochastic=False,
+                                                                                         current_timestep=None)
+
+
+
 
