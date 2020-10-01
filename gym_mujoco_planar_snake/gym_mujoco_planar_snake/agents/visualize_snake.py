@@ -128,7 +128,7 @@ def run_environment_episode(env, pi, seed, model_file, max_timesteps, render, st
         '''cum_rew_p.append(info["rew_p"])
         cum_rew_v.append(info["rew_v"])'''
 
-        distance_head.append(info["distance_head"])
+        distance_head.append(info["distance_delta"])
 
         cum_rew.append(reward)
 

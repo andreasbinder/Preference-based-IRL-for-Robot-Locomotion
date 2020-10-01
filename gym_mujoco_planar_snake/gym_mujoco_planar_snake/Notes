@@ -1,8 +1,5 @@
 TODO
-extrapolate 20:45
-cloud 21:05
-Thesis 21:25
-IRL 22:55
+
 
 
 
@@ -20,6 +17,7 @@ triplet_margin
 
 documentation in yml file
 
+triplet_margin 5 epochs
 
 true 500k , gegen 500/1000k vergleichen
 integrate create traj
