@@ -1,5 +1,24 @@
 import torch
 import torch.nn as nn
+from gym_mujoco_planar_snake.common.ensemble import Net
+
+path_today = "/home/andreas/Documents/pbirl-bachelorthesis/gym_mujoco_planar_snake/gym_mujoco_planar_snake/results/Mujoco-planar-snake-cars-angle-line-v1/improved_runs/vf_ensemble5_Sep_29_21:10:59/model_0"
+
+path_original = "/home/andreas/Documents/pbirl-bachelorthesis/gym_mujoco_planar_snake/gym_mujoco_planar_snake/results/Mujoco-planar-snake-cars-angle-line-v1/improved_runs/vf_ensemble2_triplet_good_one/model_0"
+
+net = Net(27)
+net.load_state_dict(torch.load(path_today))
+
+net_original = Net(27)
+net_original.load_state_dict(torch.load(path_original))
+
+inp = torch.ones(27)
+
+print(net.cum_return(inp))
+
+#print(net_original.cum_return(inp))
+
+
 
 '''loss = nn.CrossEntropyLoss()
 input = torch.randn(3, 5, requires_grad=True)
@@ -11,13 +30,13 @@ print(output)'''
 
 torch.manual_seed(0)
 
-input1 = torch.tensor([[3, 4]]).float() #torch.randn(1, 2)
+'''input1 = torch.tensor([[3, 4]]).float() #torch.randn(1, 2)
 input2 = torch.tensor([[4, 3]]).float()
 cos = nn.CosineSimilarity(dim=1, eps=1e-6)
 output = cos(input1, input2)
 print(input1)
 print(input2)
-print(output)
+print(output)'''
 
 '''def init_weights(m):
     if type(m) == nn.Linear:

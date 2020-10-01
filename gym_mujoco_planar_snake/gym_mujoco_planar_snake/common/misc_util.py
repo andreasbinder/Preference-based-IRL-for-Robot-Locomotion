@@ -2,6 +2,21 @@
 import json
 import yaml
 
+import numpy as np
+import os
+def merge_saved_numpy_arrays(log_dir, save_dir):
+    arrays = os.listdir(log_dir)
+    def _get_array(dir):
+        with open(dir, 'rb') as f:
+            data = np.load(f, allow_pickle=True)
+        return data
+
+    listed_array = np.array([_get_array(os.path.join(log_dir, path)) for path in arrays])
+
+
+
+    return np.concatenate(listed_array)
+
 class Configs():
     """
         class that stores run configurations
@@ -88,6 +103,9 @@ class Configs():
 
     def get_input_dim(self):
         return self.data["reward_learning"]["input_dim"]
+
+    def get_ranking_method(self):
+        return self.data["reward_learning"]["ranking_method"]
 
 
 

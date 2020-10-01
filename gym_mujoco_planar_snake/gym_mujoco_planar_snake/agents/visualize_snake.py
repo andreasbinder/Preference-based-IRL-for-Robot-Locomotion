@@ -27,9 +27,9 @@ from gym_mujoco_planar_snake.common.env_wrapper import ModelSaverWrapper
 
 from gym_mujoco_planar_snake.common import my_tf_util
 
-from gym_mujoco_planar_snake.benchmark.info_collector import InfoCollector, InfoDictCollector
+# from gym_mujoco_planar_snake.benchmark.info_collector import InfoCollector, InfoDictCollector
 
-import gym_mujoco_planar_snake.benchmark.plots as import_plots
+# import gym_mujoco_planar_snake.benchmark.plots as import_plots
 
 
 
@@ -80,7 +80,8 @@ def run_environment_episode(env, pi, seed, model_file, max_timesteps, render, st
     # obs[-1] = target_v
 
     # info_collector = InfoCollector(env, {'target_v': target_v})
-    info_collector = InfoCollector(env, {'env': env, 'seed': seed})
+    # info_collector = InfoCollector(env, {'env': env, 'seed': seed})
+    info_collector = None
 
     #injured_joint_pos = [None, 7, 5, 3, 1]
     # injured_joint_pos = [None, 7, 6, 5, 4, 3, 2, 1, 0]
@@ -97,11 +98,14 @@ def run_environment_episode(env, pi, seed, model_file, max_timesteps, render, st
     observations = []
     cum_velocity = []
     cum_rew = []
+    distance_head = []
     # max_timesteps is set to 1000
     while (not done) and number_of_timestep < max_timesteps:
 
         # TODO!!!
         # obs[-1] = target_v
+
+
 
         action, _ = pi.act(stochastic, obs)
 
@@ -120,8 +124,11 @@ def run_environment_episode(env, pi, seed, model_file, max_timesteps, render, st
 
         obs, reward, done, info = env.step(action)
 
-        cum_rew_p.append(info["rew_p"])
-        cum_rew_v.append(info["rew_v"])
+        # TODO add if needed
+        '''cum_rew_p.append(info["rew_p"])
+        cum_rew_v.append(info["rew_v"])'''
+
+        distance_head.append(info["distance_delta"])
 
         cum_rew.append(reward)
 
@@ -151,12 +158,15 @@ def run_environment_episode(env, pi, seed, model_file, max_timesteps, render, st
 
         number_of_timestep += 1
 
+    print("Distance")
+    print(sum(distance_head))
+
     #imageio.mimsave('snake.gif', [np.array(img) for i, img in enumerate(images) if i % 2 == 0], fps=20)
     print(sum(cum_velocity) / len(cum_velocity))
     print(sum(cum_rew_p))
     print(sum(cum_rew_v))
 
-    import matplotlib.pyplot as plt
+    '''import matplotlib.pyplot as plt
 
     indices = [i for i in range(len(cum_velocity))]
 
@@ -174,7 +184,7 @@ def run_environment_episode(env, pi, seed, model_file, max_timesteps, render, st
     ax3.set_title("Reward Velocity")
 
 
-    plt.show()
+    plt.show()'''
 
     return done, number_of_timestep, info_collector, cum_reward
 
@@ -213,8 +223,6 @@ def enjoy(env_id, seed, model_dir):
         model_index = 0
         model_file = model_files[model_index]
 
-        print("Model Files")
-        print(model_files)
 
         print('available models: ', len(model_files))
         logger.log("load model_file: %s" % model_file)
@@ -237,6 +245,7 @@ def enjoy(env_id, seed, model_dir):
 
             # TODO specify target velocity
             # only takes effect in angle envs
+            # TODO
             env.unwrapped.metadata['target_v'] = 0.1
             #env.unwrapped.metadata['target_v'] = 0.15
             # env.unwrapped.metadata['target_v'] = 0.25
@@ -244,26 +253,14 @@ def enjoy(env_id, seed, model_dir):
             # env._max_episode_steps = env._max_episode_steps * 3
 
 
-
-            #########################################################################
-            # TODO:                                                                 #
-            #                                                                       #
-            #########################################################################
-            #env._max_episode_steps = 50
-            #########################################################################
-            #                       END OF YOUR CODE                                #
-            #########################################################################
-
             done, number_of_timesteps, info_collector, rewards = run_environment_episode(env, pi, seed, model_file,
-                                                                                env._max_episode_steps, render=True,
+                                                                                env._max_episode_steps, render=RENDER,
                                                                                 stochastic=False)
 
 
+
             print(rewards)
-            '''if True:
-                print(rewards)
-                break
-            '''
+
             #info_collector.episode_info_print()
 
             sum_reward.append(rewards)
@@ -294,8 +291,6 @@ def enjoy(env_id, seed, model_dir):
 
 
 
-            
-
 
 
 def main():
@@ -322,4 +317,5 @@ def main():
 
 
 if __name__ == '__main__':
+    RENDER = True
     main()

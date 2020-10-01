@@ -2,13 +2,17 @@ import argparse
 from time import ctime
 import os
 
+import shutil
+
 import random
 
 from gym_mujoco_planar_snake.common.multi_agents import AgentSquad
 from gym_mujoco_planar_snake.common.misc_util import Configs
 #from gym_mujoco_planar_snake.common.evaluate import DataFrame
-from gym_mujoco_planar_snake.common.ensemble import Ensemble, Ensemble_Triplet, Ensemble_Base
+from gym_mujoco_planar_snake.common.ensemble import Ensemble
 from gym_mujoco_planar_snake.common.env_wrapper import MyMonitor
+
+import gym_mujoco_planar_snake.common.data_util as data_util
 
 from baselines.common import set_global_seeds
 
@@ -24,11 +28,12 @@ def set_seeds(configs):
 
     set_global_seeds(seed)
 
-    tf.set_random_seed(seed)
+    '''tf.set_random_seed(seed)
     np.random.seed(seed)
-    random.seed(seed)
+    random.seed(seed)'''
 
-    torch.manual_seed(seed)
+    # TODO
+    torch.manual_seed(0)
 
 
 
@@ -48,6 +53,13 @@ def create_new_vf_ensemble(base_log_dir):
     # TODO write reward to one specific dir
     default_reward = os.path.join(net_save_path, "default_reward")
     os.mkdir(default_reward)
+
+    # save config file
+
+    # TODO modify src path
+    src = "/home/andreas/Documents/pbirl-bachelorthesis/gym_mujoco_planar_snake/gym_mujoco_planar_snake/agents/configurations/configs.yml"
+
+    shutil.copyfile(src, os.path.join(net_save_path, "configs_copy.yml"))
 
     return net_save_path, default_reward
 
@@ -82,6 +94,26 @@ def get_dataset_and_true_rewards_from_default_dir(default_dataset_dir):
 
 
     return np.concatenate(trajectories), np.array(true_rews)
+
+def get_dataset(default_dataset_dir):
+
+
+    trajectories = []
+    for file in os.listdir(default_dataset_dir):
+
+            traj_path = os.path.join(default_dataset_dir, file)
+
+            with open(traj_path, 'rb') as f:
+                traj = np.load(f, allow_pickle=True)
+
+
+
+            trajectories.append(traj)
+
+    trajectories = data_util.generate_dataset_from_full_episodes(trajectories, 50, 100)
+
+    return np.concatenate(trajectories)
+
 
 def get_true_rewards_and_predictions_from_default_dir(default_reward_dir):
 
@@ -128,6 +160,7 @@ def main():
     # Step 1b: scan default_dataset directory for training data
     default_dataset_dir = os.path.join(base_log_dir, "initial_runs", "default_dataset")
 
+    # TODO
     trajectories, true_initial_rewards = get_dataset_and_true_rewards_from_default_dir(default_dataset_dir)
 
     # first reproducability, then dataframe, then reward learning
@@ -140,6 +173,8 @@ def main():
 
 
     # TODO test trajectories
+
+    # trajectories = get_dataset(default_dataset_dir)
 
 
     ########################################################################################

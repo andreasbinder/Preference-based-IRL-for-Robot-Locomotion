@@ -377,7 +377,8 @@ class MujocoPlanarSnakeCarsAngleEnv(MujocoPlanarSnakeCarsEnv):
 
         self.update += 1
 
-        print(self.target_v)
+        #  TODO print or dont print
+        # print(self.target_v)
         return super().reset_model()
 
     '''def reset_model(self):
@@ -388,7 +389,11 @@ class MujocoPlanarSnakeCarsAngleEnv(MujocoPlanarSnakeCarsEnv):
         #self.target_v += 0.05
         #self.target_v += 0.2
 
-        self.target_v = 0.1
+        if self.update >= 100:
+            self.target_v = 0.3
+        else:
+            self.target_v = 0.1
+
 
         self.update += 1
 
@@ -444,7 +449,7 @@ class MujocoPlanarSnakeCarsAngleEnv(MujocoPlanarSnakeCarsEnv):
             self.init_idx_values()
 
         # careful position before step
-        self.move_ball()
+        self.move_ball()max_velocity
 
 
         distbefore = self.calc_distance()
@@ -525,10 +530,15 @@ class MujocoPlanarSnakeCarsAngleEnv(MujocoPlanarSnakeCarsEnv):
         # careful position before step
         self.move_ball()
 
+        # TODO
+        head_x_before, head_y_before = self.get_head_pos()
 
         distbefore = self.calc_distance()
         self.do_simulation(a, self.frame_skip)
         distafter = self.calc_distance()
+
+        # TODO
+        head_x_after, head_y_after = self.get_head_pos()
 
 
         angle_difference = self.get_head_to_target_degree_angle_difference() # no + or - , no left right
@@ -561,7 +571,8 @@ class MujocoPlanarSnakeCarsAngleEnv(MujocoPlanarSnakeCarsEnv):
         # works great, min max must be trained
         a1 = 0.2
         a2 = 0.2
-        rew_v = (1.0 - (np.abs(self.target_v - velocity) / a1)) ** (1 / a2)
+
+        #rew_v = (1.0 - (np.abs(self.target_v - velocity) / a1)) ** (1 / a2)
 
 
         # see old git version for all the parameter tries
@@ -569,12 +580,27 @@ class MujocoPlanarSnakeCarsAngleEnv(MujocoPlanarSnakeCarsEnv):
         b1 = 0.6
         rew_p = np.abs(1.0 - power_normalized) ** (b1 ** (-2.0))
 
+
+
+        max_velocity = 0.3
+        rew_v = (1.0 - (np.abs(velocity - self.target_v) / a1)) ** (1 / a2)
+
+        #rew_v = min(velocity / max_velocity, 1)
+
+        #rew_v = velocity / max_velocity
+
         '''rew_v = np.clip(rew_v, 0, 1)
         rew_p = np.clip(rew_p, 0, 1)'''
+
+        #reward = 0.5 * (rew_v + rew_p)
+
+        #reward = rew_v
 
         reward = rew_v * rew_p
 
         #reward = np.clip(reward, 0, 1)
+
+        distance_head = math.sqrt(((head_x_after - head_x_before) ** 2) + ((head_y_after - head_y_before) ** 2))
 
 
         ob = self.get_obs()
@@ -582,6 +608,7 @@ class MujocoPlanarSnakeCarsAngleEnv(MujocoPlanarSnakeCarsEnv):
         return ob, reward, False,  dict(reward=reward,
                                         rew_p=rew_p,
                                         rew_v=rew_v,
+                                        distance_head=distance_head,
 
 
                                        power=power,

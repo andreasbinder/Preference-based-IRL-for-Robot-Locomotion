@@ -311,6 +311,11 @@ class MyRewardWrapper(RewardWrapper):
         self.reward_list = []
 
 
+        # TODO apply sigmoid
+        self.sigmoid = nn.Sigmoid()
+
+
+
 
     def step(self, action):
 
@@ -328,6 +333,8 @@ class MyRewardWrapper(RewardWrapper):
             # Preference based reward
             with torch.no_grad():
                 pred_rews = net.cum_return(torch.from_numpy(obs).float())
+                # TODO apply sigmoid
+                # pred_rews = self.sigmoid(pred_rews)
             r_hat = pred_rews.item()
 
             # Normalization only has influence on predicted reward

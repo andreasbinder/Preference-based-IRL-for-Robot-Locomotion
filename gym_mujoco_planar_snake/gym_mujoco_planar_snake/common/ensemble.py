@@ -464,10 +464,11 @@ class Ensemble(object):
         self.epochs = configs.get_epochs()
         self.split_ratio = configs.get_split_ratio()
         self.input_dim = configs.get_input_dim()
+        self.ranking_method = configs.get_ranking_method()
 
 
         # TODO for every mode
-        self.loss_fn, self.preprocess_fn, self.forward_pass_fn = self.initialize_mode("triplet")
+        self.loss_fn, self.preprocess_fn, self.forward_pass_fn = self.initialize_mode(self.ranking_method)
 
 
         self.train_summary_writer = None
