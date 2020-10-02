@@ -535,8 +535,6 @@ def generate_dataset_from_full_episodes(all_episodes, trajectory_length, n):
 
     for index, episode in enumerate(all_episodes):
         episode_length = len(episode[0])
-        print(episode_length)
-        print(trajectory_length)
         starts = np.random.randint(0, episode_length - trajectory_length, size=n)
         starts.sort()
 

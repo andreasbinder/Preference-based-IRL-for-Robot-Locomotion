@@ -1,6 +1,6 @@
 import numpy as np
 
-path1 = "/home/andreas/Documents/pbirl-bachelorthesis/gym_mujoco_planar_snake/gym_mujoco_planar_snake/results/Mujoco-planar-snake-cars-angle-line-v1/initial_runs/ppo_original_1.5Mio/test_ckpts_save/train.npy"
+path1 = "/home/andreas/Documents/pbirl-bachelorthesis/gym_mujoco_planar_snake/gym_mujoco_planar_snake/results/Mujoco-planar-snake-cars-angle-line-v1/initial_runs/ppo_original_1.5Mio/data_500k/train.npy"
 
 with open(path1, 'rb') as f:
     d1 = np.load(f, allow_pickle=True)

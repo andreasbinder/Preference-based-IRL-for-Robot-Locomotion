@@ -1,10 +1,9 @@
 # TODO
 # fix order of get models: sees 50K as > then 450k
 
-
 from baselines.common import set_global_seeds, tf_util as U
 from baselines.ppo1 import mlp_policy
-from baselines import bench
+
 import gym, logging
 from baselines import logger
 import tensorflow as tf
@@ -12,29 +11,13 @@ import numpy as np
 
 from tqdm import tqdm
 
-#from sklearn.model_selection import ParameterGrid
-
-from gym.envs.registration import register
-
-# TODO doesnt work
-# from baselines.common.vec_env import VecVideoRecorder
-
-import imageio
-
 import os
 import os.path as osp
 
 from gym_mujoco_planar_snake.common.misc_util import Configs
 
-from gym_mujoco_planar_snake.common.env_wrapper import ModelSaverWrapper
-
 from gym_mujoco_planar_snake.common import my_tf_util
 
-#from gym_mujoco_planar_snake.benchmark.info_collector import InfoCollector, InfoDictCollector
-
-# import gym_mujoco_planar_snake.benchmark.plots as import_plots
-
-import gym_mujoco_planar_snake.common.data_util as data_util
 
 import torch
 
@@ -91,7 +74,7 @@ def run_environment_episode(env, pi, seed, model_file, max_timesteps, render, st
 
         cum_reward.append(reward)
 
-        distance.append(info["distance_head"])
+        distance.append(info["distance_delta"])
 
         # render
         if render:
@@ -202,29 +185,6 @@ def save_full_episodes(observations, time_step, distance):
 
 
 
-def main():
-    import argparse
-    parser = argparse.ArgumentParser(formatter_class=argparse.ArgumentDefaultsHelpFormatter)
-
-    parser.add_argument('--seed', help='RNG seed', type=int, default=0)
-
-    parser.add_argument('--env', help='environment ID', default='Mujoco-planar-snake-cars-angle-line-v1')
-
-    parser.add_argument('--model_dir', help='model to render', type=str)
-
-    args = parser.parse_args()
-    logger.configure()
-
-    #set_seeds(args.seed)
-
-    agent_id = args.model_dir[-1]
-
-    #enjoy(args.env, seed=args.seed, model_dir=args.model_dir)
-
-    with tf.variable_scope(agent_id):
-        load_episodes(args.env, seed=args.seed, model_dir=args.model_dir)
-
-
 if __name__ == '__main__':
     import argparse
     parser = argparse.ArgumentParser(formatter_class=argparse.ArgumentDefaultsHelpFormatter)
@@ -234,8 +194,14 @@ if __name__ == '__main__':
 
     parser.add_argument('--model_dir', help='model to render', type=str)
 
+    parser.add_argument('--variable_scope',  default="0")
+
     args = parser.parse_args()
     logger.configure()
+
+    ENV_ID = 'Mujoco-planar-snake-cars-angle-line-v1'
+
+    # TODO configs
 
     # TODO consider longer trajectory
     args.model_dir = "/home/andreas/Documents/pbirl-bachelorthesis/gym_mujoco_planar_snake/gym_mujoco_planar_snake/results/Mujoco-planar-snake-cars-angle-line-v1/initial_runs/ppo_original_1.5Mio/agent_0"
@@ -243,12 +209,12 @@ if __name__ == '__main__':
     TRAJECTORY_LENGTH = 50 #50 100
     EPISODE_MAX_LENGTH = 1000
     RENDER = False
-    SAVE_PATH = "/home/andreas/Documents/pbirl-bachelorthesis/gym_mujoco_planar_snake/gym_mujoco_planar_snake/results/Mujoco-planar-snake-cars-angle-line-v1/initial_runs/ppo_original_1.5Mio/test_ckpts_save"
+    SAVE_PATH = "/home/andreas/Documents/pbirl-bachelorthesis/gym_mujoco_planar_snake/gym_mujoco_planar_snake/results/Mujoco-planar-snake-cars-angle-line-v1/initial_runs/ppo_original_1.5Mio/data_500k"
 
     FULL_EPISODES = []
 
     agent_id = args.model_dir[-1]
-    agent_id = "0"
+
 
     list = [x[:-len(".index")] for x in os.listdir(args.model_dir) if x.endswith(".index")]
     list.sort(key=str.lower)
@@ -261,7 +227,7 @@ if __name__ == '__main__':
 
 
     # Split in train and extrapolation data
-    percentage = 2/3
+    percentage = 1/3
     FACTOR = int(num_models * percentage)
     FULL_EPISODES = np.concatenate(FULL_EPISODES)
 
@@ -285,7 +251,7 @@ if __name__ == '__main__':
 
     train_set = generate_dataset_from_full_episodes(TRAIN, 50, 100)
 
-    name_for_default = "inp.npy"
+    name_for_default = "subtrajectories.npy"
 
-    with open(os.path.join(SAVE_PATH, "inp.npy"), 'wb') as f:
+    with open(os.path.join(SAVE_PATH, name_for_default), 'wb') as f:
         np.save(f, np.array(train_set))

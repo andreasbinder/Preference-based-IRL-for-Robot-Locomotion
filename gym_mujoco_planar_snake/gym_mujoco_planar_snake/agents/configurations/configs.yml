@@ -1,14 +1,19 @@
+# TODO
+create_dataset: test
+
+
+
 # define hyperparameters for IRL training
 reward_learning:
   num_nets: 1
   input_dim: 27
   split_ratio: 0.9
   # available
-  ranking_method: triplet_margin
+  ranking_method: triplet
   hparams:
     lr: 0.00005 #0.00005
     # pair 2, 15
-    epochs: 10 #10, 20 for triplet cum_reward
+    epochs: 5 #10, 20 for triplet cum_reward
     ranking_approach: 5
     dataset_size: 0
 
