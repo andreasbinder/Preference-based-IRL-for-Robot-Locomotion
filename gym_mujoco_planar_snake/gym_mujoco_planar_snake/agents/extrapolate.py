@@ -63,10 +63,16 @@ if __name__ == '__main__':
                         default="gym_mujoco_planar_snake/agents/configurations/configs.yml")
     args = parser.parse_args()
 
-    torch.manual_seed(0)
+
 
     configs = Configs(args.path_to_configs)
     configs = configs.data["extrapolation"]
+
+
+    # Seed
+    seed = configs["seed"]
+    torch.manual_seed(seed)
+    np.random.seed(seed)
 
     # Net
     input_dim = 27
@@ -89,6 +95,9 @@ if __name__ == '__main__':
     plt.scatter(extrapolation_timesteps, extrapolation_distance, color="r")
 
     plt.show()
+
+    # TODO
+    # plot more sophisticated: labels, legends
 
 
 

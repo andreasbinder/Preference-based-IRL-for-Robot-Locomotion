@@ -10,7 +10,7 @@
 /gym_mujoco_planar_snake/gym_mujoco_planar_snake/LemkeFiles
 /gym_mujoco_planar_snake/gym_mujoco_planar_snake/common/__pycache__
 /gym_mujoco_planar_snake/gym_mujoco_planar_snake/agents/__pycache__
-.idea
+.idea/
 .PowerFolder
 .vscode
 
