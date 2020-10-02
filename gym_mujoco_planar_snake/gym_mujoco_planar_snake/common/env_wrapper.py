@@ -55,7 +55,7 @@ def prepare_env(env, save_check_points, save_dir, sfs, id, learned_reward, confi
 
         ctrl_coeff = configs.get_ctrl_coeff()
         env = MyRewardWrapper(env, nets, num_timesteps, log_dir, ctrl_coeff, default_reward_dir, id)
-    else:
+    '''else:
         trajectory_length = configs.get_trajectory_length()
         num_traj_per_epoch = configs.get_num_traj_per_episode()
         env = GenTrajWrapper(env,
@@ -63,7 +63,7 @@ def prepare_env(env, save_check_points, save_dir, sfs, id, learned_reward, confi
                              id,
                              num_timesteps,
                              trajectory_length,
-                             num_traj_per_epoch)
+                             num_traj_per_epoch)'''
 
 
     return env

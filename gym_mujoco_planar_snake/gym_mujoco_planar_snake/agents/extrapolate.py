@@ -63,8 +63,6 @@ if __name__ == '__main__':
                         default="gym_mujoco_planar_snake/agents/configurations/configs.yml")
     args = parser.parse_args()
 
-
-
     configs = Configs(args.path_to_configs)
     configs = configs.data["extrapolation"]
 

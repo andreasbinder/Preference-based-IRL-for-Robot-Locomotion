@@ -1,5 +1,8 @@
 # TODO
-create_dataset: test
+create_dataset:
+  seed: 0
+  variable_scope: 0
+
 
 extrapolation:
   seed: 0
@@ -17,7 +20,7 @@ reward_learning:
   hparams:
     lr: 0.00005 #0.00005
     # pair 2, 15
-    epochs: 5 #10, 20 for triplet cum_reward
+    epochs: 1 #10, 20 for triplet cum_reward
     ranking_approach: 5
     dataset_size: 0
 
@@ -27,15 +30,15 @@ ppo:
     seed: 0
     log_dir: gym_mujoco_planar_snake/results/
   initial:
-    create_trajectories: false # if false you need to provide training data
+    create_trajectories: true # if false you need to provide training data
     trajectory_length: 100 #50
     num_traj_per_episode: 10
     num_agents: 1 # 5
-    num_timesteps: 1500000 # 1000000 1500000
-    sfs: 5000 #10000 5000
+    num_timesteps: 3000 # 1000000 1500000
+    sfs: 1000 #10000 5000
     save_checkpoints: true
   improved:
-    validate_learned_reward: true
+    validate_learned_reward: false
     num_agents: 1
     num_timesteps: 1000000 #1000000
     sfs: 100000 #100000

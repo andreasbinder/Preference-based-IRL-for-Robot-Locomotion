@@ -9,7 +9,7 @@ import os
 from baselines import logger
 import os.path as osp
 
-class InfoCollector():
+class InfoCollectorLemke():
 
     def __init__(self, env, paras):
         self.dict_list_infos = None
@@ -92,6 +92,91 @@ class InfoCollector():
 
         my_plots.plot_head_trace(self.get_list_dict(['head_x', 'head_y']))
         #my_plots.plot_snake_gait(self.get_list_dict(['head_x', 'head_y', 'joints_pos', 'joint_head_pos']))
+
+class InfoCollector():
+
+    def __init__(self, env):
+        self.dict_list_infos = None
+        self.env = env
+        #self.paras = paras
+
+    def add_info(self, info):
+        # dict_list_infos
+        if self.dict_list_infos is None:
+            self.dict_list_infos = dict.fromkeys(info, 42)
+            # reference problem
+            for key in self.dict_list_infos.keys():
+                self.dict_list_infos[key] = []
+
+        # add values
+        [self.dict_list_infos[k].append(v) for k, v in info.items()]
+
+    def get_list_dict(self,columns):
+        return {x:list(self.dict_list_infos[x]) for x in columns}
+
+    def get_mean_dict(self, columns):
+        menas_dict = {x:float(np.mean(self.dict_list_infos[x])) for x in columns}
+        return menas_dict
+
+    def get_sum_dict(self, columns):
+        sum_dict = {x:float(np.sum(self.dict_list_infos[x])) for x in columns}
+        return sum_dict
+
+    def get_first_dict(self, columns):
+        first_dict = {x:str(self.dict_list_infos[x][0]) for x in columns}
+        return first_dict
+
+    def get_mean_dict_200(self, columns):
+        menas_dict = {x:float(np.mean(self.dict_list_infos[x][200:])) for x in columns}
+        return menas_dict
+
+    def get_sum_dict_200(self, columns):
+        sum_dict = {x:float(np.sum(self.dict_list_infos[x][200:])) for x in columns}
+        return sum_dict
+
+    def episode_info_print(self):
+        paras = ['reward', 'velocity', 'power', 'power_normalized', 'total_power_sec', 'mean_actuatorfrcs', 'abs_joint_velocities', 'energy0',
+                 'sensor_head_velocity', 'target_v']
+        means_v = list([float(np.mean(self.dict_list_infos[x])) for x in paras])
+
+        cum = list([float(np.sum(self.dict_list_infos[x])) for x in ['power', 'distance_delta']])
+
+        max = list([float(np.max(np.abs(self.dict_list_infos[x]))) for x in ['max_joint_velocities']])
+
+
+        print(
+            'mean reward {d[0]:06.4f}, '
+            'mean velocity {d[1]:06.4f}, '
+            'mean power {d[2]:06.4f}, '
+            'energy normalized {d[3]:06.4f}, '
+            'mean actuatorfrcs {d[4]:06.4f}, '
+            'mean abs_joint_velocities {d[5]:06.4f},'
+            'mean energy0 {d[6]:06.4f}, '
+            'mean sensor_head_velocity {d[7]:06.4f}, '
+            'mean_target_v {d[8]:06.4f}, '
+            'sum power {d2[0]:06.4f}, '
+            'sum distance_delta {d2[1]:06.4f} '
+            'max_joint_velocities {d3[0]:06.4f} '.format(d=means_v, d2=cum, d3=max))
+
+        return means_v
+
+    def save_csv(self, dir, fname= None):
+        df = pd.DataFrame.from_dict(self.dict_list_infos)
+
+
+
+        if fname is None:
+            fname = 'data_run_env_{}_seed_{}'.format(self.paras['env'].spec.id, self.paras['seed'])
+
+        df.to_csv('{}/{}.csv'.format(dir, fname))
+
+    def plot(self, dir=None):
+        my_plots = plots.Plots(self.env, dir)
+        # todo
+
+        my_plots.plot_head_trace(self.get_list_dict(['head_x', 'head_y']))
+        #my_plots.plot_snake_gait(self.get_list_dict(['head_x', 'head_y', 'joints_pos', 'joint_head_pos']))
+
 
 class InfoDictCollector():
     def __init__(self, env):

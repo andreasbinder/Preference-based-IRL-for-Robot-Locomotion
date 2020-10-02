@@ -2,6 +2,7 @@
 /venv
 __pycache__
 __pycache__/
+/gym_mujoco_planar_snake/gym_mujoco_planar_snake/results/
 /gym_mujoco_planar_snake/gym_mujoco_planar_snake/log
 /gym_mujoco_planar_snake/gym_mujoco_planar_snake/__pycache__
 /gym_mujoco_planar_snake/gym_mujoco_planar_snake/results
