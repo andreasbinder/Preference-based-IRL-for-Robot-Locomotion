@@ -2,6 +2,18 @@
 create_dataset:
   seed: 0
   variable_scope: 0
+  # learning
+  save_frequency: 1000 # 5000
+  num_timesteps: 2000 # 1500000
+  checkpoint_dir: /tmp/test_create0/
+  data_dir: /tmp/test_create_result/
+  # dataset creation
+  subtrajector_length: 50 #50 100
+  episode_length: 1000
+  percentage: 0.66
+
+
+
 
 
 extrapolation:

@@ -374,20 +374,29 @@ if __name__ == '__main__':
     configs = configs.data["create_dataset"]
 
     # hyperparameters
-    # TODO migrate to configs
-    TRAJECTORY_LENGTH = 50 #50 100
-    EPISODE_MAX_LENGTH = 1000
-    RENDER = False
-    sfs = 5000
-    ENV_ID = 'Mujoco-planar-snake-cars-angle-line-v1'
-    NUM_TIMESTEPS = 1500000
-    SAVE_DIR = "/tmp/test_create0/"
-    MAX_EPISODE_STEPS = 1000
-    FULL_EPISODES = []
-    EXTRAPOLATE_NAME = "create_test.npy"
-    SAVE_PATH = "/tmp/test_create_result/"
-    percentage = 0.5
+    sfs = configs["save_frequency"]
+    NUM_TIMESTEPS = configs["num_timesteps"]
+    SAVE_DIR = configs["checkpoint_dir"]
+    SAVE_PATH = configs["data_dir"]
 
+    import os, datetime
+
+    SAVE_DIR = os.path.join(SAVE_DIR, datetime.datetime.now().strftime('%Y-%m-%d_%H-%M-%S'))
+    os.makedirs(SAVE_DIR)
+
+    SAVE_PATH = os.path.join(SAVE_PATH, datetime.datetime.now().strftime('%Y-%m-%d_%H-%M-%S'))
+    os.makedirs(SAVE_PATH)
+
+
+    TRAJECTORY_LENGTH = configs["subtrajector_length"]
+    MAX_EPISODE_STEPS = configs["episode_length"]
+    percentage = configs["percentage"]
+    percentage = float(percentage)
+
+    RENDER = False
+    ENV_ID = 'Mujoco-planar-snake-cars-angle-line-v1'
+
+    FULL_EPISODES = []
 
     # seeds
     set_global_seeds(configs["seed"])
