@@ -26,7 +26,9 @@ class Configs():
         with open(yaml_path) as f:
             self.data = yaml.load(f)
 
-
+    # TODO
+    def get_extrapolation_configs(self):
+        return self.data["extrapolation"]
 
         #self.update(yaml_path)
 
