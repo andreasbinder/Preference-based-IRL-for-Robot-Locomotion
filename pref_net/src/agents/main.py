@@ -6,13 +6,13 @@ import shutil
 
 import random
 
-from pref_net.common.multi_agents import AgentSquad
-from pref_net.common.misc_util import Configs
+from src.common.multi_agents import AgentSquad
+from src.common.misc_util import Configs
 #from gym_mujoco_planar_snake.common.evaluate import DataFrame
-from pref_net.common.ensemble import Ensemble
-from pref_net.common.env_wrapper import MyMonitor
+from src.common.ensemble import Ensemble
+from src.common.env_wrapper import MyMonitor
 
-import pref_net.common.data_util as data_util
+import src.common.data_util as data_util
 
 from baselines.common import set_global_seeds
 
@@ -57,7 +57,7 @@ def create_new_vf_ensemble(base_log_dir):
     # save config file
 
     # TODO modify src path
-    src = "/pref_net/src/agents/configurations/configs.yml"
+    src = "/home/andreas/Documents/pbirl-bachelorthesis/pref_net/configs.yml"
 
     shutil.copyfile(src, os.path.join(net_save_path, "configs_copy.yml"))
 
@@ -241,7 +241,7 @@ def main():
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(formatter_class=argparse.ArgumentDefaultsHelpFormatter)
     parser.add_argument('--path_to_configs', type=str,
-                        default="pref_net/agents/configurations/configs.yml")
+                        default="src/agents/configurations/configs.yml")
     args = parser.parse_args()
 
     configs = Configs(args.path_to_configs)

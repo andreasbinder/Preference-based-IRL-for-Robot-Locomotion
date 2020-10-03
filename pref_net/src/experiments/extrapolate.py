@@ -4,7 +4,7 @@ import argparse
 import os
 import torch
 import torch.nn as nn
-from pref_net.common.misc_util import Configs
+from src.common.misc_util import Configs
 
 class Net(nn.Module):
     def __init__(self, input_dim):
@@ -60,7 +60,7 @@ def load_data(path):
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(formatter_class=argparse.ArgumentDefaultsHelpFormatter)
     parser.add_argument('--path_to_configs', type=str,
-                        default="gym_mujoco_planar_snake/agents/configurations/configs.yml")
+                        default="/home/andreas/Documents/pbirl-bachelorthesis/pref_net/configs.yml")
     args = parser.parse_args()
 
     configs = Configs(args.path_to_configs)

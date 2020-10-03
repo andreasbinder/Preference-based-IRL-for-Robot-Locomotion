@@ -27,24 +27,24 @@ train:
   hparams:
     lr: 0.00005 #0.00005
     # pair 2, 15
-    epochs: 20 #10, 20 for triplet cum_reward
+    epochs: 15 #10, 20 for triplet cum_reward
     ranking_approach: 5
     dataset_size: 0
 
 
 
-
+evaluate: TODO
 
 extrapolation:
   seed: 0
-  train_path: /home/andreas/Documents/pbirl-bachelorthesis/gym_mujoco_planar_snake/gym_mujoco_planar_snake/results/Mujoco-planar-snake-cars-angle-line-v1/initial_runs/ppo_original_1.5Mio/data_500k/train.npy
-  extrapolation_path: /home/andreas/Documents/pbirl-bachelorthesis/gym_mujoco_planar_snake/gym_mujoco_planar_snake/results/Mujoco-planar-snake-cars-angle-line-v1/initial_runs/ppo_original_1.5Mio/data_500k/extrapolate.npy
-  net_path: /home/andreas/Documents/pbirl-bachelorthesis/gym_mujoco_planar_snake/gym_mujoco_planar_snake/results/Mujoco-planar-snake-cars-angle-line-v1/improved_runs/vf_ensemble5_Oct__2_00:04:44/model_0
+  train_path: /home/andreas/Desktop/2020-10-03_00-13-18_0.5/train.npy
+  extrapolation_path: /home/andreas/Desktop/2020-10-03_00-13-18_0.5/extrapolate.npy
+  net_path: /tmp/model_0
 
 visualize:
   seed: 0
-  variable_scope: 0
-  model_dir: TODO
+  variable_scope: 1
+  model_dir: /tmp/pi_hat/2020-10-03_17-10-16/1
 
 
 # define hyperparameters for IRL training
@@ -65,7 +65,7 @@ ppo:
   general:
     env_id: Mujoco-planar-snake-cars-angle-line-v1
     seed: 0
-    log_dir: pref_net/results/
+    log_dir: src/results/
   initial:
     create_trajectories: false # if false you need to provide training data
     trajectory_length: 100 #50

@@ -1,7 +1,7 @@
 # TODO
 # fix order of get models: sees 50K as > then 450k
 
-from pref_net.common.misc_util import Configs
+from src.common.misc_util import Configs
 
 from baselines.common import set_global_seeds, tf_util as U
 from baselines.ppo1 import mlp_policy
@@ -23,9 +23,9 @@ import imageio
 import os
 import os.path as osp
 
-from pref_net.common.env_wrapper import ModelSaverWrapper
+from src.common.env_wrapper import ModelSaverWrapper
 
-from pref_net.common import my_tf_util
+from src.common import my_tf_util
 
 
 # from gym_mujoco_planar_snake.benchmark.info_collector import InfoCollector, InfoDictCollector
@@ -294,7 +294,7 @@ if __name__ == '__main__':
 
     parser = argparse.ArgumentParser(formatter_class=argparse.ArgumentDefaultsHelpFormatter)
     parser.add_argument('--path_to_configs', type=str,
-                        default="pref_net/agents/configurations/configs.yml")
+                        default="/home/andreas/Documents/pbirl-bachelorthesis/pref_net/configs.yml")
     args = parser.parse_args()
 
     configs = Configs(args.path_to_configs)
@@ -302,12 +302,12 @@ if __name__ == '__main__':
 
     logger.configure()
 
-    agent_id = args.model_dir[-1]
+
 
     RENDER = True
     ENV_ID = 'Mujoco-planar-snake-cars-angle-line-v1'
 
-    with tf.variable_scope(configs["variable_scope"]):
+    with tf.variable_scope(str(configs["variable_scope"])):
         enjoy(ENV_ID, configs["seed"], configs["model_dir"])
 
 

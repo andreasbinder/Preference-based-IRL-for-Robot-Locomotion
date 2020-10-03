@@ -5,8 +5,8 @@ import os
 import shutil
 
 from gym.core import ObservationWrapper
-# from baselines.common import tf_util as U
-from src.common import my_tf_util as U
+from baselines.common import tf_util as U
+
 from baselines import logger
 import os.path as osp
 import os
@@ -37,8 +37,11 @@ import random
 from src.common.multi_agents import AgentSquad
 from src.common.misc_util import Configs
 #from gym_mujoco_planar_snake.common.evaluate import DataFrame
-from src.common.ensemble import Ensemble
+from src.common.ensemble import Ensemble as RFA
 from src.common.env_wrapper import MyMonitor
+
+from src.utils.model_saver import ModelSaverWrapper
+from src.utils.agent import PPOAgent
 
 
 
@@ -56,28 +59,28 @@ def set_seeds(seed):
     #seed = configs.get_seed()
     # tensorflow, numpy, random(python)
 
-    set_global_seeds(seed)
+    #set_global_seeds(seed)
 
-    '''tf.set_random_seed(seed)
+    tf.set_random_seed(seed)
     np.random.seed(seed)
-    random.seed(seed)'''
+    random.seed(seed)
 
     # TODO
     torch.manual_seed(seed)
 
 class MyRewardWrapper(RewardWrapper):
 
-    def __init__(self, venv, nets, max_timesteps, save_dir, ctrl_coeff, default_reward_dir, id):
+    def __init__(self, venv, nets, ctrl_coeff):
         RewardWrapper.__init__(self, venv)
 
         self.venv = venv
         self.counter = 0
         self.ctrl_coeff = ctrl_coeff
         self.nets = nets
-        self.id = id
+        #self.id = id
 
-        self.save_dir = save_dir
-        self.default_reward_dir = default_reward_dir
+        #self.save_dir = save_dir
+        #self.default_reward_dir = default_reward_dir
 
         self.cliprew = 10.
         self.epsilon = 1e-8
@@ -85,7 +88,7 @@ class MyRewardWrapper(RewardWrapper):
         self.rew_rms = [RunningMeanStd(shape=()) for _ in range(len(nets))]
 
         # TODO compare reward development
-        self.max_timesteps = max_timesteps
+        #self.max_timesteps = max_timesteps
         self.rewards = []
 
         self.reward_list = []
@@ -133,12 +136,6 @@ class MyRewardWrapper(RewardWrapper):
 
         self.store_rewards(rews, pred)
 
-        # self.reward_list.append(rews.item())
-
-        # TODO render for debugging
-        # do rendering by saving observations or actions
-        '''if self.counter >= 200000:
-            self.venv.render()'''
 
 
 
@@ -150,7 +147,7 @@ class MyRewardWrapper(RewardWrapper):
 
 
 
-        if self.counter == self.max_timesteps:
+        '''if self.counter == self.max_timesteps:
             with open(os.path.join(self.save_dir, "results.npy"), 'wb') as f:
                 np.save(f, np.array(self.rewards))
 
@@ -158,7 +155,7 @@ class MyRewardWrapper(RewardWrapper):
                                    "results" + str(self.id) + ctime()[4:19].replace(" ", "_") + ".npy"), 'wb') as f:
                 np.save(f, np.array(self.rewards))
 
-            self.rewards = []
+            self.rewards = []'''
 
         return self.venv.reset(**kwargs)
 
@@ -173,14 +170,20 @@ class MyRewardWrapper(RewardWrapper):
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(formatter_class=argparse.ArgumentDefaultsHelpFormatter)
     parser.add_argument('--path_to_configs', type=str,
-                        default="src/agents/configurations/configs.yml")
+                        default="/home/andreas/Documents/pbirl-bachelorthesis/pref_net/configs.yml")
     args = parser.parse_args()
 
     configs = Configs(args.path_to_configs)
+
+    configs.data["reward_learning"] = configs.data["train"]
+
     configs_tmp = configs
     configs = configs.data["train"]
 
 
+
+    # skip warnings
+    tf.compat.v1.logging.set_verbosity(tf.compat.v1.logging.ERROR)
     set_seeds(configs["seed"])
 
     TRAIN_PATH = "/home/andreas/Desktop/2020-10-03_00-13-18_0.5/train.npy"
@@ -191,8 +194,70 @@ if __name__ == '__main__':
     # main process
     train_set = data_util.generate_dataset_from_full_episodes(TRAIN, 50, 100)
 
-    ensemble = Ensemble(configs_tmp, "/tmp/")
+    net_path = "/tmp/"
+
+    ensemble = RFA(configs_tmp, net_path)
 
     ensemble.fit(train_set)
+
+    net = RFA.load(net_path, 1)
+
+    # seeds
+    ENV_ID = 'Mujoco-planar-snake-cars-angle-line-v1'
+
+    SAVE_DIR = "/tmp/pi_hat/"
+
+    import gym
+    import os, datetime
+    from baselines.ppo1 import mlp_policy
+
+    SAVE_DIR = os.path.join(SAVE_DIR, datetime.datetime.now().strftime('%Y-%m-%d_%H-%M-%S'))
+    os.makedirs(SAVE_DIR)
+
+    num_runs = 1
+    NUM_TIMESTEPS = 1000000
+    sfs = 100000
+    ctrl_coeff = 0.0
+
+    for index in range(1, num_runs + 1):
+
+
+
+        with tf.variable_scope(str(index)):
+
+            SAVE = os.path.join(SAVE_DIR, str(index))
+
+            env = gym.make(ENV_ID)
+
+            env.seed(configs["seed"])
+
+            env = ModelSaverWrapper(env, SAVE, sfs)
+            env = Monitor(env, SAVE)
+            #self, venv, nets, max_timesteps, save_dir, ctrl_coeff, default_reward_dir, id)
+            env = MyRewardWrapper(env, net, ctrl_coeff)
+
+
+
+            policy_fn = lambda name, ob_space, ac_space: mlp_policy.MlpPolicy(name=name,
+                                                                                ob_space=ob_space,
+                                                                                ac_space=ac_space,
+                                                                                hid_size=64,
+                                                                                num_hid_layers=2
+                                                                                )
+            pi = policy_fn("pi", env.observation_space, env.action_space)
+
+            sess = U.make_session(num_cpu=1, make_default=False)
+            sess.__enter__()
+            sess.run(tf.initialize_all_variables())
+            with sess.as_default():
+
+                agent = PPOAgent(env, pi, policy_fn)
+                agent.learn(NUM_TIMESTEPS)
+
+
+
+
+
+
 
 
