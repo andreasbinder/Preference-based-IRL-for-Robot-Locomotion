@@ -1,7 +1,24 @@
 # Preference-based Inverse Reinforcement Learning Approach for Robot Locomotion under Suboptimal Learning Conditions
 **Bachelor's Thesis in Robotics**
 
+Structure
+```bash
+prefnet
+|--src
+|  |--envs
+|  |--experiments
+|  |--util
+|  |--create
+|  |--train
+|--configs 
+```
+
+
+
+
 ## Setup
+
+
 
 
 ### System:
@@ -32,7 +49,7 @@ This project consists of three major steps to perform IRL.
 
 ### Script Templates
 
-All commands are run inside the [gym_mujoco_planar_snake](gym_mujoco_planar_snake) directory.
+All commands are run inside the [gym_mujoco_planar_snake](pref_net) directory.
 
 
 
