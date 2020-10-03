@@ -1,72 +1,315 @@
 import argparse
-from time import ctime
-import os
-
+import os, datetime
 import shutil
 
-from gym.core import ObservationWrapper
-from baselines.common import tf_util as U
-
-from baselines import logger
-import os.path as osp
-import os
-import time
-from time import ctime
-
-import time
 from gym.core import RewardWrapper
-
-import torch
-import torch.nn as nn
-import torch.nn.functional as F
-
-import numpy as np
-import os
-
-from time import ctime
-
-from baselines.common.running_mean_std import RunningMeanStd
-from baselines.bench.monitor import Monitor, load_results, get_monitor_files
-
-#from gym_mujoco_planar_snake.common.reward_nets import *
-from src.common.ensemble import Ensemble
+import gym
 
 
-import random
-
-from src.common.multi_agents import AgentSquad
-from src.common.misc_util import Configs
-#from gym_mujoco_planar_snake.common.evaluate import DataFrame
-from src.common.ensemble import Ensemble as RFA
-from src.common.env_wrapper import MyMonitor
-
-from src.utils.model_saver import ModelSaverWrapper
-from src.utils.agent import PPOAgent
-
-
-
-import src.common.data_util as data_util
-
-from baselines.common import set_global_seeds
 
 import tensorflow as tf
-
-
-import torch
 import numpy as np
+import torch
+import torch.nn as nn
 
-def set_seeds(seed):
-    #seed = configs.get_seed()
-    # tensorflow, numpy, random(python)
 
-    #set_global_seeds(seed)
+from baselines.ppo1 import mlp_policy
+from baselines.common import tf_util as U
+from baselines.common.running_mean_std import RunningMeanStd
+from baselines.bench.monitor import Monitor
 
-    tf.set_random_seed(seed)
-    np.random.seed(seed)
-    random.seed(seed)
+import src.common.data_util as data_util
+from src.common.misc_util import Configs
+from src.common.ensemble import Ensemble as RFA
+from src.utils.model_saver import ModelSaverWrapper
+from src.utils.agent import PPOAgent
+from src.utils.seeds import set_seeds
 
-    # TODO
-    torch.manual_seed(seed)
+
+class Net(nn.Module):
+    def __init__(self, input_dim):
+        super().__init__()
+
+        self.input_dim = input_dim
+
+        self.model = nn.Sequential(
+            nn.Linear(self.input_dim, 256),
+            nn.ReLU(),
+            nn.Linear(256, 256),
+            nn.ReLU(),
+            nn.Linear(256, 1)
+        )
+
+
+    def cum_return(self, traj):
+        # return of one traj
+        sum_rewards = 0
+
+        r = self.model(traj)
+
+        sum_rewards += torch.sum(r)
+
+        return sum_rewards
+
+    def forward(self, trajs):
+        cum_rs = [self.cum_return(traj).unsqueeze(0) for traj in trajs]
+
+        return torch.cat(tuple(cum_rs), 0).unsqueeze(0)
+
+
+class RewardFunctionApproximator(object):
+
+    def __init__(self, configs, net_save_path):
+        self.num_nets = configs.get_num_nets()
+        self.ranking_approach = configs.get_ranking_approach()
+        self.net_save_path = net_save_path
+
+        #
+        # TODO save training results
+        #self.hparams = Params(args.hparams_path)
+        self.lr = configs.get_learning_rate()
+        self.epochs = configs.get_epochs()
+        self.split_ratio = configs.get_split_ratio()
+        self.input_dim = configs.get_input_dim()
+        self.ranking_method = configs.get_ranking_method()
+
+
+        # TODO for every mode
+        self.loss_fn, self.preprocess_fn, self.forward_pass_fn = self.initialize_mode(self.ranking_method)
+
+
+        self.train_summary_writer = None
+        self.val_summary_writer = None
+        self.initialize_tensorboard()
+
+    def initialize_mode(self, mode):
+        print("Mode %s" % mode)
+        if mode == "pair":
+            return (
+                nn.BCEWithLogitsLoss(),
+                lambda raw_data: data.build_custom_ranking_trainset(raw_data, ranking=2),
+                lambda net, optimizer, inputs, label: self.forward_pass_pair_ranking(net, optimizer, inputs, label)
+                    )
+        if mode == "explicit":
+            return (
+                custom_losses.ExplicitRankingLoss(),
+                lambda raw_data: data.build_custom_ranking_trainset(raw_data, ranking=self.ranking_approach),
+                lambda net, optimizer, inputs, label: self.forward_pass_explicit_ranking(net, optimizer, inputs, label)
+                    )
+        if mode == "dcg":
+            return (
+                custom_losses.MultiLabelDCGLoss(),
+                lambda raw_data: data.build_custom_ranking_trainset(raw_data, ranking=self.ranking_approach),
+                lambda net, optimizer, inputs, label: self.forward_pass_dcg_ranking(net, optimizer, inputs, label)
+                    )
+        if mode == "triplet":
+            return (
+                nn.BCEWithLogitsLoss(),
+                lambda raw_data: data.build_custom_triplet_trainset(raw_data, ranking=3),
+                lambda net, optimizer, inputs, label: self.forward_pass_custom_triplet(net, optimizer, inputs, label)
+                    )
+        if mode == "triplet_sigmoid":
+            return (
+                nn.BCELoss(),
+                lambda raw_data: data.build_custom_triplet_trainset(raw_data, ranking=3),
+                lambda net, optimizer, inputs, label: self.forward_pass_custom_triplet_sigmoid(net, optimizer, inputs, label)
+                    )
+
+        if mode == "triplet_margin":
+            return (
+                nn.BCEWithLogitsLoss(),
+                lambda raw_data: data.build_test_margin_triplet_trainset(raw_data, ranking=3),
+                lambda net, optimizer, inputs, label: self.forward_pass_custom_triplet(net, optimizer, inputs, label)
+                    )
+        if mode == "triplet_better":
+            return (
+                nn.BCEWithLogitsLoss(),
+                lambda raw_data: data.build_test_better_triplet_trainset(raw_data, ranking=3),
+                lambda net, optimizer, inputs, label: self.forward_pass_custom_triplet(net, optimizer, inputs, label)
+            )
+
+
+
+
+
+    def preprocess_data(self, raw_data):
+        # choose
+        data = self.preprocess_fn(raw_data)
+
+        #data = split_dataset_for_nets(data, self.num_nets)
+
+        return data
+
+    def fit(self, raw_data):
+
+        whole_dataset = self.preprocess_data(raw_data)
+
+
+        nets = [Net(self.input_dim)] * self.num_nets
+
+
+        #nets = [Net(self.input_dim), Net(self.input_dim), Net(self.input_dim), Net(self.input_dim),Net(self.input_dim)]
+        #final_dataset = [raw_data[i:i + self.num_nets] for i, _ in enumerate(raw_data[::self.num_nets])]
+
+        #self.train(0, nets[0], whole_dataset[0])
+        import numpy as np
+
+        for index, net in enumerate(nets):
+            self.initialize_tensorboard()
+            self.train(index, net, whole_dataset)
+
+            #np.random.shuffle(whole_dataset)
+            whole_dataset = self.preprocess_data(raw_data)
+
+
+
+    def train(self, index, net, dataset):
+
+        train_set, val_set = data.split_into_train_val(dataset, self.split_ratio)
+
+
+        optimizer = optim.Adam(net.parameters(), lr=self.lr)
+
+        # training
+        print("Start Learning")
+        for epoch in range(self.epochs):
+
+            running_loss = 0.0
+
+            print("Training")
+            for item in tqdm(train_set):
+                inputs, label = item
+
+                loss = self.forward_pass_fn(net, optimizer, inputs, label)
+
+                loss.backward()
+                optimizer.step()
+
+                # print statistics
+                running_loss += loss.item()
+
+            print("Validating")
+            running_val_loss = 0.0
+            for item in tqdm(val_set):
+                inputs, label = item
+
+                loss = self.forward_pass_fn(net, optimizer, inputs, label)
+
+                # print statistics
+                running_val_loss += loss.item()
+
+            template = 'Epoch {}, Loss: {:10.4f}, Validation Loss: {:10.4f}'
+            stats = template.format(
+                epoch + 1,
+                running_loss / len(train_set),
+                running_val_loss / len(val_set)
+            )
+            print(stats)
+
+            self.train_summary_writer.add_scalar('train_loss', running_loss / len(train_set), epoch)
+            self.val_summary_writer.add_scalar('val_loss', running_val_loss / len(val_set), epoch)
+
+        self.save(index=index, net=net)
+
+    def forward_pass_explicit_ranking(self, net, optimizer, inputs, label):
+
+        trajs = [torch.from_numpy(inp).float() for inp in inputs]
+
+        y = torch.tensor(label).unsqueeze(0)
+
+        optimizer.zero_grad()
+
+        rewards = net(trajs)
+
+        loss = self.loss_fn(rewards, y)
+
+        return loss
+
+    def forward_pass_pair_ranking(self, net, optimizer, inputs, label):
+
+        trajs = [torch.from_numpy(inp).float() for inp in inputs]
+
+        y = torch.tensor(label).unsqueeze(0).float()
+
+        optimizer.zero_grad()
+
+        rewards = net(trajs)
+
+        loss = self.loss_fn(rewards, y)
+
+        return loss
+
+    def forward_pass_dcg_ranking(self, net, optimizer, inputs, label):
+
+        trajs = [torch.from_numpy(inp).float() for inp in inputs]
+
+        y = torch.tensor(label).unsqueeze(0)
+
+        optimizer.zero_grad()
+
+        rewards = net(trajs)
+
+        loss = self.loss_fn(rewards, y)
+
+        return loss
+
+    def forward_pass_custom_triplet(self, net, optimizer, inputs, label):
+
+        trajs = [torch.from_numpy(inp).float() for inp in inputs]
+
+        y = torch.tensor(label).unsqueeze(0)
+
+        optimizer.zero_grad()
+
+        rewards = net(trajs)
+
+        loss = self.loss_fn(rewards, y)
+
+        return loss
+
+    def forward_pass_custom_triplet_sigmoid(self, net, optimizer, inputs, label):
+
+        trajs = [torch.from_numpy(inp).float() for inp in inputs]
+
+        y = torch.tensor(label).unsqueeze(0).float()
+
+        optimizer.zero_grad()
+
+        rewards = net(trajs)
+
+        loss = self.loss_fn(rewards, y)
+
+        return loss
+
+    def save(self, index, net):
+
+        torch.save(net.state_dict(), os.path.join(self.net_save_path, "model_" + str(index)))
+
+    @staticmethod
+    def load(log_dir, num_nets, input_dim=27):
+
+        nets = []
+        for index in range(num_nets):
+            path = os.path.join(log_dir, "model_" + str(index))
+            net = Net(input_dim)
+            net.load_state_dict(torch.load(path))
+            nets.append(net)
+
+        return nets
+
+    def initialize_tensorboard(self):
+
+        from tensorboardX import SummaryWriter
+
+        current_time = datetime.datetime.now().strftime('%Y-%m-%d_%H-%M-%S')
+        train_log_dir = configs["tensorboard_dir"] + current_time + '/train'
+        val_log_dir = configs["tensorboard_dir"] + current_time + '/val'
+
+
+        self.train_summary_writer = SummaryWriter(train_log_dir)
+        self.val_summary_writer = SummaryWriter(val_log_dir)
+
+
 
 class MyRewardWrapper(RewardWrapper):
 
@@ -74,41 +317,18 @@ class MyRewardWrapper(RewardWrapper):
         RewardWrapper.__init__(self, venv)
 
         self.venv = venv
-        self.counter = 0
         self.ctrl_coeff = ctrl_coeff
         self.nets = nets
-        #self.id = id
-
-        #self.save_dir = save_dir
-        #self.default_reward_dir = default_reward_dir
 
         self.cliprew = 10.
         self.epsilon = 1e-8
-
         self.rew_rms = [RunningMeanStd(shape=()) for _ in range(len(nets))]
-
-        # TODO compare reward development
-        #self.max_timesteps = max_timesteps
-        self.rewards = []
-
-        self.reward_list = []
-
-
-        # TODO apply sigmoid
-        self.sigmoid = nn.Sigmoid()
-
-
 
 
     def step(self, action):
 
-        self.counter += 1
 
         obs, rews, news, infos = self.venv.step(action)
-
-        # acs = self.last_actions
-
-        # TODO save true reward
 
         r_hats = 0.
 
@@ -116,12 +336,10 @@ class MyRewardWrapper(RewardWrapper):
             # Preference based reward
             with torch.no_grad():
                 pred_rews = net.cum_return(torch.from_numpy(obs).float())
-                # TODO apply sigmoid
-                # pred_rews = self.sigmoid(pred_rews)
+
             r_hat = pred_rews.item()
 
             # Normalization only has influence on predicted reward
-            # Normalize TODO try without, 2. run has no running mean
             rms.update(np.array([r_hat]))
             r_hat = np.clip(r_hat / np.sqrt(rms.var + self.epsilon), -self.cliprew, self.cliprew)
 
@@ -130,41 +348,11 @@ class MyRewardWrapper(RewardWrapper):
 
         pred = r_hats / len(self.nets) - self.ctrl_coeff * np.sum(action ** 2)
 
-        #pred = r_hats / len(self.nets) * np.abs(1.0 - infos["power_normalized"])
-
-        # TODO normalize
-
-        self.store_rewards(rews, pred)
-
-
-
-
-        # TODO return reward or abs_reward
         return obs, pred, news, infos
 
     def reset(self, **kwargs):
 
-
-
-
-        '''if self.counter == self.max_timesteps:
-            with open(os.path.join(self.save_dir, "results.npy"), 'wb') as f:
-                np.save(f, np.array(self.rewards))
-
-            with open(os.path.join(self.default_reward_dir,
-                                   "results" + str(self.id) + ctime()[4:19].replace(" ", "_") + ".npy"), 'wb') as f:
-                np.save(f, np.array(self.rewards))
-
-            self.rewards = []'''
-
         return self.venv.reset(**kwargs)
-
-    def store_rewards(self, reward, pred_reward):
-        self.rewards.append((reward, pred_reward))
-
-
-# gen data here?
-# ppo in common
 
 
 if __name__ == '__main__':
@@ -180,61 +368,46 @@ if __name__ == '__main__':
     configs_tmp = configs
     configs = configs.data["train"]
 
-
-
     # skip warnings
     tf.compat.v1.logging.set_verbosity(tf.compat.v1.logging.ERROR)
     set_seeds(configs["seed"])
 
-    TRAIN_PATH = "/home/andreas/Desktop/2020-10-03_00-13-18_0.5/train.npy"
-
-    with open(TRAIN_PATH, 'rb') as f:
+    with open(configs["data_dir"], 'rb') as f:
         TRAIN = np.load(f, allow_pickle=True)
 
-    # main process
-    train_set = data_util.generate_dataset_from_full_episodes(TRAIN, 50, 100)
 
-    net_path = "/tmp/"
+    train_set = data_util.generate_dataset_from_full_episodes(TRAIN, configs["subtrajectry_length"], configs["subtrajectories_per_episode"])
 
-    ensemble = RFA(configs_tmp, net_path)
+    SAVE_DIR = os.path.join(configs["save_dir"], datetime.datetime.now().strftime('%Y-%m-%d_%H-%M-%S'))
+    os.makedirs(SAVE_DIR)
+    shutil.copyfile(args.path_to_configs, os.path.join(SAVE_DIR, "configs_copy.yml"))
+
+
+    ensemble = RFA(configs_tmp, SAVE_DIR)
 
     ensemble.fit(train_set)
 
-    net = RFA.load(net_path, 1)
+    net = RFA.load(SAVE_DIR, 1)
 
-    # seeds
+    # RL
     ENV_ID = 'Mujoco-planar-snake-cars-angle-line-v1'
 
-    SAVE_DIR = "/tmp/pi_hat/"
+    indices = [str(index) for index in range(1, configs["num_agents"] + 1)]
 
-    import gym
-    import os, datetime
-    from baselines.ppo1 import mlp_policy
+    for index in indices:
 
-    SAVE_DIR = os.path.join(SAVE_DIR, datetime.datetime.now().strftime('%Y-%m-%d_%H-%M-%S'))
-    os.makedirs(SAVE_DIR)
+        with tf.variable_scope(index):
 
-    num_runs = 1
-    NUM_TIMESTEPS = 1000000
-    sfs = 100000
-    ctrl_coeff = 0.0
-
-    for index in range(1, num_runs + 1):
-
-
-
-        with tf.variable_scope(str(index)):
-
-            SAVE = os.path.join(SAVE_DIR, str(index))
+            SAVE = os.path.join(SAVE_DIR, index)
 
             env = gym.make(ENV_ID)
 
             env.seed(configs["seed"])
 
-            env = ModelSaverWrapper(env, SAVE, sfs)
+            env = ModelSaverWrapper(env, SAVE, configs["save_sequency"])
             env = Monitor(env, SAVE)
-            #self, venv, nets, max_timesteps, save_dir, ctrl_coeff, default_reward_dir, id)
-            env = MyRewardWrapper(env, net, ctrl_coeff)
+
+            env = MyRewardWrapper(env, net, configs["ctrl_coeff"])
 
 
 
@@ -252,7 +425,7 @@ if __name__ == '__main__':
             with sess.as_default():
 
                 agent = PPOAgent(env, pi, policy_fn)
-                agent.learn(NUM_TIMESTEPS)
+                agent.learn(configs["num_timesteps"])
 
 
 

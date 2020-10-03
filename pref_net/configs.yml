@@ -20,14 +20,25 @@ create_dataset:
 train:
   seed: 0
   num_nets: 1
+  data_dir: /home/andreas/Desktop/2020-10-03_00-13-18_0.5/train.npy
   input_dim: 27
   split_ratio: 0.9
+  save_dir: /tmp/pi_hat/
+  num_agents: 1
+  num_timesteps: 1000000
+  save_sequency: 100000
+  ctrl_coeff: 0.0
+  subtrajectry_length: 50
+  subtrajectories_per_episode: 100
+  tensorboard_dir: /tmp/tensorboard/
   # available
-  ranking_method: triplet
+  ranking_method: triplet_margin
+  # margin 13 05
+  # normal 9 01
   hparams:
     lr: 0.00005 #0.00005
     # pair 2, 15
-    epochs: 15 #10, 20 for triplet cum_reward
+    epochs: 25 #10, 20 for triplet cum_reward, 9
     ranking_approach: 5
     dataset_size: 0
 
@@ -44,7 +55,7 @@ extrapolation:
 visualize:
   seed: 0
   variable_scope: 1
-  model_dir: /tmp/pi_hat/2020-10-03_17-10-16/1
+  model_dir: /home/andreas/Desktop/pi_2020-10-03_18-03-20/1
 
 
 # define hyperparameters for IRL training

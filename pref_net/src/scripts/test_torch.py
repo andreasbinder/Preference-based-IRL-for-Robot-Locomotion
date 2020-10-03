@@ -1,6 +1,45 @@
 import torch
 import torch.nn as nn
-from pref_net.common.ensemble import Net
+
+
+class MyEnsemble(nn.Module):
+    def __init__(self):
+        super(MyEnsemble, self).__init__()
+        self.model = nn.Sequential(
+            nn.Linear(1,2)
+        )
+        make_model = lambda : self.model
+        self.modelA = make_model()
+        self.modelB = make_model()
+        # Remove last linear layer
+        self.modelA.fc = nn.Identity()
+        self.modelB.fc = nn.Identity()
+
+        # Create new classifier
+        #self.classifier = nn.Linear(2048 + 512, nb_classes)
+
+    def forward(self, x):
+        x1 = self.modelA(x.clone())  # clone to make sure x is not changed by inplace methods
+        x1 = x1.view(x1.size(0), -1)
+        x2 = self.modelB(x)
+        x2 = x2.view(x2.size(0), -1)
+        x = torch.cat((x1, x2), dim=1)
+
+        x = self.classifier(F.relu(x))
+        return x
+
+
+inp =  torch.tensor([3.])
+
+ensemble = MyEnsemble()
+
+
+print(ensemble.modelA(inp))
+
+print(ensemble.modelB(inp))
+
+import sys
+sys.exit()
 
 path_today = "/gym_mujoco_planar_snake/prefnet/results/Mujoco-planar-snake-cars-angle-line-v1/improved_runs/vf_ensemble5_Sep_29_21:10:59/model_0"
 

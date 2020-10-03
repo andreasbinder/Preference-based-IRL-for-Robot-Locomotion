@@ -523,13 +523,6 @@ def generate_dataset_from_full_episodes(all_episodes, trajectory_length, n):
     numpy array
         array containing the training data
     """
-    '''epi = all_episodes[0]
-    print(len(list(epi[0])) )
-    print(epi.shape)
-    #print(all_episodes.shape)
-
-    import sys
-    sys.exit()'''
 
     training_set = []
 
@@ -538,16 +531,10 @@ def generate_dataset_from_full_episodes(all_episodes, trajectory_length, n):
         starts = np.random.randint(0, episode_length - trajectory_length, size=n)
         starts.sort()
 
-        # TODO time_step or reward, time_step  + start
-        # trajectories = np.array([(np.array(observations)[start:start + TRAJECTORY_LENGTH], sum(cum_reward[start:start + TRAJECTORY_LENGTH])) for start in starts])
         training_set.append(np.array(
             [(np.array(episode[0][start:start + trajectory_length]), episode[1] + start) for start in starts]))
 
-    # path = "/home/andreas/Documents/pbirl-bachelorthesis/gym_mujoco_planar_snake/gym_mujoco_planar_snake/results/Mujoco-planar-snake-cars-angle-line-v1/initial_runs/default_dataset"
-    '''name = "trajectories_{time_step}.npy".format(time_step=time_step)
 
-    with open(os.path.join(SAVE_PATH, name), 'wb') as f:
-        np.save(f, np.array(trajectories))'''
 
     training_set = np.concatenate(training_set)
 
