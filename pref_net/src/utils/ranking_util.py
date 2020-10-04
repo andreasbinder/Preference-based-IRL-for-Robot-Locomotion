@@ -212,5 +212,5 @@ class TripletMarginLoss(nn.Module):
 
 RANKING_DICT = {
     "Triplet" : TripletLoss(),
-    "TripletMarginLoss" : TripletMarginLoss()
+    "TripletMargin" : TripletMarginLoss()
 }

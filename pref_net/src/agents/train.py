@@ -142,14 +142,15 @@ class MyRewardWrapper(RewardWrapper):
 
     def __init__(self, venv, nets, ctrl_coeff):
         RewardWrapper.__init__(self, venv)
-
         self.venv = venv
         self.ctrl_coeff = ctrl_coeff
-        self.nets = nets
+
+        # TODO change for one net
+        self.nets = [nets]
 
         self.cliprew = 10.
         self.epsilon = 1e-8
-        self.rew_rms = [RunningMeanStd(shape=()) for _ in range(len(nets))]
+        self.rew_rms = [RunningMeanStd(shape=()) for _ in range(len(self.nets))]
 
     def step(self, action):
         obs, rews, news, infos = self.venv.step(action)

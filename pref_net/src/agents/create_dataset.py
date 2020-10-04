@@ -1,38 +1,25 @@
-import numpy as np
 
 import os.path as osp
-import tensorflow as tf
+
 
 import argparse
 import os, datetime
 
-from baselines.common import set_global_seeds, tf_util as U
+
 from baselines.ppo1 import mlp_policy
-#from baselines.ppo1.pposgd_simple import learn
-from baselines import logger
 
 import gym, logging
-from gym.core import ObservationWrapper
 import os
 
-from src.common.env_wrapper import prepare_env
-from src.common import my_tf_util
-from src.common.misc_util import Configs
+
+from src.utils.configs import Configs
 from src.benchmark.info_collector import InfoCollector, InfoDictCollector
 
-from baselines.common.mpi_running_mean_std import RunningMeanStd
 
-from baselines.common.distributions import make_pdtype
-
-from baselines.common import Dataset, explained_variance, fmt_row, zipsame
 from baselines import logger
 import baselines.common.tf_util as U
 import tensorflow as tf, numpy as np
-import time
-from baselines.common.mpi_adam import MpiAdam
-from baselines.common.mpi_moments import mpi_moments
-from mpi4py import MPI
-from collections import deque
+
 
 from src.utils.model_saver import ModelSaverWrapper
 from src.utils.agent import PPOAgent
@@ -45,7 +32,7 @@ if __name__ == '__main__':
 
     parser = argparse.ArgumentParser(formatter_class=argparse.ArgumentDefaultsHelpFormatter)
     parser.add_argument('--path_to_configs', type=str,
-                        default="src/agents/configurations/configs.yml")
+                        default="/home/andreas/Documents/pbirl-bachelorthesis/pref_net/configs.yml")
     args = parser.parse_args()
 
     configs_file = Configs(args.path_to_configs)

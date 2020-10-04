@@ -2,6 +2,9 @@
 /venv
 __pycache__
 __pycache__/
+/pref_net/src/common
+/pref_net/src/benchmark
+/pref_net/src/scripts
 /pref_net/src/results/
 /pref_net/src/log
 /pref_net/src/__pycache__

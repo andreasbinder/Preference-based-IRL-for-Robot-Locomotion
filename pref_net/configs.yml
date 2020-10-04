@@ -5,7 +5,7 @@ create_dataset:
   variable_scope: 0
   # learning
   save_frequency:  5000
-  num_timesteps: 1500000
+  num_timesteps: 1000000
   checkpoint_dir: /tmp/checkpoints/
   data_dir: /tmp/data/
 
@@ -13,7 +13,7 @@ create_dataset:
   # dataset creation
   subtrajector_length: 50 #50 100
   episode_length: 1000
-  percentage: 0.33
+  percentage: 0.75
 
 
 
@@ -33,10 +33,11 @@ train:
   subtrajectories_per_episode: 100
   tensorboard_dir: /tmp/tensorboard/
   # available
-  ranking_method: Triplet
+  ranking_method: TripletMargin
   # margin 13 05
   # normal 9 01
   lr: 0.00005 #0.00005
+  margin: 300000
   # pair 2, 15
   epochs: 16 #10, 20 for triplet cum_reward, 9
   ranking_approach: 5
@@ -55,7 +56,7 @@ extrapolation:
 visualize:
   seed: 0
   variable_scope: 1
-  model_dir: /tmp/pi_hat/2020-10-04_00-06-25/1
+  model_dir: /home/andreas/Documents/pbirl-bachelorthesis/pref_net/src/log/pi_opt/2020-10-04_19-34-35/1
 
 
 # define hyperparameters for IRL training
