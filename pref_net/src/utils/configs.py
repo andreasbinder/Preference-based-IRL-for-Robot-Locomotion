@@ -10,7 +10,7 @@ class Configs():
             self.data = yaml.load(f)
 
     def __getitem__(self, key):
-        return self.data["key"]
+        return self.data[key]
 
 
     # TODO
