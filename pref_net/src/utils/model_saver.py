@@ -15,7 +15,7 @@ import os
 from src.common.env_wrapper import prepare_env
 from src.common import my_tf_util
 from src.common.misc_util import Configs
-from src.benchmark.info_collector import InfoCollector, InfoDictCollector
+#from src.benchmark.info_collector import InfoCollector, InfoDictCollector
 
 from baselines.common.mpi_running_mean_std import RunningMeanStd
 

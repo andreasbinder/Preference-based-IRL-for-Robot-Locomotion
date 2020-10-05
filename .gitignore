@@ -19,7 +19,8 @@ __pycache__/
 .idea/
 .PowerFolder
 .vscode
-
+README_Lemke.md
+requirements.txt
 /pref_net/dist
 /pref_net/build
 /pref_net/gym_mujoco_planar_snake.egg-info

@@ -1,7 +1,7 @@
 # TODO
 # fix order of get models: sees 50K as > then 450k
 
-from src.common.misc_util import Configs
+from src.utils.configs import Configs
 
 from baselines.common import set_global_seeds, tf_util as U
 from baselines.ppo1 import mlp_policy
@@ -23,7 +23,7 @@ import imageio
 import os
 import os.path as osp
 
-from src.common.env_wrapper import ModelSaverWrapper
+from src.utils.model_saver import ModelSaverWrapper
 
 from src.common import my_tf_util
 

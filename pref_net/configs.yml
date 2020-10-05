@@ -37,9 +37,9 @@ train:
   # margin 13 05
   # normal 9 01
   lr: 0.00005 #0.00005
-  margin: 300000
+  margin: 200000
   # pair 2, 15
-  epochs: 16 #10, 20 for triplet cum_reward, 9
+  epochs: 25 #10, 20 for triplet cum_reward, 9
   ranking_approach: 5
   dataset_size: 0
 
@@ -56,7 +56,7 @@ extrapolation:
 visualize:
   seed: 0
   variable_scope: 1
-  model_dir: /home/andreas/Documents/pbirl-bachelorthesis/pref_net/src/log/pi_opt/2020-10-04_19-34-35/1
+  model_dir: /home/andreas/Documents/pbirl-bachelorthesis/pref_net/src/log/pi_opt/2020-10-04_21-41-56/1
 
 
 # define hyperparameters for IRL training
