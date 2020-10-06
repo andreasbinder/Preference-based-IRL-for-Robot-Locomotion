@@ -21,7 +21,7 @@ create_dataset:
 train:
   seed: 0
   num_nets: 1
-  data_dir: /home/andreas/Desktop/2020-10-03_00-13-18_0.5/train.npy
+  data_dir: /home/andreas/Documents/PrefNet_Data/train.npy
   input_dim: 27
   split_ratio: 0.9
   save_dir: /home/andreas/Documents/pbirl-bachelorthesis/pref_net/src/log/pi_opt
@@ -35,20 +35,28 @@ train:
   tensorboard_dir: /tmp/tensorboard/
   # available methods:
   # Pair, Triplet, TripletMargin
-  ranking_method: Pair
+  ranking_method: Triplet
   # margin 13 05
   # normal 9 01
-  lr: 0.00005 #0.00005
+  lr: 0.000005 #0.00005
   margin: 200000
   # pair 2, 15
-  epochs: 25 #10, 20 for triplet cum_reward, 9
+  epochs: 40 #10, 20 for triplet cum_reward, 9
   ranking_approach: 5
   dataset_size: 0
   max_num_subtrajectories: 10000
 
 
 
-evaluate: TODO
+evaluate:
+  seed: 0
+  runs_per_model: 5
+  paths_with_var_scops:
+    - model0:
+        - 1
+        - /home/andreas/Documents/pbirl-bachelorthesis/pref_net/src/log/pi_opt/2020-10-05_19-17-08/1
+
+
 
 extrapolation:
   seed: 0
@@ -60,7 +68,7 @@ extrapolation:
 visualize:
   seed: 0
   variable_scope: 1
-  model_dir: /home/andreas/Documents/pbirl-bachelorthesis/pref_net/src/log/pi_opt/2020-10-05_12-34-18/1
+  model_dir: /home/andreas/Documents/pbirl-bachelorthesis/pref_net/src/log/pi_opt/2020-10-05_19-00-27/1
 
 
 # define hyperparameters for IRL training

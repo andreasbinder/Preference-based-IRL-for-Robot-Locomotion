@@ -1,35 +1,15 @@
-import numpy as np
 
 import os.path as osp
-import tensorflow as tf
 
-from baselines.common import set_global_seeds, tf_util as U
-from baselines.ppo1 import mlp_policy
-#from baselines.ppo1.pposgd_simple import learn
-from baselines import logger
-
-import gym, logging
 from gym.core import ObservationWrapper
-import os
 
-from src.common.env_wrapper import prepare_env
-from src.common import my_tf_util
-from src.common.misc_util import Configs
-#from src.benchmark.info_collector import InfoCollector, InfoDictCollector
 
-from baselines.common.mpi_running_mean_std import RunningMeanStd
+from pref_net.src.common import my_tf_util
 
-from baselines.common.distributions import make_pdtype
 
-from baselines.common import Dataset, explained_variance, fmt_row, zipsame
+
 from baselines import logger
-import baselines.common.tf_util as U
-import tensorflow as tf, numpy as np
-import time
-from baselines.common.mpi_adam import MpiAdam
-from baselines.common.mpi_moments import mpi_moments
-from mpi4py import MPI
-from collections import deque
+
 
 class ModelSaverWrapper(ObservationWrapper):
 

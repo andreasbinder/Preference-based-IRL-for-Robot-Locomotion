@@ -9,7 +9,7 @@ from gym.envs.robotics import rotations
 from mujoco_py import MjViewer, MjSim, MjRenderPool, MjRenderContextOffscreen
 import copy
 
-from src.envs.mujoco_15.mujoco_head_cam import MujocoHeadCam
+from pref_net.src.envs.mujoco_15.mujoco_head_cam import MujocoHeadCam
 #from src.benchmark.tracks_generator import TracksGenerator
 from skimage import color
 from skimage import transform

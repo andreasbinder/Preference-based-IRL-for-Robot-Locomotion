@@ -12,11 +12,11 @@ import gym, logging
 import os
 
 
-from src.utils.configs import Configs
-from src.utils.info_collector import InfoCollector, InfoDictCollector
-from src.utils.model_saver import ModelSaverWrapper
-from src.utils.agent import PPOAgent
-from src.utils.seeds import set_seeds
+from pref_net.src.utils.configs import Configs
+from pref_net.src.utils.info_collector import InfoCollector, InfoDictCollector
+from pref_net.src.utils.model_saver import ModelSaverWrapper
+from pref_net.src.utils.agent import PPOAgent
+from pref_net.src.utils.seeds import set_seeds
 
 
 from baselines import logger

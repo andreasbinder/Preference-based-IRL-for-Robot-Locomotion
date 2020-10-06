@@ -17,12 +17,13 @@ from baselines.common import tf_util as U
 from baselines.common.running_mean_std import RunningMeanStd
 from baselines.bench.monitor import Monitor
 
-from src.utils.configs import Configs
-from src.utils.model_saver import ModelSaverWrapper
-from src.utils.agent import PPOAgent
-from src.utils.seeds import set_seeds
-import src.utils.ranking_util as ranking_util
-import src.utils.data_util as data_util
+
+from pref_net.src.utils.configs import Configs
+from pref_net.src.utils.model_saver import ModelSaverWrapper
+from pref_net.src.utils.agent import PPOAgent
+from pref_net.src.utils.seeds import set_seeds
+import pref_net.src.utils.ranking_util as ranking_util
+import pref_net.src.utils.data_util as data_util
 
 
 class Net(nn.Module):
@@ -200,11 +201,22 @@ if __name__ == '__main__':
     with open(configs["data_dir"], 'rb') as f:
         TRAIN = np.load(f, allow_pickle=True)
 
+    np.random.shuffle(TRAIN)
+
     train_set = data_util.generate_dataset_from_full_episodes(TRAIN, configs["subtrajectry_length"],
                                                               configs["subtrajectories_per_episode"],
                                                               configs["max_num_subtrajectories"])
 
-    np.random.shuffle(train_set)
+    print(len(list(np.unique(train_set[:, 1]))))
+    print(len(list(train_set)))
+
+
+
+    import sys
+    sys.exit()
+
+
+
 
     # reward learning
     rfa = RewardFunctionApproximator(SAVE_DIR)

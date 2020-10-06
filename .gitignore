@@ -24,5 +24,6 @@ requirements.txt
 /pref_net/dist
 /pref_net/build
 /pref_net/gym_mujoco_planar_snake.egg-info
-
+/log
+/results
 Notes
