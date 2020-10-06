@@ -302,7 +302,8 @@ if __name__ == '__main__':
 
     logger.configure()
 
-
+    # skip warnings
+    tf.compat.v1.logging.set_verbosity(tf.compat.v1.logging.ERROR)
 
     RENDER = True
     ENV_ID = 'Mujoco-planar-snake-cars-angle-line-v1'

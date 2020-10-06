@@ -201,7 +201,8 @@ if __name__ == '__main__':
         TRAIN = np.load(f, allow_pickle=True)
 
     train_set = data_util.generate_dataset_from_full_episodes(TRAIN, configs["subtrajectry_length"],
-                                                              configs["subtrajectories_per_episode"])
+                                                              configs["subtrajectories_per_episode"],
+                                                              configs["max_num_subtrajectories"])
 
     np.random.shuffle(train_set)
 
@@ -212,6 +213,13 @@ if __name__ == '__main__':
 
     torch.save(net.state_dict(), os.path.join(SAVE_DIR, "model"))
 
+    '''with open(os.path.join("/home/andreas/Desktop", "test.npy"), 'wb') as f:
+        np.save(f, np.array(train_set))
+
+    # TODO
+    import sys
+    sys.exit()
+    '''
     # rl on top
     ENV_ID = 'Mujoco-planar-snake-cars-angle-line-v1'
 

@@ -7,7 +7,7 @@ def split_into_train_val(whole_dataset, ratio):
 
 
 
-def generate_dataset_from_full_episodes(all_episodes, trajectory_length, n):
+def generate_dataset_from_full_episodes(all_episodes, trajectory_length, n, max_num_subtrajectories):
     """
     Divides full episodes into n snippets of k length and returns it
 
@@ -35,7 +35,7 @@ def generate_dataset_from_full_episodes(all_episodes, trajectory_length, n):
         # get unique starts
         while True:
             starts = np.random.randint(0, episode_length - trajectory_length, size=n)
-            if len(list(starts)) == n:
+            if len(list(np.unique(starts))) == n:
                 break
 
         # TODO advantage for sorting?
@@ -46,6 +46,14 @@ def generate_dataset_from_full_episodes(all_episodes, trajectory_length, n):
 
 
     training_set = np.concatenate(training_set)
+
+    print(len(list(np.unique(training_set[:, 1]))))
+
+
+
+    training_set = np.array([training_set[index] for index in range(max_num_subtrajectories)])
+
+    print(len(list(np.unique(training_set[:, 1]))))
 
     return training_set
 

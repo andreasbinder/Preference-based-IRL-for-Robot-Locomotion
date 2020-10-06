@@ -13,7 +13,10 @@ import os
 
 
 from src.utils.configs import Configs
-from src.benchmark.info_collector import InfoCollector, InfoDictCollector
+from src.utils.info_collector import InfoCollector, InfoDictCollector
+from src.utils.model_saver import ModelSaverWrapper
+from src.utils.agent import PPOAgent
+from src.utils.seeds import set_seeds
 
 
 from baselines import logger
@@ -21,9 +24,6 @@ import baselines.common.tf_util as U
 import tensorflow as tf, numpy as np
 
 
-from src.utils.model_saver import ModelSaverWrapper
-from src.utils.agent import PPOAgent
-from src.utils.seeds import set_seeds
 
 
 
@@ -117,7 +117,8 @@ if __name__ == '__main__':
 
             # Split in train and extrapolation data
             full_episodes = np.concatenate(full_episodes)
-            FACTOR = int(num_models * float(configs["percentage"]))
+            FACTOR = int(num_models * float(configs["percentage"] / configs["num_timesteps"]))
+
 
             TRAIN = full_episodes[:FACTOR]
             EXTRAPOLATE = full_episodes[FACTOR:]

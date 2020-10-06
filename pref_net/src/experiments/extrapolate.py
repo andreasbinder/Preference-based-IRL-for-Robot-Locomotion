@@ -4,7 +4,7 @@ import argparse
 import os
 import torch
 import torch.nn as nn
-from src.common.misc_util import Configs
+from pref_net.src.common.misc_util import Configs
 
 class Net(nn.Module):
     def __init__(self, input_dim):
@@ -80,8 +80,15 @@ if __name__ == '__main__':
     # Retrieve Data
     train_episodes, extrapolation_episodes = load_data(configs["train_path"]), load_data(configs["extrapolation_path"])
 
+    n = configs["num_samples"]
+
+    train_episodes, extrapolation_episodes = sample(train_episodes, n), sample(extrapolation_episodes, n)
+
     train_timesteps = [episode[1] for episode in train_episodes]
     extrapolation_timesteps = [episode[1] for episode in extrapolation_episodes]
+
+    train_predictions = [predict(episode[0], net).item() for episode in train_episodes]
+    extrapolation_predictions = [predict(episode[0], net).item() for episode in extrapolation_episodes]
 
     train_distance = [sum(episode[2])  for episode in train_episodes]
     extrapolation_distance = [sum(episode[2]) for episode in extrapolation_episodes]
@@ -89,8 +96,27 @@ if __name__ == '__main__':
     # Plot
     plt.title("Extrapolation")
 
-    plt.scatter(train_timesteps, train_distance, color='b')
-    plt.scatter(extrapolation_timesteps, extrapolation_distance, color="r")
+    joint = np.concatenate((train_predictions, extrapolation_predictions))
+
+    # TODO 5 rausnehmen
+    joint = (np.array(joint) - np.array(joint).min()) / \
+                        np.abs(np.array(joint).max() - np.array(joint).min()) * 5
+
+    train_predictions, extrapolation_predictions = joint[:n], joint[n:]
+
+    # rescale
+    # x_new = (x-min) / range * scalar
+    '''train_predictions = (np.array(train_predictions) - np.array(train_predictions).min()) / \
+                        np.abs(np.array(train_predictions).max() - np.array(train_predictions).min()) * 5
+
+    extrapolation_predictions = (np.array(extrapolation_predictions) - np.array(extrapolation_predictions).min()) / \
+                        np.abs(np.array(extrapolation_predictions).max() - np.array(extrapolation_predictions).min()) * 5'''
+
+    plt.scatter(train_timesteps, train_predictions, color='b', label='Training Data')
+    plt.scatter(extrapolation_timesteps, extrapolation_predictions, color="r", label='Unseen Data')
+
+    plt.scatter(train_timesteps, train_distance, color='y', label='Training Data')
+    plt.scatter(extrapolation_timesteps, extrapolation_distance, color="g", label='Unseen Data')
 
     plt.show()
 
