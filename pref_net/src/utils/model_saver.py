@@ -3,9 +3,7 @@ import os.path as osp
 
 from gym.core import ObservationWrapper
 
-
-from pref_net.src.common import my_tf_util
-
+from pref_net.src.utils import my_tf_util
 
 
 from baselines import logger

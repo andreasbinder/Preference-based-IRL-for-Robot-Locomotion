@@ -18,17 +18,17 @@ import imageio
 import os
 import os.path as osp
 
-from src.utils.model_saver import ModelSaverWrapper
+from pref_net.src.utils.model_saver import ModelSaverWrapper
 
-from src.common import my_tf_util
+from pref_net.src.utils import my_tf_util
 
-from src.utils.info_collector import InfoCollector, InfoDictCollector
+#from src.utils.info_collector import InfoCollector, InfoDictCollector
 
 import argparse
 
-from src.utils.configs import Configs
+from pref_net.src.utils.configs import Configs
 
-import matplotlib.pyplot as plt
+#import matplotlib.pyplot as plt
 
 
 def get_latest_model_file(model_dir):
@@ -43,13 +43,7 @@ def get_model_files(model_dir):
     return files
 
 
-def get_model_dir(env_id, name):
-    # '../../models'
-    model_dir = osp.join(logger.get_dir(), 'models')
-    os.mkdir(model_dir)
-    model_dir = ModelSaverWrapper.gen_model_dir_path(model_dir, env_id, name)
-    logger.log("model_dir: %s" % model_dir)
-    return model_dir
+
 
 
 # also for benchmark
@@ -106,12 +100,7 @@ if __name__ == '__main__':
 
     ENV_ID = 'Mujoco-planar-snake-cars-angle-line-v1'
 
-    policy_fn = lambda name, ob_space, ac_space: mlp_policy.MlpPolicy(name=name,
-                                                                      ob_space=ob_space,
-                                                                      ac_space=ac_space,
-                                                                      hid_size=64,
-                                                                      num_hid_layers=2
-                                                                      )
+
     env = gym.make(ENV_ID)
 
 
@@ -129,6 +118,13 @@ if __name__ == '__main__':
             sess = U.make_session(num_cpu=1)
             sess.__enter__()
 
+            policy_fn = lambda name, ob_space, ac_space: mlp_policy.MlpPolicy(name=name,
+                                                                              ob_space=ob_space,
+                                                                              ac_space=ac_space,
+                                                                              hid_size=64,
+                                                                              num_hid_layers=2
+                                                                              )
+
             pi = policy_fn('pi', env.observation_space, env.action_space)
 
 
@@ -144,7 +140,7 @@ if __name__ == '__main__':
                                                  model_file,
                                                  env._max_episode_steps,
                                                  stochastic=False)
-                print(rewards)
+                #print(single_rewards)
 
                 rewards += single_rewards
 

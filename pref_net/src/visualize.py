@@ -1,36 +1,19 @@
-# TODO
-# fix order of get models: sees 50K as > then 450k
-
-from src.utils.configs import Configs
-
 from baselines.common import set_global_seeds, tf_util as U
 from baselines.ppo1 import mlp_policy
-from baselines import bench
+
 import gym, logging
 from baselines import logger
 import tensorflow as tf
-import numpy as np
 
-# from sklearn.model_selection import ParameterGrid
-
-from gym.envs.registration import register
-
-# TODO doesnt work
-# from baselines.common.vec_env import VecVideoRecorder
-
-import imageio
 
 import os
 import os.path as osp
 
-from src.utils.model_saver import ModelSaverWrapper
+from pref_net.src.utils.configs import Configs
+from pref_net.src.utils.model_saver import ModelSaverWrapper
+from pref_net.src.common import my_tf_util
 
-from src.common import my_tf_util
 
-
-# from gym_mujoco_planar_snake.benchmark.info_collector import InfoCollector, InfoDictCollector
-
-# import gym_mujoco_planar_snake.benchmark.plots as import_plots
 
 
 def get_latest_model_file(model_dir):
@@ -204,7 +187,7 @@ def enjoy(env_id, seed, model_dir):
         # model_file = get_latest_model_file(model_dir)
         # model_files.sort()
 
-        model_index = 0
+        model_index = configs["model_index"]
         model_file = model_files[model_index]
 
         print('available models: ', len(model_files))

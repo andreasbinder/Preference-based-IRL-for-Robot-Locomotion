@@ -98,11 +98,22 @@ if __name__ == '__main__':
 
     joint = np.concatenate((train_predictions, extrapolation_predictions))
 
+    # highest value
+    scale = np.concatenate((train_distance, extrapolation_distance), axis=0).max()
     # TODO 5 rausnehmen
     joint = (np.array(joint) - np.array(joint).min()) / \
-                        np.abs(np.array(joint).max() - np.array(joint).min()) * 5
+                        np.abs(np.array(joint).max() - np.array(joint).min()) * scale #* 6
 
     train_predictions, extrapolation_predictions = joint[:n], joint[n:]
+
+    '''# statistics
+    print("#"*5, "Mean", "#"*5)
+    print("Distance %f"%(np.array(train_distance).mean()))
+    print("Prediction %f"%(np.array(train_predictions).mean()))
+    print("Distance %f" % (np.array(extrapolation_distance).mean()))
+    print("Prediction %f" % (np.array(extrapolation_predictions).mean()))'''
+
+
 
     # rescale
     # x_new = (x-min) / range * scalar
@@ -118,6 +129,9 @@ if __name__ == '__main__':
     plt.scatter(train_timesteps, train_distance, color='y', label='Training Data')
     plt.scatter(extrapolation_timesteps, extrapolation_distance, color="g", label='Unseen Data')
 
+    plt.legend()
+    plt.xlabel("Timesteps")
+    plt.ylabel("Predicted and Actual Distance")
     plt.show()
 
     # TODO

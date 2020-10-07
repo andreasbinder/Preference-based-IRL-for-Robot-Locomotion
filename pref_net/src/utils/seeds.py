@@ -10,4 +10,3 @@ def set_seeds(seed):
     random.seed(seed)
     torch.manual_seed(seed)
 
-    print("Set seed to %i"%seed)

@@ -131,7 +131,7 @@ class RewardFunctionApproximator(object):
 
         from tensorboardX import SummaryWriter
 
-        current_time = datetime.datetime.now().strftime('%Y-%m-%d_%H-%M-%S')
+        current_time = datetime.datetime.now().strftime('%Y-%m-%d_%H-%M-%S') + mode
         train_log_dir = configs["tensorboard_dir"] + current_time + '/train'
         val_log_dir = configs["tensorboard_dir"] + current_time + '/val'
 
@@ -191,9 +191,19 @@ if __name__ == '__main__':
 
     # skip warnings
     tf.compat.v1.logging.set_verbosity(tf.compat.v1.logging.ERROR)
-    set_seeds(configs["seed"])
 
-    SAVE_DIR = os.path.join(configs["save_dir"], datetime.datetime.now().strftime('%Y-%m-%d_%H-%M-%S'))
+    print("#" * 15)
+    print("Reward Learning")
+
+
+    set_seeds(configs["seed"])
+    print("Seed: %s"%(configs["seed"]))
+
+
+    mode = configs["ranking_method"]
+    print("Method Approach: %s"%(mode))
+
+    SAVE_DIR = os.path.join(configs["save_dir"], datetime.datetime.now().strftime('%Y-%m-%d_%H-%M-%S') + "_" +  mode)
     os.makedirs(SAVE_DIR)
     shutil.copyfile(args.path_to_configs, os.path.join(SAVE_DIR, "configs_copy.yml"))
 
@@ -203,19 +213,14 @@ if __name__ == '__main__':
 
     np.random.shuffle(TRAIN)
 
-    train_set = data_util.generate_dataset_from_full_episodes(TRAIN, configs["subtrajectry_length"],
+    '''train_set = data_util.generate_dataset_from_full_episodes(TRAIN, configs["subtrajectry_length"],
                                                               configs["subtrajectories_per_episode"],
-                                                              configs["max_num_subtrajectories"])
+                                                              configs["max_num_subtrajectories"])'''
 
-    print(len(list(np.unique(train_set[:, 1]))))
-    print(len(list(train_set)))
-
-
-
-    import sys
-    sys.exit()
-
-
+    # TODO validate trainset
+    test_file = "/home/andreas/Documents/pbirl-bachelorthesis/results/Mujoco-planar-snake-cars-angle-line-v1/initial_runs/ppo_original_1.5Mio/test_ckpts_save/inp.npy"
+    with open(test_file, 'rb') as f:
+        train_set = np.load(f, allow_pickle=True)
 
 
     # reward learning
@@ -225,41 +230,44 @@ if __name__ == '__main__':
 
     torch.save(net.state_dict(), os.path.join(SAVE_DIR, "model"))
 
-    '''with open(os.path.join("/home/andreas/Desktop", "test.npy"), 'wb') as f:
-        np.save(f, np.array(train_set))
+    # rl with learnt reward function R_hat
+    if configs["run_rl"]:
 
-    # TODO
-    import sys
-    sys.exit()
-    '''
-    # rl on top
-    ENV_ID = 'Mujoco-planar-snake-cars-angle-line-v1'
+        print("#" * 15)
+        print("Run RL")
 
-    indices = [str(index) for index in range(1, configs["num_agents"] + 1)]
 
-    for index in indices:
-        with tf.variable_scope(index):
-            SAVE = os.path.join(SAVE_DIR, index)
+        ENV_ID = 'Mujoco-planar-snake-cars-angle-line-v1'
 
-            env = gym.make(ENV_ID)
+        indices = [str(index) for index in range(1, configs["num_agents"] + 1)]
 
-            env.seed(configs["seed"])
+        for index in indices:
+            with tf.variable_scope(index):
+                SAVE = os.path.join(SAVE_DIR, index)
 
-            env = ModelSaverWrapper(env, SAVE, configs["save_sequency"])
-            env = Monitor(env, SAVE)
-            env = MyRewardWrapper(env, net, configs["ctrl_coeff"])
+                env = gym.make(ENV_ID)
 
-            policy_fn = lambda name, ob_space, ac_space: mlp_policy.MlpPolicy(name=name,
-                                                                              ob_space=ob_space,
-                                                                              ac_space=ac_space,
-                                                                              hid_size=64,
-                                                                              num_hid_layers=2
-                                                                              )
-            pi = policy_fn("pi", env.observation_space, env.action_space)
+                env.seed(configs["seed"])
 
-            sess = U.make_session(num_cpu=1, make_default=False)
-            sess.__enter__()
-            sess.run(tf.initialize_all_variables())
-            with sess.as_default():
-                agent = PPOAgent(env, pi, policy_fn)
-                agent.learn(configs["num_timesteps"])
+                env = ModelSaverWrapper(env, SAVE, configs["save_sequency"])
+                env = Monitor(env, SAVE)
+                env = MyRewardWrapper(env, net, configs["ctrl_coeff"])
+
+
+
+                sess = U.make_session(num_cpu=1, make_default=False)
+                sess.__enter__()
+                sess.run(tf.initialize_all_variables())
+                with sess.as_default():
+
+                    policy_fn = lambda name, ob_space, ac_space: mlp_policy.MlpPolicy(name=name,
+                                                                                      ob_space=ob_space,
+                                                                                      ac_space=ac_space,
+                                                                                      hid_size=64,
+                                                                                      num_hid_layers=2
+                                                                                      )
+                    pi = policy_fn("pi", env.observation_space, env.action_space)
+
+
+                    agent = PPOAgent(env, pi, policy_fn)
+                    agent.learn(configs["num_timesteps"])

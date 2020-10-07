@@ -54,31 +54,36 @@ if __name__ == '__main__':
     full_episodes = []
 
     # seeds
-    set_seeds(configs["seed"])
+
 
     # skip warnings
     tf.compat.v1.logging.set_verbosity(tf.compat.v1.logging.ERROR)
 
     with tf.variable_scope(str(configs["variable_scope"])):
 
-        env = gym.make(ENV_ID)
-        env = ModelSaverWrapper(env, SAVE_CKPT_DIR, configs["save_frequency"])
-        env.seed(configs["seed"])
 
-        info_dict_collector = InfoDictCollector(env)
 
-        policy_fn = lambda name, ob_space, ac_space: mlp_policy.MlpPolicy(name=name,
-                                                                            ob_space=ob_space,
-                                                                            ac_space=ac_space,
-                                                                            hid_size=64,
-                                                                            num_hid_layers=2
-                                                                            )
-        pi = policy_fn("pi", env.observation_space, env.action_space)
+
 
         sess = U.make_session(num_cpu=1, make_default=False)
         sess.__enter__()
         sess.run(tf.initialize_all_variables())
         with sess.as_default():
+            env = gym.make(ENV_ID)
+            env = ModelSaverWrapper(env, SAVE_CKPT_DIR, configs["save_frequency"])
+            env.seed(configs["seed"])
+
+            set_seeds(configs["seed"])
+
+            info_dict_collector = InfoDictCollector(env)
+
+            policy_fn = lambda name, ob_space, ac_space: mlp_policy.MlpPolicy(name=name,
+                                                                              ob_space=ob_space,
+                                                                              ac_space=ac_space,
+                                                                              hid_size=64,
+                                                                              num_hid_layers=2
+                                                                              )
+            pi = policy_fn("pi", env.observation_space, env.action_space)
 
             # optimize policy
             agent = PPOAgent(env, pi, policy_fn)
@@ -117,7 +122,7 @@ if __name__ == '__main__':
 
             # Split in train and extrapolation data
             full_episodes = np.concatenate(full_episodes)
-            FACTOR = int(num_models * float(configs["percentage"] / configs["num_timesteps"]))
+            FACTOR = int(num_models * float(configs["num_train"] / configs["num_timesteps"]))
 
 
             TRAIN = full_episodes[:FACTOR]
@@ -132,18 +137,18 @@ if __name__ == '__main__':
 
 
 
-            from src.benchmark.plot_results import return_all_episode_statistics
+            '''from src.benchmark.plot_results import return_all_episode_statistics
 
             # TODO
             return_all_episode_statistics(TRAIN)
-
-            from src.common.data_util import generate_dataset_from_full_episodes
+            '''
+            '''from src.common.data_util import generate_dataset_from_full_episodes
 
             # TODO
             train_set = generate_dataset_from_full_episodes(TRAIN, 50, 100)
             name_for_default = "subtrajectories.npy"
             with open(os.path.join(SAVE_DATA_DIR, name_for_default), 'wb') as f:
-                np.save(f, np.array(train_set))
+                np.save(f, np.array(train_set))'''
 
 
 

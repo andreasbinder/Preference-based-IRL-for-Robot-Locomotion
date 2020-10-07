@@ -1,4 +1,4 @@
-from pref_net.src.common import my_tf_util
+from pref_net.src.utils import my_tf_util
 
 #from src.benchmark.info_collector import InfoCollector, InfoDictCollector
 from pref_net.src.utils.info_collector import InfoCollector, InfoDictCollector

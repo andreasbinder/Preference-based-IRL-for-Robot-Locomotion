@@ -47,13 +47,7 @@ def generate_dataset_from_full_episodes(all_episodes, trajectory_length, n, max_
 
     training_set = np.concatenate(training_set)
 
-    print(len(list(np.unique(training_set[:, 1]))))
-
-
-
     training_set = np.array([training_set[index] for index in range(max_num_subtrajectories)])
-
-    print(len(list(np.unique(training_set[:, 1]))))
 
     return training_set
 
