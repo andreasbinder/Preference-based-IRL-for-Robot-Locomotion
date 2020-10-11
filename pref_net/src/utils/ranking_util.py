@@ -330,7 +330,7 @@ class InitialTripletLoss(nn.Module):
 
         available_labels = np.arange(ranking)
 
-        # TODO only for pairs!!
+
         num_elements_per_metric = data.shape[0]
 
         final_dataset = []
@@ -883,6 +883,245 @@ class FaceNetLoss(nn.Module):
 
         return loss
 
+class ComplexInitialTripletLoss(nn.Module):
+
+    """ Triplet Ranking Loss """
+
+    def __init__(self):
+        super(ComplexInitialTripletLoss, self).__init__()
+
+        self.loss_fn = nn.BCEWithLogitsLoss()
+
+
+
+    def forward(self, prediction, target):
+
+
+        return self.loss_fn(prediction, target)
+
+    def prepare_data(self, raw_data, configs):
+        # input shape: (num trajectories, 2)
+        ranking = 3
+
+        final_dataset = []
+
+        calculate_distance = lambda x, y: abs(triplet[x, 1] - triplet[y, 1])
+
+        i = 0
+        label = None
+
+        while raw_data.shape[0] > 100:
+
+            triplet = raw_data[:3]
+
+            min_index, middle_index, max_index = triplet[:, 1].argsort()
+
+            min_distance = calculate_distance(min_index, middle_index)
+            max_distance = calculate_distance(max_index, middle_index)
+            if min_distance + configs["margin"] < max_distance:
+                label = np.array([-1.] * ranking)
+                label[min_index], label[middle_index], label[max_index] = 0., 0., 1.
+                obs = tuple(triplet[label, 0] for label in range(ranking))
+                item = (obs, label)
+                final_dataset.append(item)
+                raw_data = raw_data[3:]
+
+                i += 1
+                if i % 200 == 0:
+                    print(label)
+                    print(triplet[:, 1])
+
+            elif max_distance + configs["margin"] < min_distance:
+                label = np.array([-1.] * ranking)
+                label[min_index], label[middle_index], label[max_index] = 0., 1., 1.
+                obs = tuple(triplet[label, 0] for label in range(ranking))
+                item = (obs, label)
+                final_dataset.append(item)
+                raw_data = raw_data[3:]
+
+                i += 1
+                if i % 200 == 0:
+                    print(label)
+                    print(triplet[:, 1])
+
+            else:
+                np.random.shuffle(raw_data)
+
+
+
+        print("%i Tuples of %i Trajectories" % (len(final_dataset), ranking))
+
+        return final_dataset
+
+    def forward_pass(self, net, optimizer, inputs, label):
+
+        trajs = [torch.from_numpy(inp).float() for inp in inputs]
+
+        y = torch.tensor(label).unsqueeze(0)
+
+        optimizer.zero_grad()
+
+        rewards = net(trajs)
+
+        loss = self.loss_fn(rewards, y)
+
+        return loss
+
+class ComplexInitialPairLoss(nn.Module):
+
+    """ Triplet Ranking Loss """
+
+    def __init__(self):
+        super(ComplexInitialPairLoss, self).__init__()
+
+        self.loss_fn = nn.BCEWithLogitsLoss()
+
+
+
+    def forward(self, prediction, target):
+
+
+        return self.loss_fn(prediction, target)
+
+    def prepare_data(self, raw_data, configs):
+        # input shape: (num trajectories, 2)
+        ranking = 2
+
+        data = np.array([raw_data[i:i + ranking] for i, _ in enumerate(raw_data[::ranking])])
+
+        available_labels = np.arange(ranking)
+
+        # TODO only for pairs!!
+        num_elements_per_metric = data.shape[0]
+
+        final_dataset = []
+
+        for index in range(num_elements_per_metric):
+            element = data[index, :, :]
+
+            #        for label in available_labels:
+
+            obs = tuple(element[label, 0] for label in available_labels)
+            # obs = (element[0,0], element[1,0])
+
+            # TODO do multiclass classification instead
+            label = element[:, 1].argsort()
+
+            item = (obs, label)
+            final_dataset.append(item)
+
+        print("%i Tuples of %i Trajectories" % (len(final_dataset), ranking))
+
+        return final_dataset
+
+    def forward_pass(self, net, optimizer, inputs, label):
+
+        trajs = [torch.from_numpy(inp).float() for inp in inputs]
+
+        # TOOO float?
+        y = torch.tensor(label).unsqueeze(0).float()
+
+        optimizer.zero_grad()
+
+        rewards = net(trajs)
+
+        loss = self.loss_fn(rewards, y)
+
+        return loss
+
+# TODO test
+class ComplexEpisodeTripletLoss(nn.Module):
+
+    """ Triplet Ranking Loss """
+
+    def __init__(self):
+        super(ComplexEpisodeTripletLoss, self).__init__()
+
+        self.loss_fn = nn.BCEWithLogitsLoss()
+
+
+
+    def forward(self, prediction, target):
+
+
+        return self.loss_fn(prediction, target)
+
+    def prepare_data(self, raw_data, configs):
+        # input shape: (num trajectories, 2)
+        ranking = 3
+
+        final_dataset = []
+
+        calculate_distance = lambda x, y: abs(triplet[x, 1] - triplet[y, 1])
+
+        episode_start = lambda index: triplet[index, 1] % configs["episode_length"]
+
+        i = 0
+        label = None
+
+        while raw_data.shape[0] > 100:
+
+            triplet = raw_data[:3]
+
+            min_index, middle_index, max_index = triplet[:, 1].argsort()
+
+            if episode_start(min_index) > episode_start(middle_index) or \
+                    episode_start(min_index) > episode_start(max_index) or \
+                    episode_start(middle_index) > episode_start(max_index):
+                np.random.shuffle(raw_data)
+                continue
+
+            min_distance = calculate_distance(min_index, middle_index)
+            max_distance = calculate_distance(max_index, middle_index)
+            if min_distance < max_distance:
+                label = np.array([-1.] * ranking)
+                label[min_index], label[middle_index], label[max_index] = 0., 0., 1.
+                obs = tuple(triplet[label, 0] for label in range(ranking))
+                item = (obs, label)
+                final_dataset.append(item)
+                raw_data = raw_data[3:]
+
+                i += 1
+                if i % 200 == 0:
+                    print(label)
+                    print(triplet[:, 1])
+
+            elif max_distance < min_distance:
+                label = np.array([-1.] * ranking)
+                label[min_index], label[middle_index], label[max_index] = 0., 1., 1.
+                obs = tuple(triplet[label, 0] for label in range(ranking))
+                item = (obs, label)
+                final_dataset.append(item)
+                raw_data = raw_data[3:]
+
+                i += 1
+                if i % 200 == 0:
+                    print(label)
+                    print(triplet[:, 1])
+
+            else:
+                np.random.shuffle(raw_data)
+
+
+
+        print("%i Tuples of %i Trajectories" % (len(final_dataset), ranking))
+
+        return final_dataset
+
+    def forward_pass(self, net, optimizer, inputs, label):
+
+        trajs = [torch.from_numpy(inp).float() for inp in inputs]
+
+        y = torch.tensor(label).unsqueeze(0)
+
+        optimizer.zero_grad()
+
+        rewards = net(trajs)
+
+        loss = self.loss_fn(rewards, y)
+
+        return loss
+
 
 
 RANKING_DICT = {
@@ -894,5 +1133,7 @@ RANKING_DICT = {
     "InitialTripletMargin" : InitialTripletMarginLoss(),
     "NaiveTriplet" : NaiveTripletLoss(),
     "FaceNet" : FaceNetLoss(),
-    "InitialPair" : InitialPairLoss()
+    "InitialPair" : InitialPairLoss(),
+    "ComplexInitialTriplet" : ComplexInitialTripletLoss(),
+    "ComplexEpisodeTriplet": ComplexEpisodeTripletLoss()
 }

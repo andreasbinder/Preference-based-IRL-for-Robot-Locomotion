@@ -9,6 +9,7 @@ import os, datetime
 from baselines.ppo1 import mlp_policy
 
 import gym, logging
+from gym.core import RewardWrapper
 import os
 
 
@@ -23,6 +24,23 @@ from baselines import logger
 import baselines.common.tf_util as U
 import tensorflow as tf, numpy as np
 
+
+class MaskRewardWrapper(RewardWrapper):
+
+    def __init__(self, venv):
+        RewardWrapper.__init__(self, venv)
+        self.venv = venv
+
+
+    def step(self, action):
+        obs, rews, news, infos = self.venv.step(action)
+
+        new_metric = infos["rew_v"]
+
+        return obs, new_metric, news, infos
+
+    def reset(self, **kwargs):
+        return self.venv.reset(**kwargs)
 
 
 
@@ -70,6 +88,8 @@ if __name__ == '__main__':
         sess.run(tf.initialize_all_variables())
         with sess.as_default():
             env = gym.make(ENV_ID)
+            # TODO use rew_v
+            env = MaskRewardWrapper(env)
             env = ModelSaverWrapper(env, SAVE_CKPT_DIR, configs["save_frequency"])
             env.seed(configs["seed"])
 

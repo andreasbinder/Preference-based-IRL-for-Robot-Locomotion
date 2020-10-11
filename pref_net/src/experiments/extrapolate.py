@@ -99,7 +99,9 @@ if __name__ == '__main__':
     joint = np.concatenate((train_predictions, extrapolation_predictions))
 
     # highest value
-    scale = np.concatenate((train_distance, extrapolation_distance), axis=0).max()
+    #scale = np.concatenate((train_distance, extrapolation_distance), axis=0).max()
+    scale = 8
+    #print(scale)
     # TODO 5 rausnehmen
     joint = (np.array(joint) - np.array(joint).min()) / \
                         np.abs(np.array(joint).max() - np.array(joint).min()) * scale #* 6
@@ -113,7 +115,9 @@ if __name__ == '__main__':
     print("Distance %f" % (np.array(extrapolation_distance).mean()))
     print("Prediction %f" % (np.array(extrapolation_predictions).mean()))'''
 
-
+    # try to get straight line by using
+    '''train_distance, extrapolation_distance = np.exp(train_distance), np.exp(extrapolation_distance)
+    train_predictions, extrapolation_predictions = np.exp(train_predictions), np.exp(extrapolation_predictions)'''
 
     # rescale
     # x_new = (x-min) / range * scalar
@@ -123,11 +127,11 @@ if __name__ == '__main__':
     extrapolation_predictions = (np.array(extrapolation_predictions) - np.array(extrapolation_predictions).min()) / \
                         np.abs(np.array(extrapolation_predictions).max() - np.array(extrapolation_predictions).min()) * 5'''
 
-    plt.scatter(train_timesteps, train_predictions, color='b', label='Training Data')
-    plt.scatter(extrapolation_timesteps, extrapolation_predictions, color="r", label='Unseen Data')
+    plt.scatter(train_timesteps, train_predictions, color='b', label='Predictions on Training Data')
+    plt.scatter(extrapolation_timesteps, extrapolation_predictions, color="r", label='Predictions on Unseen Data')
 
-    plt.scatter(train_timesteps, train_distance, color='y', label='Training Data')
-    plt.scatter(extrapolation_timesteps, extrapolation_distance, color="g", label='Unseen Data')
+    plt.scatter(train_timesteps, train_distance, color='y', label='Distance of the Training Data')
+    plt.scatter(extrapolation_timesteps, extrapolation_distance, color="g", label='Distance of the Unseen Data')
 
     plt.legend()
     plt.xlabel("Timesteps")
