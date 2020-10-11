@@ -24,7 +24,6 @@ You might also need to set some system variables in .bashrc/.zshrc:
     export LD_LIBRARY_PATH=${LD_LIBRARY_PATH}:~/.mujoco/mjpro150/bin
 ```
 
-
 ## Content
 
 This repository contains the [source code](./pref_net/src) to reproduce the results for my thesis. All hyperparameters are set in the [configs file](./pref_net/configs.yml). Make sure that you reference the configs file when executing a python script.
@@ -36,6 +35,7 @@ Additionally, my [thesis](./thesis) and my [final presentation](./presentation) 
 You can download the training data in different splits here. TODO
 Alternatively, you can run create_dataset. 
 
+
 ```bash
     python pref_net/src/create_dataset.py ----path_to_configs PATH/TO/CONFIGS
 ```
@@ -43,12 +43,11 @@ Alternatively, you can run create_dataset.
 Once you either downloaded or saved the data, you need to reference train.npy in the configuration file and set your hyperparameters.
 In case you want to run PPO on top of the learnt reward function, you have to set run_RL to true.
 ```bash
-=======
-```python
+
     python pref_net/src/create_dataset.py ----path_to_configs PATH/TO/CONFIGS
 ```
 
-Once you either downloaded or saved the data, you need to reference train.npy in the configuration file and set your hyperparameter.
+Once you either downloaded or saved the data, you need to reference train.npy in the configuration file and set your hyperparameters.
 In case you want to run PPO on top of the learnt reward function, you have to set run_RL to true.
 ```bash
 
@@ -57,12 +56,12 @@ In case you want to run PPO on top of the learnt reward function, you have to se
 
 The ```visualize.py``` file lets you visualize a PPO run. 
 
+
 ```bash
     python pref_net/src/visualize.py ----path_to_configs PATH/TO/CONFIGS
 ```
 
 
-=======
 ```bash
     python pref_net/src/visualize.py ----path_to_configs PATH/TO/CONFIGS
 ```
