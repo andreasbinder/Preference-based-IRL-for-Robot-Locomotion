@@ -11,7 +11,7 @@ import os.path as osp
 
 from pref_net.src.utils.configs import Configs
 from pref_net.src.utils.model_saver import ModelSaverWrapper
-from pref_net.src.common import my_tf_util
+from pref_net.src.utils import my_tf_util
 
 
 
@@ -98,8 +98,8 @@ def run_environment_episode(env, pi, seed, model_file, max_timesteps, render, st
         obs, reward, done, info = env.step(action)
 
         # TODO add if needed
-        '''cum_rew_p.append(info["rew_p"])
-        cum_rew_v.append(info["rew_v"])'''
+        cum_rew_p.append(info["rew_p"])
+        cum_rew_v.append(info["rew_v"])
 
         distance_head.append(info["distance_delta"])
 
@@ -135,9 +135,14 @@ def run_environment_episode(env, pi, seed, model_file, max_timesteps, render, st
     print(sum(distance_head))
 
     # imageio.mimsave('snake.gif', [np.array(img) for i, img in enumerate(images) if i % 2 == 0], fps=20)
+    print("Velocity")
     print(sum(cum_velocity) / len(cum_velocity))
+    print("Power Consumption")
     print(sum(cum_rew_p))
+    print("Velocity Reward")
     print(sum(cum_rew_v))
+    print("Total Reward")
+    print(sum(cum_rew))
 
     '''import matplotlib.pyplot as plt
 
@@ -211,7 +216,7 @@ def enjoy(env_id, seed, model_dir):
             # TODO specify target velocity
             # only takes effect in angle envs
             # TODO
-            env.unwrapped.metadata['target_v'] = 0.1
+            env.unwrapped.metadata['target_v'] = 0.25
             # env.unwrapped.metadata['target_v'] = 0.15
             # env.unwrapped.metadata['target_v'] = 0.25
 
@@ -222,7 +227,7 @@ def enjoy(env_id, seed, model_dir):
                                                                                          render=RENDER,
                                                                                          stochastic=False)
 
-            print(rewards)
+            #print(rewards)
 
             # info_collector.episode_info_print()
 

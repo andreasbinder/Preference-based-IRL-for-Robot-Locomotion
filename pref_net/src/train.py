@@ -213,12 +213,12 @@ if __name__ == '__main__':
 
     np.random.shuffle(TRAIN)
 
-    '''train_set = data_util.generate_dataset_from_full_episodes(TRAIN, configs["subtrajectry_length"],
+    train_set = data_util.generate_dataset_from_full_episodes(TRAIN, configs["subtrajectry_length"],
                                                               configs["subtrajectories_per_episode"],
-                                                              configs["max_num_subtrajectories"])'''
+                                                              configs["max_num_subtrajectories"])
 
     # TODO validate trainset
-    test_file = "/home/andreas/Documents/pbirl-bachelorthesis/results/Mujoco-planar-snake-cars-angle-line-v1/initial_runs/ppo_original_1.5Mio/test_ckpts_save/inp.npy"
+    test_file = "/home/andreas/Documents/pbirl-bachelorthesis/log/original_datasets/inp.npy"
     with open(test_file, 'rb') as f:
         train_set = np.load(f, allow_pickle=True)
 
