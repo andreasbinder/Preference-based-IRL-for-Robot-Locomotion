@@ -62,11 +62,6 @@ The ```visualize.py``` file lets you visualize a PPO run.
 ```
 
 
-```bash
-    python pref_net/src/visualize.py ----path_to_configs PATH/TO/CONFIGS
-```
-
-
 TODO experiments
 TODO extrapolate
 TODO evaluation
