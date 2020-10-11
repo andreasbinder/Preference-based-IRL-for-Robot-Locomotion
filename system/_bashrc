@@ -116,94 +116,43 @@ if ! shopt -oq posix; then
   fi
 fi
 
-# vrep
-export VREP_ROOT="$HOME/V-REP_PRO_EDU_V3_4_0_Linux"
+#export PATH="</home/andreas/.cache/pip/wheels/d5/0e/c7/c65ff914fe711a32210656cf0c8d9f28041d78bff409ad96d0/anaconda-0.0.1.1-cp36-none-any.whl>bin:$PATH"
 
-# added by Anaconda3 4.4.0 installer
-# PYTHON
-export PATH="/home/chris/anaconda3/bin:$PATH"
-#export PATH="/home/chris/anaconda3/envs/charmconda/bin/:$PATH"
+#mujoco
+#export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:/home/andreas/.mujoco/mujoco200/bin
+#export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:/home/andreas/.mujoco/mjpro150/bin
+
+#export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:/home/andreas/.mujoco/mujoco200/bin
+
+#export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:/home/andreas/.mujoco/mujoco200/bin
+export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:/home/andreas/.mujoco/mjpro150/bin
 
 
-# cuda for gpu-tensorflow
-#Nvidia
-#export CUDA_HOME=/usr/local/cuda-8.0
-#export LD_LIBRARY_PATH=${LD_LIBRARY_PATH}:${CUDA_HOME}/lib64
-#export PATH=${PATH}:${CUDA_HOME}/bin
-
-# gym
-export GYM_PATH=~/gym/python3_ws:$GYM_PATH
-
-# ros
-#source /opt/ros/kinetic/setup.bash
-
-# gazebo-ros
-export GAZEBO_MODEL_PATH=/home/chris/gym-gazebo/gym_gazebo/envs/installation/../assets/models
-export GYM_GAZEBO_WORLD_MAZE=/home/chris/gym-gazebo/gym_gazebo/envs/installation/../assets/worlds/maze.world
-export GYM_GAZEBO_WORLD_CIRCUIT=/home/chris/gym-gazebo/gym_gazebo/envs/installation/../assets/worlds/circuit.world
-export GYM_GAZEBO_WORLD_CIRCUIT2=/home/chris/gym-gazebo/gym_gazebo/envs/installation/../assets/worlds/circuit2.world
-export GYM_GAZEBO_WORLD_CIRCUIT2C=/home/chris/gym-gazebo/gym_gazebo/envs/installation/../assets/worlds/circuit2c.world
-export GYM_GAZEBO_WORLD_ROUND=/home/chris/gym-gazebo/gym_gazebo/envs/installation/../assets/worlds/round.world
-
-# ros
-#source /home/chris/gym-gazebo/gym_gazebo/envs/installation/catkin_ws/devel/setup.bash
-#export GAZEBO_MODEL_PATH=~/gym-gazebo/gym_gazebo/envs/installation/catkin_ws/src:$GAZEBO_MODEL_PATH
-#export GAZEBO_MODEL_PATH=$GAZEBO_MODEL_PATH:/home/chris/gym-gazebo/gym_gazebo/envs/assets/models
-
-# roboschool
-export ROBOSCHOOL_PATH=/home/chris/python3_ws/roboschool
-export PYTHONPATH="$ROBOSCHOOL_PATH/roboschool:$PYTHONPATH"
-
-export PKG_CONFIG_PATH="/home/chris/anaconda3/lib/pkgconfig:$PKG_CONFIG_PATH"
-
-# gym-mujoco-planar-snake?
-export GYM_MUJOCO_PATH=/home/chris/python3_ws/gym-mujoco-planar-snake
+# Alternative to pip
+export GYM_MUJOCO_PATH=/home/andreas/LRZ_Sync+Share/MasterThesis-master/gym-mujoco-planar-snake
 export PYTHONPATH="$GYM_MUJOCO_PATH/gym-mujoco-planar-snake:$PYTHONPATH"
 
-# gym_gazebo_projects
-#export GYM_GAZEBO_PROJECTS_PATH=/home/chris/python3_ws/gym_gazebo_projects
-#export PYTHONPATH="$GYM_GAZEBO_PROJECTS_PATH/envs:$PYTHONPATH"
 
-# roboschool_projects
-# python3_ws
-#export ROBOSCHOOL_PROJECTS_PATH=/home/chris/python3_ws/roboschool_projects
 
-# baseline
-export OPENAI_LOGDIR=/home/chris/openai_logdir/tensorboard/x_new
-export OPENAI_LOG_FORMAT="stdout,log,csv,json,tensorboard"
-export PYTHONPATH="/home/chris/python3_ws/baselines:$PYTHONPATH"
+# allianz authentication
+export PATH=$PATH:~/bin
 
-# mujoco-py 1.50.1
-#export PYTHONPATH="/home/chris/python3_ws/mujoco-py:$PYTHONPATH"
-#export PYTHONPATH="/home/chris/python3_ws/mujoco-py/mujoco_py:$PYTHONPATH"
 
-# all?
-#export PYTHONPATH="/home/chris/python3_ws:$PYTHONPATH"
+alias ghe-refresh="adp-2fa c --global \
+                             --offline_token /home/andreas/.git/adp-secrets/offline.token \
+                             --access_token /home/andreas/.git/adp-secrets/access.token"
 
-# MUJOCO
-#export MUJOCO_PY_MJKEY_PATH=/bin/mjkey.txt
-#export MUJOCO_PY_MJPRO_PATH=/home/chris/python3_ws/mujoco-py-1.50.1.0
-
-# TODO
-export MUJOCO_PY_MJPRO_PATH=/home/chris/.mujoco/mjpro150
-#export MUJOCO_PY_MJPRO_PATH=/home/chris/.mujoco/mjpro131
-
-export LD_LIBRARY_PATH=${LD_LIBRARY_PATH}:/home/chris/.mujoco/mjpro150/bin
-#LD_LIBRARY_PATH=~/.mujoco/mjpro150/bin pip install mujoco-py
-#LD_LIBRARY_PATH=$HOME/.mujoco/mjpro150/bin pip install mujoco-py
-#LD_LIBRARY_PATH=$home/chris/python3_ws/mujoco-py-1.50.1.0/bin pip install mujoco-py
-#export MUJOCO_PY_FORCE_CPU="True"
-#LD_LIBRARY_PATH=$HOME/.mujoco/mjpro150/bin pip install mujoco-py
-#LD_LIBRARY_PATH=$HOME/.mujoco/mjpro150/bin pip3 install -U 'mujoco-py<1.50.2,>=1.50.1'
-
-#rllab
-export PYTHONPATH="/home/chris/python3_ws/rllab:$PYTHONPATH"
-
-#dm-control
-export PYTHONPATH="/home/chris/python3_ws/dm-control:$PYTHONPATH"
-
-# GODLIKE FIX ... GLEW init error
-export LD_PRELOAD=/usr/lib/x86_64-linux-gnu/libGLEW.so:/usr/lib/nvidia-384/libGL.so
-# X Error of failed request:  BadAccess (attempt to access private resource denied)
-export QT_X11_NO_MITSHM=1
-
+# >>> conda initialize >>>
+# !! Contents within this block are managed by 'conda init' !!
+__conda_setup="$('/home/andreas/miniconda3/bin/conda' 'shell.bash' 'hook' 2> /dev/null)"
+if [ $? -eq 0 ]; then
+    eval "$__conda_setup"
+else
+    if [ -f "/home/andreas/miniconda3/etc/profile.d/conda.sh" ]; then
+        . "/home/andreas/miniconda3/etc/profile.d/conda.sh"
+    else
+        export PATH="/home/andreas/miniconda3/bin:$PATH"
+    fi
+fi
+unset __conda_setup
+# <<< conda initialize <<<
