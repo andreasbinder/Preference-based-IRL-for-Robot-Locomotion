@@ -1,3 +1,0 @@
-Sun Oct 11 01:05:22 2020
-ERROR: Could not read hardware property
-

@@ -209,19 +209,21 @@ if __name__ == '__main__':
 
     # data
     with open(configs["data_dir"], 'rb') as f:
-        TRAIN = np.load(f, allow_pickle=True)
+        train_set = np.load(f, allow_pickle=True)
 
-    np.random.shuffle(TRAIN)
+    '''np.random.shuffle(TRAIN)
 
     train_set = data_util.generate_dataset_from_full_episodes(TRAIN, configs["subtrajectry_length"],
                                                               configs["subtrajectories_per_episode"],
-                                                              configs["max_num_subtrajectories"])
+                                                              configs["max_num_subtrajectories"])'''
 
     # TODO validate trainset
-    test_file = "/home/andreas/Documents/pbirl-bachelorthesis/log/original_datasets/inp.npy"
+    '''test_file = "/home/andreas/Documents/pbirl-bachelorthesis/log/original_datasets/inp.npy"
+    #test_file = "/home/andreas/Desktop/subtrajectories_15k.npy"
     with open(test_file, 'rb') as f:
-        train_set = np.load(f, allow_pickle=True)
-
+        train_set = np.load(f, allow_pickle=True)'''
+    # TODO
+    #torch.manual_seed(2)
 
     # reward learning
     rfa = RewardFunctionApproximator(SAVE_DIR)

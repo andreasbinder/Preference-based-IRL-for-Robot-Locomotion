@@ -216,7 +216,7 @@ def enjoy(env_id, seed, model_dir):
             # TODO specify target velocity
             # only takes effect in angle envs
             # TODO
-            env.unwrapped.metadata['target_v'] = 0.25
+            #env.unwrapped.metadata['target_v'] = 0.1
             # env.unwrapped.metadata['target_v'] = 0.15
             # env.unwrapped.metadata['target_v'] = 0.25
 
