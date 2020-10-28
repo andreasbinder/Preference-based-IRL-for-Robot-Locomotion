@@ -7,19 +7,25 @@ create_dataset:
   variable_scope: 0
   # learning
   num_timesteps: 1500000
-  num_train: 1000000
+  num_train: 1000000 #1000000 800000
   save_frequency:  5000
   episode_length: 1000
+  # subtrajectory creation
+  subtrajectry_length: 50 # 50
+  subtrajectories_per_episode: 100 #100 125
+  max_num_subtrajectories: 20000
   # saving
   checkpoint_dir: /home/andreas/Documents/pbirl-bachelorthesis/log/pi_subopt/checkpoints/
-  data_dir: /home/andreas/Documents/pbirl-bachelorthesis/log/pi_subopt/data/
+  data_dir: /home/andreas/Documents/pbirl-bachelorthesis/log/original_datasets/measure_data
+  #/home/andreas/Documents/pbirl-bachelorthesis/log/pi_subopt/data/
 ####################################################################################################################################
 # Reward Learning
 ####################################################################################################################################
 train:
   seed: 0
   # data
-  data_dir: /home/andreas/Documents/pbirl-bachelorthesis/log/pi_subopt/data/2020-10-08_10-46-49/train.npy # rew_v
+  data_dir: /home/andreas/Documents/pbirl-bachelorthesis/log/original_datasets/inp.npy
+  #/home/andreas/Documents/pbirl-bachelorthesis/log/original_datasets/inp.npy # PATH + subtrajectories.npy
   # /home/andreas/Documents/pbirl-bachelorthesis/log/pi_subopt/data/2020-10-07_14-33-48/train.npy
   # /home/andreas/Documents/pbirl-bachelorthesis/log/750/train.npy
   subtrajectry_length: 50
@@ -39,8 +45,8 @@ train:
   # ranking
   # available methods:
   # Pair, Triplet, TripletMargin
-  ranking_method: InitialTriplet
-  margin: 100000
+  ranking_method: Triplet
+  margin: 200000
   # policy optimization
   run_rl: true
   num_agents: 1
@@ -52,27 +58,35 @@ train:
 ####################################################################################################################################
 # Experiments
 ####################################################################################################################################
-evaluate:
+ranking_quality:
+  seed: 0
+  data_path: /home/andreas/Documents/pbirl-bachelorthesis/log/original_datasets/train.npy
+  num_samples: 200
+  triplet_path: /home/andreas/Documents/pbirl-bachelorthesis/log/net_qual_seeds/2020-10-20_01-08-14_Triplet2/model
+  #/home/andreas/Documents/pbirl-bachelorthesis/log/original_datasets/2020-10-13_12-47-12_Triplet/model
+  #/home/andreas/Documents/pbirl-bachelorthesis/log/original_datasets/2020-10-09_16-51-34_InitialTriplet_result/model
+  pair_path: /home/andreas/Documents/pbirl-bachelorthesis/log/net_qual_seeds/2020-10-20_01-21-52_Pair2/model
+  #/home/andreas/Documents/pbirl-bachelorthesis/log/original_datasets/2020-10-10_00-00-31_Pair/model
+
+rl_on_top:
   seed: 0
   runs_per_model: 1
   paths_with_var_scops:
-
-
     - model0:
         - 1
-        - /home/andreas/Documents/pbirl-bachelorthesis/log/pi_opt/2020-10-07_23-23-44_InitialTriplet_results2/1
+        - /home/andreas/Documents/pbirl-bachelorthesis/log/original_datasets/2020-10-07_01-13-39_thesis_results/1
     - model1:
         - 2
-        - /home/andreas/Documents/pbirl-bachelorthesis/log/pi_opt/2020-10-07_23-23-44_InitialTriplet_results2/2
+        - /home/andreas/Documents/pbirl-bachelorthesis/log/original_datasets/2020-10-07_01-13-39_thesis_results/2
     - model2:
         - 3
-        - /home/andreas/Documents/pbirl-bachelorthesis/log/pi_opt/2020-10-07_23-23-44_InitialTriplet_results2/3
+        - /home/andreas/Documents/pbirl-bachelorthesis/log/original_datasets/2020-10-07_01-13-39_thesis_results/3
     - model3:
         - 4
-        - /home/andreas/Documents/pbirl-bachelorthesis/log/pi_opt/2020-10-07_23-23-44_InitialTriplet_results2/4
+        - /home/andreas/Documents/pbirl-bachelorthesis/log/original_datasets/2020-10-07_01-13-39_thesis_results/4
     - model4:
         - 5
-        - /home/andreas/Documents/pbirl-bachelorthesis/log/pi_opt/2020-10-07_23-23-44_InitialTriplet_results2/5
+        - /home/andreas/Documents/pbirl-bachelorthesis/log/original_datasets/2020-10-07_01-13-39_thesis_results/5
 
 extrapolation:
   seed: 0
@@ -90,6 +104,21 @@ extrapolation:
   #/home/andreas/Documents/pbirl-bachelorthesis/log/pi_opt/2020-10-07_01-13-39_thesis_results/model
   #/home/andreas/Documents/pbirl-bachelorthesis/log/pi_opt/2020-10-07_01-13-39_thesis_results/model
   #/home/andreas/Documents/pbirl-bachelorthesis/log/pi_opt/2020-10-07_23-23-44_InitialTriplet_results2/model
+
+
+
+correlation:
+  seed: 0
+  pair_net_path: /home/andreas/Documents/pbirl-bachelorthesis/log/net_qual_seeds/2020-10-20_01-21-52_Pair2/model
+  #/home/andreas/Documents/pbirl-bachelorthesis/log/original_datasets/2020-10-10_00-00-31_Pair/model
+  triplet_net_path: /home/andreas/Documents/pbirl-bachelorthesis/log/net_qual_seeds/2020-10-20_01-07-45_InitialTriplet2/model
+  #/home/andreas/Documents/pbirl-bachelorthesis/log/original_datasets/2020-10-09_16-51-34_InitialTriplet_result/model
+  #/home/andreas/Documents/pbirl-bachelorthesis/log/original_datasets/2020-10-13_12-47-12_Triplet/model
+  #
+  #
+  data_path: /home/andreas/Documents/pbirl-bachelorthesis/log/original_datasets/measure_data/train.npy
+  #/home/andreas/Documents/pbirl-bachelorthesis/log/original_datasets/train.npy
+
 ####################################################################################################################################
 # Visualization
 ####################################################################################################################################
@@ -97,44 +126,9 @@ visualize:
   seed: 0
   variable_scope: 1
   model_index: 0
-  model_dir: /home/andreas/Documents/pbirl-bachelorthesis/log/original_datasets/2020-10-09_16-51-34_InitialTriplet/1
+  model_dir: /tmp/pi_opt/2020-10-20_04-59-17_Triplet/1
 
 
-####################################################################################################################################
-# DEPRECATED
-# define hyperparameters for IRL training
-reward_learning:
-  num_nets: 1
-  input_dim: 27
-  split_ratio: 0.9
-  # available
-  ranking_method: pair
-  hparams:
-    lr: 0.00005 #0.00005
-    # pair 2, 15
-    epochs: 40 #10, 20 for triplet cum_reward
-    ranking_approach: 5
-    dataset_size: 0
 
-ppo:
-  general:
-    env_id: Mujoco-planar-snake-cars-angle-line-v1
-    seed: 0
-    log_dir: src/results/
-  initial:
-    create_trajectories: false # if false you need to provide training data
-    trajectory_length: 100 #50
-    num_traj_per_episode: 10
-    num_agents: 1 # 5
-    num_timesteps: 3000 # 1000000 1500000
-    sfs: 1000 #10000 5000
-    save_checkpoints: true
-  improved:
-    validate_learned_reward: false
-    num_agents: 1
-    num_timesteps: 1000000 #1000000
-    sfs: 100000 #100000
-    save_checkpoints: true
-    ctrl_coeff: 0.0 #0.0  should prevent agent from taking too high action values
 
 

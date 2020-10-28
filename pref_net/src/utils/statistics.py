@@ -38,8 +38,16 @@ def return_all_episode_statistics(all_episodes):
     print("mean")
     print(mean(episode_distances))
 
+    print(np.array(episode_distances).ptp())
 
 
+path = "/home/andreas/Documents/pbirl-bachelorthesis/log/original_datasets/train.npy"
+#path = "/home/andreas/Documents/pbirl-bachelorthesis/log/original_datasets/measure_data/train.npy"
+
+with open(path, 'rb') as f:
+    data = np.load(f, allow_pickle=True)
+
+return_all_episode_statistics(data)
 
 
 

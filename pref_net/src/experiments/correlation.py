@@ -6,10 +6,10 @@ import tensorflow as tf
 # skip warnings
 tf.compat.v1.logging.set_verbosity(tf.compat.v1.logging.ERROR)
 
-from pref_net.src.utils import seeds as seeds
+'''from pref_net.src.utils import seeds as seeds
 
 seed = 0
-seeds.set_seeds(seed)
+seeds.set_seeds(seed)'''
 
 import torch
 import torch.nn as nn
@@ -72,8 +72,7 @@ def get_ranks(array):
     ranks[temp] = np.arange(len(array))
     return ranks
 
-def get_ranking_prediction():
-    pass
+
 
 def load_net(path):
     net = Net(27)
@@ -117,9 +116,9 @@ if __name__ == '__main__':
     args = parser.parse_args()
 
     configs = Configs(args.path_to_configs)
-    configs = configs.data["extrapolation"]
+    configs = configs.data["correlation"]
 
-
+    #from pref_net.src.utils import seeds as seeds
     # Seed
     seed = configs["seed"]
     torch.manual_seed(seed)
@@ -127,177 +126,240 @@ if __name__ == '__main__':
 
     # Net
     input_dim = 27
-    pair_path = "/home/andreas/Documents/pbirl-bachelorthesis/log/pi_opt/2020-10-08_13-29-39_Pair/model"
-    pair_path = "/home/andreas/Documents/pbirl-bachelorthesis/log/original_datasets/2020-10-10_00-00-31_Pair/model"
+    #pair_path = "/home/andreas/Documents/pbirl-bachelorthesis/log/pi_opt/2020-10-08_13-29-39_Pair/model"
+    pair_path = configs["pair_net_path"]
     net = Net(input_dim=input_dim)
     net.load_state_dict(torch.load(pair_path))
 
 
 
-    triplet_path = "/home/andreas/Documents/pbirl-bachelorthesis/log/pi_opt/2020-10-07_23-23-44_InitialTriplet_results2/model"
-    triplet_path = "/home/andreas/Documents/pbirl-bachelorthesis/log/original_datasets/2020-10-09_16-51-34_InitialTriplet/model"
+    #triplet_path = "/home/andreas/Documents/pbirl-bachelorthesis/log/pi_opt/2020-10-07_23-23-44_InitialTriplet_results2/model"
+    triplet_path = configs["triplet_net_path"]
     triplet_net = Net(input_dim=input_dim)
     triplet_net.load_state_dict(torch.load(triplet_path))
 
+    formula = lambda x: np.exp(x/100) * 4000 + 100000# distance np.exp(x) * 2000
+
     # Retrieve Data
-    data_path = "/home/andreas/Documents/pbirl-bachelorthesis/log/pi_subopt/data/2020-10-07_14-33-48/train.npy"
-    data_path = "/home/andreas/Documents/pbirl-bachelorthesis/log/original_datasets/extrapolate.npy"
+    #data_path = "/home/andreas/Documents/pbirl-bachelorthesis/log/pi_subopt/data/2020-10-07_14-33-48/train.npy"
+    data_path = configs["data_path"]
 
-    train_episodes, extrapolation_episodes = load_data(data_path), load_data(data_path)
+    train_episodes = load_data(data_path)
 
-    n = configs["num_samples"]
+    paths = [
+        "/home/andreas/Documents/pbirl-bachelorthesis/log/original_datasets/2020-10-10_00-00-31_Pair/model",
+        "/home/andreas/Documents/pbirl-bachelorthesis/log/original_datasets/2020-10-13_12-47-12_Triplet/model",
+        "/home/andreas/Documents/pbirl-bachelorthesis/log/original_datasets/2020-10-09_16-51-34_InitialTriplet_result/model"
+    ]
 
-    train_episodes, extrapolation_episodes = sample(train_episodes, n), sample(extrapolation_episodes, n)
+    net_templates = [Net(input_dim=input_dim) for _ in range(len(paths))]
+
+    nets = []
+    for net_template, path in zip(net_templates, paths):
+        net_template.load_state_dict(torch.load(path))
+        nets.append(net_template)
+
+    #nets = [net_template.load_state_dict(torch.load(path)) for net_template, path in zip(net_templates, paths)]
 
     train_timesteps = [episode[1] for episode in train_episodes]
-    #extrapolation_timesteps = [episode[1] for episode in extrapolation_episodes]
+    train_reward = np.array([sum(episode[3]) for episode in train_episodes])
 
-    train_predictions = [predict(episode[0], net).item() for episode in train_episodes]
-    triplet_train_predictions = [predict(episode[0], triplet_net).item() for episode in train_episodes]
+    train_predictions = np.array([[predict(episode[0], net).item() for episode in train_episodes]
+                                   for net in nets
+                                   ])
+
+
+    #print(np.corrcoef(train_reward, train_predictions[0]))
+    #print(train_predictions.shape)
+
+    net_labels = ["Pairnet Predictions", "Tripletnet Predictions", "NaiveTripletnet Predictions"]
+
+    fig, (ax1, ax2, ax3) = plt.subplots(3,1)
+    fig.suptitle('Ground-truth Reward vs Predictions')
+
+    ax1.scatter(train_timesteps, train_reward, c='b', label='Ground-truth Reward')
+    ax1_twinx = ax1.twinx()
+    ax1_twinx.scatter(train_timesteps, train_predictions[0], c='r',label=net_labels[0])
+
+    lines, labels = ax1.get_legend_handles_labels()
+    lines2, labels2 = ax1_twinx.get_legend_handles_labels()
+    ax1_twinx.legend(lines + lines2, labels + labels2, loc=4)
+
+    ax2.scatter(train_timesteps, train_reward, c='b', label='Ground-truth Reward')
+    ax2_twinx = ax2.twinx()
+    ax2_twinx.scatter(train_timesteps, train_predictions[1], c='r',label=net_labels[1])
+
+    lines, labels = ax2.get_legend_handles_labels()
+    lines2, labels2 = ax2_twinx.get_legend_handles_labels()
+    ax2_twinx.legend(lines + lines2, labels + labels2, loc=4)
+
+    ax3.scatter(train_timesteps, train_reward, c='b', label='Ground-truth Reward')
+    ax3_twinx = ax3.twinx()
+    ax3_twinx.scatter(train_timesteps, train_predictions[2], c='r',label=net_labels[2])
+
+    lines, labels = ax3.get_legend_handles_labels()
+    lines2, labels2 = ax3_twinx.get_legend_handles_labels()
+    ax3_twinx.legend(lines + lines2, labels + labels2, loc=4)
+
+    ax1.set_xlabel('Timesteps')
+    ax1.set_ylabel('Ground-truth Reward')
+    ax1_twinx.set_ylabel('Predictions')
+
+    ax2.set_xlabel('Timesteps')
+    ax2.set_ylabel('Ground-truth Reward')
+    ax2_twinx.set_ylabel('Predictions')
+
+    ax3.set_xlabel('Timesteps')
+    ax3.set_ylabel('Ground-truth Reward')
+    ax3_twinx.set_ylabel('Predictions')
+
+    plt.show()
+    '''ax2 = ax1.twinx()
+    #ax1.plot(x, y1, 'g-')
+    ax1_scatter = ax1.scatter(x, y1, c='b', label='Ground-truth Reward')
+    #ax2.plot(x, y2, 'b-')
+    ax2_scatter = ax2.scatter(x, y2, c='r',label='Predicted Reward' )'''
+
+
+
+    import sys
+    sys.exit()
+    # TODO
+    train_predictions = np.array([predict(episode[0], net).item() for episode in train_episodes])
+    triplet_train_predictions = np.array([predict(episode[0], triplet_net).item() for episode in train_episodes])
     #extrapolation_predictions = [predict(episode[0], net).item() for episode in extrapolation_episodes]
 
-    train_distance = [sum(episode[2])  for episode in train_episodes]
+    train_reward = np.array([sum(episode[3])  for episode in train_episodes])
     #extrapolation_distance = [sum(episode[2]) for episode in extrapolation_episodes]
 
+    '''train_predictions = (np.array(train_predictions) - np.array(train_predictions).min()) / \
+                        np.abs(np.array(train_predictions).max() - np.array(train_predictions).min()) * max(
+        train_reward)
+
+    triplet_train_predictions = (np.array(triplet_train_predictions) - np.array(triplet_train_predictions).min()) / \
+                                np.abs(np.array(triplet_train_predictions).max() - np.array(
+                                    triplet_train_predictions).min()) * max(train_reward)'''
+
+
+    '''train_reward = formula(train_reward)
+    train_predictions = formula(train_predictions)
+    triplet_train_predictions = formula(triplet_train_predictions)'''
+
     print("Correlation Triplet")
-    print(np.corrcoef(train_distance, triplet_train_predictions))
+    print(np.corrcoef(train_reward, triplet_train_predictions))
     print("Correlation Pair")
-    print(np.corrcoef(train_distance, train_predictions))
+    print(np.corrcoef(train_reward, train_predictions))
 
-    plt.scatter(train_timesteps, triplet_train_predictions, color='b', label='Predictions on Training Data')
-    # plt.scatter(extrapolation_timesteps, extrapolation_predictions, color="r", label='Predictions on Unseen Data')
+    from scipy import stats
 
-    plt.scatter(train_timesteps, train_distance, color='y', label='Distance of the Training Data')
-    # plt.scatter(extrapolation_timesteps, extrapolation_distance, color="g", label='Distance of the Unseen Data')
+    spear = stats.spearmanr(train_reward, triplet_train_predictions).correlation
+    spear_pair = stats.spearmanr(train_reward, train_predictions).correlation
 
-    plt.legend()
-    plt.xlabel("Timesteps")
-    plt.ylabel("Predicted and Actual Distance")
+    print("Triplet Spear")
+    print(spear)
+
+    print("Pair Spear")
+    print(spear_pair)
+
+    import numpy as np
+    import matplotlib.pyplot as plt
+
+    '''    plt.scatter(train_reward, triplet_train_predictions)
+    plt.ylabel("Predicted Reward")
+    plt.xlabel("Ground-truth Reward")
+
     plt.show()
 
     import sys
+    sys.exit()'''
 
+
+
+    x = train_timesteps
+    y1 = train_reward
+    y2 = triplet_train_predictions
+
+    fig, ax1 = plt.subplots()
+
+    ax2 = ax1.twinx()
+    #ax1.plot(x, y1, 'g-')
+    ax1_scatter = ax1.scatter(x, y1, c='b', label='Ground-truth Reward')
+    #ax2.plot(x, y2, 'b-')
+    ax2_scatter = ax2.scatter(x, y2, c='r',label='Predicted Reward' )
+
+
+    ax1.set_xlabel('Timesteps')
+    ax1.set_ylabel('Ground-truth Reward')
+    ax2.set_ylabel('Predicted Reward')
+    '''ax1.legend(loc=2)
+    ax2.legend(loc=6)'''
+    #plt.legend()
+    axes = ax1_scatter + ax2_scatter
+    labels = [ax.get_label() for ax in axes]
+    ax1.legend(axes, labels)
+
+    lines, labels = ax.get_legend_handles_labels()
+    lines2, labels2 = ax2.get_legend_handles_labels()
+    ax2.legend(lines + lines2, labels + labels2, loc=0)
+
+    plt.show()
+
+
+    import sys
     sys.exit()
-    # Plot
-    plt.title("Extrapolation")
 
-    #joint = np.concatenate((train_predictions, extrapolation_predictions))
+    # TODO
+    '''print("Correlation Triplet")
+    print(np.corrcoef(train_reward, triplet_train_predictions))
+    print("Correlation Pair")
+    print(np.corrcoef(train_reward, train_predictions))
 
-    # highest value
-    #scale = np.concatenate((train_distance, extrapolation_distance), axis=0).max()
-    scale = 8
-    #print(scale)
-    # TODO 5 rausnehmen
-    '''joint = (np.array(joint) - np.array(joint).min()) / \
-                        np.abs(np.array(joint).max() - np.array(joint).min()) * scale #* 6
+    plt.scatter(train_timesteps, triplet_train_predictions, color='b', label='Predictions on Training Data')'''
+    # plt.scatter(extrapolation_timesteps, extrapolation_predictions, color="r", label='Predictions on Unseen Data')
 
-    train_predictions, extrapolation_predictions = joint[:n], joint[n:]'''
+    #plt.scatter(train_timesteps, train_reward, color='y', label='Distance of the Training Data')
+    # plt.scatter(extrapolation_timesteps, extrapolation_distance, color="g", label='Distance of the Unseen Data')
 
-    #train_predictions = (np.array(train_predictions) - np.array(train_predictions).min()) / np.abs(np.array(train_predictions).max() - np.array(train_predictions).min()) * 8
+    ##########################
+    train_predictions = (np.array(train_predictions) - np.array(train_predictions).min()) / \
+                            np.abs(np.array(train_predictions).max() - np.array(train_predictions).min()) * max(train_reward)
 
-    '''# statistics
-    print("#"*5, "Mean", "#"*5)
-    print("Distance %f"%(np.array(train_distance).mean()))
-    print("Prediction %f"%(np.array(train_predictions).mean()))
-    print("Distance %f" % (np.array(extrapolation_distance).mean()))
-    print("Prediction %f" % (np.array(extrapolation_predictions).mean()))'''
+    triplet_train_predictions = (np.array(triplet_train_predictions) - np.array(triplet_train_predictions).min()) / \
+                            np.abs(np.array(triplet_train_predictions).max() - np.array(triplet_train_predictions).min()) * max(train_reward)
 
-    #train_distance, extrapolation_distance = np.exp(train_distance), np.exp(train_distance)
-    #train_predictions, extrapolation_predictions = np.exp(train_predictions), np.exp(train_distance)
 
-    # rescale
-    # x_new = (x-min) / range * scalar
-    '''train_predictions = (np.array(train_predictions) - np.array(train_predictions).min()) / \
-                        np.abs(np.array(train_predictions).max() - np.array(train_predictions).min()) * 5
+    '''train_reward = formula(train_reward)
+    train_predictions = np.clip(formula(train_predictions), 0, np.inf)
+    triplet_train_predictions = np.clip(formula(triplet_train_predictions), 0, np.inf)
+    '''
 
-    extrapolation_predictions = (np.array(extrapolation_predictions) - np.array(extrapolation_predictions).min()) / \
-                        np.abs(np.array(extrapolation_predictions).max() - np.array(extrapolation_predictions).min()) * 5'''
+    train_reward = np.array(train_reward)
+    train_predictions = np.array(train_predictions)
+    triplet_train_predictions = np.array(triplet_train_predictions)
 
-    plt.scatter(train_timesteps, train_predictions, color='b', label='Predictions on Training Data')
-    #plt.scatter(extrapolation_timesteps, extrapolation_predictions, color="r", label='Predictions on Unseen Data')
+    train_reward = formula(train_reward)
+    train_predictions = formula(train_predictions)
+    triplet_train_predictions = formula(triplet_train_predictions)
 
-    plt.scatter(train_timesteps, train_distance, color='y', label='Distance of the Training Data')
-    #plt.scatter(extrapolation_timesteps, extrapolation_distance, color="g", label='Distance of the Unseen Data')
+
+    plt.scatter(train_timesteps, train_reward, color='g', label='Ground-truth Reward')
+
+    plt.scatter(train_timesteps, train_predictions, color='b', label='Predictions of Pairnet')
+
+    plt.scatter(train_timesteps, triplet_train_predictions, color='r', label='Predictions of Tripletnet')
+
+
+    plt.plot(train_timesteps, train_timesteps, color='y')
+    ##########################
+    '''print(np.corrcoef(train_reward, triplet_train_predictions))
+    print(np.corrcoef(train_reward, train_predictions))'''
 
     plt.legend()
     plt.xlabel("Timesteps")
-    plt.ylabel("Predicted and Actual Distance")
+    plt.ylabel("Rescaled Ground-truth Reward")
     plt.show()
 
-    # TODO
-    # plot more sophisticated: labels, legends
 
 
 
 
-
-
-
-
-
-
-
-data_path = "/home/andreas/Documents/pbirl-bachelorthesis/log/pi_subopt/data/2020-10-07_14-33-48/extrapolate.npy"
-
-with open(data_path, 'rb') as f:
-    data = np.load(f, allow_pickle=True)
-
-# 20 nice
-num_samples = 100
-
-samples = sample(data, num_samples)
-
-triplet_path = "/home/andreas/Documents/pbirl-bachelorthesis/log/pi_opt/2020-10-07_23-23-44_InitialTriplet_results2/model"
-pair_path = "/home/andreas/Documents/pbirl-bachelorthesis/log/pi_opt/2020-10-08_13-29-39_Pair/model"
-triplet_net, pair_net = load_net(triplet_path), load_net(pair_path)
-
-
-triplet_predictions = np.array([triplet_net(torch.tensor(inp[0]).float()).item() for inp in samples])
-pair_predictions = np.array([pair_net(torch.tensor(inp[0]).float()).item() for inp in samples])
-
-
-
-time_steps = np.array([sum(ts[2]) for ts in samples])
-
-
-scale = time_steps.max()
-# rescale
-triplet_predictions = (triplet_predictions - triplet_predictions.min()) / \
-                        np.abs(triplet_predictions.max() - triplet_predictions.min()) * scale
-
-pair_predictions = (pair_predictions - pair_predictions.min()) / \
-                        np.abs(pair_predictions.max() - pair_predictions.min()) * scale
-
-
-print("Score Triplet")
-print(np.corrcoef(triplet_predictions, time_steps))
-print("Score Pair")
-print(np.corrcoef(pair_predictions, time_steps))
-print("Score Random")
-
-import matplotlib.pyplot as plt
-
-steps = np.array([ts[1] for ts in samples])
-
-plt.scatter(steps, triplet_predictions+time_steps.min(), c="red")
-plt.scatter(steps, time_steps, c="blue")
-plt.show()
-
-
-'''triplet_ranks = get_ranks(triplet_predictions)
-pair_ranks = get_ranks(pair_predictions)
-
-optimal = np.arange(num_samples)
-
-random = np.arange(num_samples)
-
-np.random.shuffle(random)
-
-print("Score Triplet")
-print(ndcg_score(optimal.reshape(1, num_samples), triplet_ranks.reshape(1, num_samples)))
-print("Score Pair")
-print(ndcg_score(optimal.reshape(1, num_samples), pair_ranks.reshape(1, num_samples)))
-print("Score Random")
-print(ndcg_score(optimal.reshape(1, num_samples), random.reshape(1, num_samples)))'''
-
-#pearsonr()

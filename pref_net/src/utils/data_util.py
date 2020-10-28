@@ -52,3 +52,39 @@ def generate_dataset_from_full_episodes(all_episodes, trajectory_length, n, max_
 
     return training_set
 
+
+def simple_generate_dataset_from_full_episodes(all_episodes, trajectory_length, n):
+    """
+    Divides full episodes into n snippets of k length and returns it
+
+    Parameters
+    ----------
+    file_path : str
+        The file location
+    all_episodes
+        index 0 contains list of observations
+        index 1 contains the timestep
+        index 2 contains list of distance
+
+
+    Returns
+    -------
+    numpy array
+        array containing the training data
+    """
+
+    training_set = []
+
+    for index, episode in enumerate(all_episodes):
+        episode_length = len(episode[0])
+        starts = np.random.randint(0, episode_length - trajectory_length, size=n)
+        starts.sort()
+
+        training_set.append(np.array(
+            [(np.array(episode[0][start:start + trajectory_length]), episode[1] + start) for start in starts]))
+
+
+
+    training_set = np.concatenate(training_set)
+
+    return training_set

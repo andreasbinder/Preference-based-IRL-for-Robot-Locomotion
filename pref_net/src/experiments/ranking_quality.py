@@ -84,7 +84,7 @@ if __name__ == '__main__':
 
     # Seed
     seed = configs["seed"]
-    torch.manual_seed(seed)
+    torch.manual_seed(2)
     np.random.seed(seed)
     #seeds.set_seeds(seed)
 
