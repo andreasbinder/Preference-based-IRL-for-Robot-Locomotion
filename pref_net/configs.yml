@@ -5,6 +5,7 @@
 create_dataset:
   seed: 0
   variable_scope: 0
+  model_dir: /home/andreas/Desktop/original_agent_1.5/agent_0
   # learning
   num_timesteps: 1500000
   num_train: 1000000 #1000000 800000

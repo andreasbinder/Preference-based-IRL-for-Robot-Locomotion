@@ -14,10 +14,6 @@ from tqdm import tqdm
 import os
 import os.path as osp
 
-#from pref_net.sr.common.misc_util import Configs
-
-#from pref_net.common import my_tf_util
-
 from pref_net.src.utils import my_tf_util
 import pref_net.src.utils.data_util as data_util
 from pref_net.src.utils.configs import Configs
@@ -124,38 +120,14 @@ def load_episodes(env_id, seed, model_files):
         print(start_time)
         print(ctime())
 
-def save_subtrajectories(observations, time_step, distance):
-
-
-
-    starts = np.random.randint(0, EPISODE_MAX_LENGTH - TRAJECTORY_LENGTH, size=100)
-    starts.sort()
-
-    # TODO time_step or reward, time_step  + start
-    #trajectories = np.array([(np.array(observations)[start:start + TRAJECTORY_LENGTH], sum(cum_reward[start:start + TRAJECTORY_LENGTH])) for start in starts])
-    trajectories = np.array(
-        [(np.array(observations)[start:start + TRAJECTORY_LENGTH], time_step + start,  sum(distance[start:start + TRAJECTORY_LENGTH])) for
-         start in starts])
-
-
-    #path = "/home/andreas/Documents/pbirl-bachelorthesis/gym_mujoco_planar_snake/gym_mujoco_planar_snake/results/Mujoco-planar-snake-cars-angle-line-v1/initial_runs/default_dataset"
-    name = "trajectories_{time_step}.npy".format(time_step=time_step)
-
-    with open(os.path.join(SAVE_PATH, name), 'wb') as f:
-        np.save(f, np.array(trajectories))
 
 def save_full_episodes(observations, time_step, distance, cum_reward, cum_rew_p):
 
-    #print("Saving Timestep %i"%(time_step))
-
-
 
     # TODO time_step or reward, time_step  + start
-    #trajectories = np.array([(np.array(observations)[start:start + TRAJECTORY_LENGTH], sum(cum_reward[start:start + TRAJECTORY_LENGTH])) for start in starts])
     trajectories = np.array([(observations, time_step, distance, cum_reward, cum_rew_p)])
 
 
-    #path = "/home/andreas/Documents/pbirl-bachelorthesis/gym_mujoco_planar_snake/gym_mujoco_planar_snake/results/Mujoco-planar-snake-cars-angle-line-v1/initial_runs/default_dataset"
     FULL_EPISODES.append(np.array(trajectories))
 
 
@@ -163,15 +135,8 @@ def save_full_episodes(observations, time_step, distance, cum_reward, cum_rew_p)
 if __name__ == '__main__':
     import argparse
     parser = argparse.ArgumentParser(formatter_class=argparse.ArgumentDefaultsHelpFormatter)
-    parser.add_argument('--seed', help='RNG seed', type=int, default=0)
-
-    parser.add_argument('--env', help='environment ID', default='Mujoco-planar-snake-cars-angle-line-v1')
-
-    parser.add_argument('--model_dir', help='model to render', type=str, default='')
 
     parser.add_argument('--path_to_configs', type=str, default='/home/andreas/Documents/pbirl-bachelorthesis/pref_net/configs.yml')
-
-    parser.add_argument('--variable_scope',  default="0")
 
     args = parser.parse_args()
     logger.configure()
@@ -182,40 +147,31 @@ if __name__ == '__main__':
     # skip warnings
     tf.compat.v1.logging.set_verbosity(tf.compat.v1.logging.ERROR)
 
+    SEED = configs["seed"]
     ENV_ID = 'Mujoco-planar-snake-cars-angle-line-v1'
+    AGENT_ID = str(0)
 
-    # TODO configs
-
-    # TODO consider longer trajectory
-    #args.model_dir = "/gym_mujoco_planar_snake/prefnet/results/Mujoco-planar-snake-cars-angle-line-v1/initial_runs/ppo_original_1.5Mio/agent_0"
-
-    args.model_dir = "/home/andreas/Desktop/original_agent_1.5/agent_0"
+    MODEL_DIR = configs["model_dir"]
 
     TRAJECTORY_LENGTH = configs["subtrajectry_length"] #50 100
     EPISODE_MAX_LENGTH = configs["episode_length"]
     RENDER = False
-    #SAVE_PATH = "/gym_mujoco_planar_snake/prefnet/results/Mujoco-planar-snake-cars-angle-line-v1/initial_runs/ppo_original_1.5Mio/data_500k"
-    #SAVE_PATH = "/home/andreas/Desktop/original_agent_1.5/data_with_rew"
+
     SAVE_PATH = configs["data_dir"]
 
     FULL_EPISODES = []
 
-    agent_id = args.model_dir[-1]
-
-
-    list = [x[:-len(".index")] for x in os.listdir(args.model_dir) if x.endswith(".index")]
+    list = [x[:-len(".index")] for x in os.listdir(MODEL_DIR) if x.endswith(".index")]
     list.sort(key=str.lower)
-    model_files = [osp.join(args.model_dir, ele) for ele in list]
+    model_files = [osp.join(MODEL_DIR, ele) for ele in list]
 
     num_models = len(model_files)
 
-    with tf.variable_scope(agent_id):
-        load_episodes(args.env, seed=args.seed, model_files=model_files)
+    with tf.variable_scope(AGENT_ID):
+        load_episodes(ENV_ID, SEED, model_files=model_files)
 
 
     # Split in train and extrapolation data
-    percentage = 1/3
-    #FACTOR = int(num_models * percentage)
     FACTOR = int(configs["num_train"] / configs["save_frequency"])
     FULL_EPISODES = np.concatenate(FULL_EPISODES)
 
@@ -233,10 +189,6 @@ if __name__ == '__main__':
         np.save(f, np.array(EXTRAPOLATE))
 
 
-
-    '''from pref_net.benchmark.plot_results import return_all_episode_statistics
-
-    return_all_episode_statistics(TRAIN)'''
     # all_episodes, trajectory_length, n
     train_set = data_util.simple_generate_dataset_from_full_episodes(all_episodes=TRAIN,
                                                                      trajectory_length=configs["subtrajectry_length"],
