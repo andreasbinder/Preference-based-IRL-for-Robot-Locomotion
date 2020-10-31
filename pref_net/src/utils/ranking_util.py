@@ -306,12 +306,12 @@ class PairLoss(nn.Module):
 
         return loss
 
-class InitialTripletLoss(nn.Module):
+class NaiveTripletLoss(nn.Module):
 
     """ Triplet Ranking Loss """
 
     def __init__(self):
-        super(InitialTripletLoss, self).__init__()
+        super(NaiveTripletLoss, self).__init__()
 
         self.loss_fn = nn.BCEWithLogitsLoss()
 
@@ -461,7 +461,7 @@ class InitialTripletMarginLoss(nn.Module):
         return loss
 
 
-class NaiveTripletLoss(nn.Module):
+'''class NaiveTripletLoss(nn.Module):
 
     """ Triplet Ranking Loss """
 
@@ -511,12 +511,7 @@ class NaiveTripletLoss(nn.Module):
                 # find out the
                 min_index, middle_index, max_index = element[:, 1].argsort()
 
-                # check that the element with the lowest value occured before the others within one episode
-                # removed since naive version
-                '''if episode_start(min_index) > episode_start(middle_index) or \
-                        episode_start(min_index) > episode_start(max_index) or \
-                        episode_start(middle_index) > episode_start(max_index):
-                    continue'''
+                
 
                 # initialize labels
                 label = np.ones(num_items) * -1
@@ -562,7 +557,7 @@ class NaiveTripletLoss(nn.Module):
         loss = self.loss_fn(rewards, y)
 
         return loss
-
+'''
 
 class TripletLoss(nn.Module):
 
@@ -1129,9 +1124,9 @@ RANKING_DICT = {
     "Triplet" : TripletLoss(),
     "TripletMargin" : TripletMarginLoss(),
     # TODO Tests
-    "InitialTriplet" : InitialTripletLoss(),
-    "InitialTripletMargin" : InitialTripletMarginLoss(),
     "NaiveTriplet" : NaiveTripletLoss(),
+    "InitialTripletMargin" : InitialTripletMarginLoss(),
+    #"NaiveTriplet" : NaiveTripletLoss(),
     "FaceNet" : FaceNetLoss(),
     "InitialPair" : InitialPairLoss(),
     "ComplexInitialTriplet" : ComplexInitialTripletLoss(),

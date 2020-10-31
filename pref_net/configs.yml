@@ -5,48 +5,37 @@
 create_dataset:
   seed: 0
   variable_scope: 0
-  model_dir: /home/andreas/Desktop/original_agent_1.5/agent_0
+  model_dir: TODO # path to model files
   # learning
   num_timesteps: 1500000
-  num_train: 1000000 #1000000 800000
+  num_train: 1000000
   save_frequency:  5000
   episode_length: 1000
   # subtrajectory creation
-  subtrajectry_length: 50 # 50
-  subtrajectories_per_episode: 100 #100 125
+  subtrajectry_length: 50
+  subtrajectories_per_episode: 100
   max_num_subtrajectories: 20000
   # saving
-  checkpoint_dir: /home/andreas/Documents/pbirl-bachelorthesis/log/pi_subopt/checkpoints/
-  data_dir: /home/andreas/Documents/pbirl-bachelorthesis/log/original_datasets/measure_data
-  #/home/andreas/Documents/pbirl-bachelorthesis/log/pi_subopt/data/
+  data_dir: TODO # saving path for subtrajectories.npy
 ####################################################################################################################################
 # Reward Learning
 ####################################################################################################################################
 train:
   seed: 0
   # data
-  data_dir: /home/andreas/Documents/pbirl-bachelorthesis/log/original_datasets/inp.npy
-  #/home/andreas/Documents/pbirl-bachelorthesis/log/original_datasets/inp.npy # PATH + subtrajectories.npy
-  # /home/andreas/Documents/pbirl-bachelorthesis/log/pi_subopt/data/2020-10-07_14-33-48/train.npy
-  # /home/andreas/Documents/pbirl-bachelorthesis/log/750/train.npy
+  data_dir: TODO # path to subtrajectories
   subtrajectry_length: 50
-  subtrajectories_per_episode: 100 #100
+  subtrajectories_per_episode: 100
   max_num_subtrajectories: 20000
   episode_length: 1000
   # reward learning
   input_dim: 27
   split_ratio: 0.9
-  save_dir: /tmp/pi_opt/
-  #/home/andreas/Documents/pbirl-bachelorthesis/log/pi_opt
-  epochs: 20 #10 und 20
-  #10, 20 for triplet cum_reward, 9  # pair 2, 15
-  # margin 13 05
-  # normal 9 01
-  lr: 0.00005 #0.00005
+  save_dir: TODO # save path for synthetic reward function and policies learnt on top of it
+  epochs: 20
+  lr: 0.00005
   # ranking
-  # available methods:
-  # Pair, Triplet, TripletMargin
-  ranking_method: Triplet
+  ranking_method: TODO # chosen ranking method
   margin: 200000
   # policy optimization
   run_rl: true
@@ -55,19 +44,16 @@ train:
   save_sequency: 100000
   ctrl_coeff: 0.0
   # docu
-  tensorboard_dir: /tmp/tensorboard/
+  tensorboard_dir: TODO # path for tensorboard logs
 ####################################################################################################################################
 # Experiments
 ####################################################################################################################################
 ranking_quality:
   seed: 0
-  data_path: /home/andreas/Documents/pbirl-bachelorthesis/log/original_datasets/train.npy
+  data_path: TODO
   num_samples: 200
-  triplet_path: /home/andreas/Documents/pbirl-bachelorthesis/log/net_qual_seeds/2020-10-20_01-08-14_Triplet2/model
-  #/home/andreas/Documents/pbirl-bachelorthesis/log/original_datasets/2020-10-13_12-47-12_Triplet/model
-  #/home/andreas/Documents/pbirl-bachelorthesis/log/original_datasets/2020-10-09_16-51-34_InitialTriplet_result/model
-  pair_path: /home/andreas/Documents/pbirl-bachelorthesis/log/net_qual_seeds/2020-10-20_01-21-52_Pair2/model
-  #/home/andreas/Documents/pbirl-bachelorthesis/log/original_datasets/2020-10-10_00-00-31_Pair/model
+  triplet_path: TODO
+  pair_path: TODO
 
 rl_on_top:
   seed: 0
@@ -75,50 +61,32 @@ rl_on_top:
   paths_with_var_scops:
     - model0:
         - 1
-        - /home/andreas/Documents/pbirl-bachelorthesis/log/original_datasets/2020-10-07_01-13-39_thesis_results/1
+        - TODO
     - model1:
         - 2
-        - /home/andreas/Documents/pbirl-bachelorthesis/log/original_datasets/2020-10-07_01-13-39_thesis_results/2
+        - TODO
     - model2:
         - 3
-        - /home/andreas/Documents/pbirl-bachelorthesis/log/original_datasets/2020-10-07_01-13-39_thesis_results/3
+        - TODO
     - model3:
         - 4
-        - /home/andreas/Documents/pbirl-bachelorthesis/log/original_datasets/2020-10-07_01-13-39_thesis_results/4
+        - TODO
     - model4:
         - 5
-        - /home/andreas/Documents/pbirl-bachelorthesis/log/original_datasets/2020-10-07_01-13-39_thesis_results/5
+        - TODO
 
 extrapolation:
   seed: 0
   num_samples: 100
-  train_path: /home/andreas/Documents/pbirl-bachelorthesis/log/original_datasets/train.npy
-  #/home/andreas/Downloads/train.npy
-  # /home/andreas/Documents/pbirl-bachelorthesis/results/Mujoco-planar-snake-cars-angle-line-v1/initial_runs/ppo_original_1.5Mio/test_ckpts_save/train.npy
-  # /home/andreas/Documents/pbirl-bachelorthesis/log/pi_subopt/data/2020-10-07_14-33-48/train.npy
-  extrapolation_path: /home/andreas/Documents/pbirl-bachelorthesis/log/original_datasets/extrapolate.npy
-  #/home/andreas/Downloads/extrapolate.npy
-  #/home/andreas/Downloads/extrapolate.npy
-  # /home/andreas/Documents/pbirl-bachelorthesis/log/pi_subopt/data/2020-10-07_14-33-48/extrapolate.npy
-  net_path: /home/andreas/Documents/pbirl-bachelorthesis/log/original_datasets/2020-10-10_00-00-31_Pair/model
-  #/home/andreas/Documents/pbirl-bachelorthesis/log/original_datasets/2020-10-09_16-51-34_InitialTriplet/model
-  #/home/andreas/Documents/pbirl-bachelorthesis/log/pi_opt/2020-10-07_01-13-39_thesis_results/model
-  #/home/andreas/Documents/pbirl-bachelorthesis/log/pi_opt/2020-10-07_01-13-39_thesis_results/model
-  #/home/andreas/Documents/pbirl-bachelorthesis/log/pi_opt/2020-10-07_23-23-44_InitialTriplet_results2/model
-
-
+  train_path: TODO
+  extrapolation_path: TODO
+  net_path: TODO
 
 correlation:
   seed: 0
-  pair_net_path: /home/andreas/Documents/pbirl-bachelorthesis/log/net_qual_seeds/2020-10-20_01-21-52_Pair2/model
-  #/home/andreas/Documents/pbirl-bachelorthesis/log/original_datasets/2020-10-10_00-00-31_Pair/model
-  triplet_net_path: /home/andreas/Documents/pbirl-bachelorthesis/log/net_qual_seeds/2020-10-20_01-07-45_InitialTriplet2/model
-  #/home/andreas/Documents/pbirl-bachelorthesis/log/original_datasets/2020-10-09_16-51-34_InitialTriplet_result/model
-  #/home/andreas/Documents/pbirl-bachelorthesis/log/original_datasets/2020-10-13_12-47-12_Triplet/model
-  #
-  #
-  data_path: /home/andreas/Documents/pbirl-bachelorthesis/log/original_datasets/measure_data/train.npy
-  #/home/andreas/Documents/pbirl-bachelorthesis/log/original_datasets/train.npy
+  pair_net_path: TODO
+  triplet_net_path: TODO
+  data_path: TODO
 
 ####################################################################################################################################
 # Visualization
@@ -127,7 +95,7 @@ visualize:
   seed: 0
   variable_scope: 1
   model_index: 0
-  model_dir: /tmp/pi_opt/2020-10-20_04-59-17_Triplet/1
+  model_dir: TODO
 
 
 
